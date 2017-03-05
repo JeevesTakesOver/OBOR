@@ -1,0 +1,183 @@
+
+" ============================================================================
+" Vim settings and mappings
+" You can edit them as you wish
+
+" no vi-compatible
+set nocompatible
+
+" ============================================================================
+" Vim-plug initialization
+" Avoid modify this section, unless you are very sure of what you are doing
+
+let vim_plug_just_installed = 0
+let vim_plug_path = expand('~/.vim/autoload/plug.vim')
+if !filereadable(vim_plug_path)
+    echo "Installing Vim-plug..."
+    echo ""
+    silent !mkdir -p ~/.vim/autoload
+    silent !curl -fLo ~/.vim/autoload/plug.vim --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
+    let vim_plug_just_installed = 1
+endif
+
+" manually load vim-plug the first time
+if vim_plug_just_installed
+    :execute 'source '.fnameescape(vim_plug_path)
+endif
+
+" Obscure hacks done, you can now modify the rest of the .vimrc as you wish :)
+
+
+" vim-plug
+call plug#begin('~/.vim/plugged')
+
+" allow plugins by file type (required for plugins!)
+filetype plugin on
+filetype indent on
+
+
+" simple recursive grep
+nmap ,r :Ack 
+nmap ,wr :Ack <cword><CR>
+
+
+
+" ============================================================================
+" Plugins settings and mappings
+" Edit them as you wish.
+
+
+" Tasklist ------------------------------
+
+" show pending tasks list
+map <F2> :TaskList<CR>
+
+" CtrlP ------------------------------
+
+" file finder mapping
+let g:ctrlp_map = ',e'
+" tags (symbols) in current file finder mapping
+nmap ,g :CtrlPBufTag<CR>
+" tags (symbols) in all files finder mapping
+nmap ,G :CtrlPBufTagAll<CR>
+" general code finder in all files mapping
+nmap ,f :CtrlPLine<CR>
+" recent files finder mapping
+nmap ,m :CtrlPMRUFiles<CR>
+" commands finder mapping
+nmap ,c :CtrlPCmdPalette<CR>
+" to be able to call CtrlP with default search text
+function! CtrlPWithSearchText(search_text, ctrlp_command_end)
+    execute ':CtrlP' . a:ctrlp_command_end
+    call feedkeys(a:search_text)
+endfunction
+" same as previous mappings, but calling with current word as default text
+nmap ,wg :call CtrlPWithSearchText(expand('<cword>'), 'BufTag')<CR>
+nmap ,wG :call CtrlPWithSearchText(expand('<cword>'), 'BufTagAll')<CR>
+nmap ,wf :call CtrlPWithSearchText(expand('<cword>'), 'Line')<CR>
+nmap ,we :call CtrlPWithSearchText(expand('<cword>'), '')<CR>
+nmap ,pe :call CtrlPWithSearchText(expand('<cfile>'), '')<CR>
+nmap ,wm :call CtrlPWithSearchText(expand('<cword>'), 'MRUFiles')<CR>
+nmap ,wc :call CtrlPWithSearchText(expand('<cword>'), 'CmdPalette')<CR>
+" don't change working directory
+let g:ctrlp_working_path_mode = 0
+" ignore these files and folders on file finder
+let g:ctrlp_custom_ignore = {
+  \ 'dir':  '\v[\/](\.git|\.hg|\.svn|node_modules)$',
+  \ 'file': '\.pyc$\|\.pyo$',
+  \ }
+
+
+" Autoclose ------------------------------
+
+" Fix to let ESC work as espected with Autoclose plugin
+let g:AutoClosePumvisible = {"ENTER": "\<C-Y>", "ESC": "\<ESC>"}
+
+
+" Signify ------------------------------
+
+" this first setting decides in which order try to guess your current vcs
+" UPDATE it to reflect your preferences, it will speed up opening files
+let g:signify_vcs_list = [ 'git', 'hg' ]
+" mappings to jump to changed blocks
+nmap <leader>sn <plug>(signify-next-hunk)
+nmap <leader>sp <plug>(signify-prev-hunk)
+" nicer colors
+highlight DiffAdd           cterm=bold ctermbg=none ctermfg=119
+highlight DiffDelete        cterm=bold ctermbg=none ctermfg=167
+highlight DiffChange        cterm=bold ctermbg=none ctermfg=227
+highlight SignifySignAdd    cterm=bold ctermbg=237  ctermfg=119
+highlight SignifySignDelete cterm=bold ctermbg=237  ctermfg=167
+highlight SignifySignChange cterm=bold ctermbg=237  ctermfg=227
+
+
+" let's source all our vimrc files
+for vimrc_file in [ 
+        \ 'agrep',
+        \ 'airline',
+        \ 'ansible',
+        \ 'autoclose',
+        \ 'backup',
+        \ 'buffers',
+        \ 'choosewin',
+        \ 'clang',
+        \ 'clojure',
+        \ 'colorscheme',
+        \ 'conque-term',
+        \ 'css',
+        \ 'ctrlp',
+        \ 'dragvisuals',
+        \ 'easymotion',
+        \ 'easytags',
+        \ 'eclim',
+        \ 'fastfold',
+        \ 'fixedtasklist',
+        \ 'ggrep',
+        \ 'haskell',
+        \ 'html',
+        \ 'indentline',
+        \ 'indexedsearch',
+        \ 'javascript',
+        \ 'jinja',
+        \ 'json',
+        \ 'neocomplete',
+        \ 'nerdcommenter',
+        \ 'nerdcommenter',
+        \ 'nerd-tree',
+        \ 'nix',
+        \ 'nix',
+        \ 'nix',
+        \ 'powershell',
+        \ 'puppet',
+        \ 'python',
+        \ 'rainbow',
+        \ 'ruby',
+        \ 'saltstack',
+        \ 'search',
+        \ 'slimux',
+        \ 'snippets',
+        \ 'srcexplorer',
+        \ 'surround',
+        \ 'syntastic',
+        \ 'tab-completion',
+        \ 'tabman',
+        \ 'tagbar',
+        \ 'tig',
+        \ 'ui',
+        \ 'vimux',
+        \ 'yankring',
+        \ 'yankstack',
+        \ 'youcompleteme',
+        \ ]
+    let full_path = '/etc/nixos/common/vim/' . vimrc_file . '.vimrc'
+    if filereadable(full_path)
+        execute 'source' . full_path
+    endif
+endfor
+
+
+" other plugins
+Plug 'kana/vim-textobj-user'
+
+" vim-plug
+call plug#end()
