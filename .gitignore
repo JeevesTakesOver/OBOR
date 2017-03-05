@@ -1,0 +1,12 @@
+*.box
+venv
+.cache
+.vagrant
+*.log
+__pycache__
+*.azulinho
+config/config.yaml
+config/config.json
+*.vdi
+root@*
+localhost
