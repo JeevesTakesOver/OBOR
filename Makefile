@@ -124,3 +124,25 @@ restart-slave-services:
 config_json:
 	python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)' < $(config) > config/config.json
 
+
+# Deploys a local Railtrack VPN using vagrant
+.ONESHELL:
+deploy_railtrack:
+	git clone https://github.com/JeevesTakesOver/Railtrack
+	cd Railtrack
+	vagrant plugin install vagrant-hostmanager
+	vagrant plugin install hostupdater
+	export AWS_ACCESS_KEY_ID=VAGRANT
+	export AWS_SECRET_ACCESS_KEY=VAGRANT
+	export KEY_PAIR_NAME=vagrant-tinc-vpn
+	export KEY_FILENAME=$HOME/.vagrant.d/insecure_private_key
+	export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
+	export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
+	export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
+	export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv
+	export CONFIG_YAML=config/config.yaml
+	make venv
+	make up
+	make it
+	make acceptance_tests
+

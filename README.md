@@ -52,7 +52,11 @@ make target=<hostname> test_mesos_slaves
 will run integration tests on the mesos-slaves
 
 
+```
+make deploy_railtrack
+```
 
+will deploy a local Railtrack VPN based on Vagrant
 
 
 
