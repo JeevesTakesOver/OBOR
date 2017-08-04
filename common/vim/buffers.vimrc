@@ -1,3 +1,13 @@
+Plug 'fholgado/minibufexpl.vim'
+
+" MiniBufExpl Colors
+hi MBENormal               guifg=#808080 guibg=fg
+hi MBEChanged              guifg=#CD5907 guibg=fg
+hi MBEVisibleNormal        guifg=#5DC2D6 guibg=fg
+hi MBEVisibleChanged       guifg=#F1266F guibg=fg
+hi MBEVisibleActiveNormal  guifg=#A6DB29 guibg=fg
+hi MBEVisibleActiveChanged guifg=#F1266F guibg=fg
+
 
 " It defines where to look for the buffer user demanding (current window, all
 " windows in other tabs, or nowhere, i.e. open file from scratch every time) and
