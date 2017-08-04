@@ -10,3 +10,4 @@ config/config.json
 *.vdi
 root@*
 localhost
+nixpkgs
