@@ -4,7 +4,7 @@ sudo rm -rf /tmp-nixos
 sudo rm -f /etc/nixos/result
 which git || sudo nix-env -i git
 test -e /nixpkgs || sudo git clone https://github.com/Azulinho/mynixpkgs.git /nixpkgs
-cd /nixpkgs && sudo git pull && sudo git checkout local
+cd /nixpkgs && sudo git pull && sudo git checkout local_release_1703
 cd /tmp
 which wget || sudo nix-env -i wget
 sudo wget --no-check-certificate -c --header='Cookie: oraclelicense=accept-securebackup-cookie' http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz || echo
