@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 sudo rm -rf /old-root
+sudo rm -rf /tmp-nixos
 sudo rm -f /etc/nixos/result
 which git || sudo nix-env -i git
 test -e /nixpkgs || sudo git clone https://github.com/Azulinho/mynixpkgs.git /nixpkgs
