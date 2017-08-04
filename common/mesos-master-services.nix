@@ -179,6 +179,7 @@ with lib;
           "--task_lost_expunge_gc" "180000" 
           "--task_lost_expunge_initial_delay" "120000" 
           "--task_lost_expunge_interval" "300000"
+          "--failover_timeout" "600"
           "--mesos_user" "mesos"
         ];
       }; # close marathon
