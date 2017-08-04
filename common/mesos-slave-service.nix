@@ -159,7 +159,6 @@ with lib;
         extraCmdLineOptions = [
           "--log_dir=/var/log/mesos-slave"
           "--hostname=${config.networking.hostName}.${cfg.tinc_domain}"
-          "--containerizers=docker,mesos"
           "--switch_user"
         ];
       }; # close mesos-slave
@@ -291,7 +290,7 @@ with lib;
     users.extraUsers."${cfg.mesosUser}" = {
      isNormalUser = true;
      description = "${cfg.mesosUser}";
-     extraGroups = [ "vboxusers" "docker" ];
+     extraGroups = [ "vboxusers" "docker" "wheel"];
      home = "${cfg.workDir}";
      createHome = true;
      openssh.authorizedKeys.keys = [];
