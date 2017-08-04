@@ -4,8 +4,9 @@
   nix.maxJobs = 1;
   nix.useSandbox = true;
   nix.daemonNiceLevel = 19;
-  nix.gc.automatic = true;
-  nix.gc.dates = "03:15";
+  # we cleanup through our update.sh script
+  # nix.gc.automatic = false;
+  # nix.gc.dates = "03:15";
   nix.extraOptions = ''
     build-cores = 1
   '';
