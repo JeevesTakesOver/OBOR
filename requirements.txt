@@ -2,3 +2,4 @@ paramiko
 testinfra
 pytest-xdist
 pyaml
+httpie
