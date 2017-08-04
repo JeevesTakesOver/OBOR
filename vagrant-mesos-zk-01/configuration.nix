@@ -42,6 +42,7 @@ in {
 
   boot.loader.grub.device = "/dev/sda";
   boot.initrd.availableKernelModules = [ "ata_piix" ];
+
     # Creates a "vagrant" users with password-less sudo access
   users = {
     extraGroups = [ { name = "vagrant"; } { name = "vboxsf"; } ];
