@@ -21,7 +21,7 @@ in {
   services.tinc.networks.core-vpn.debugLevel = 2;
   services.tinc.networks.core-vpn.interfaceType = "tap";
   services.tinc.networks.core-vpn.chroot=false; # disable as we need to run tinc-up
-  services.tinc.networks.core-vpn.package=pkgs.tinc_pre;
+  services.tinc.networks.core-vpn.package=pkgs.tinc;
   services.tinc.networks.core-vpn.extraConfig = ''
       AddressFamily = ipv4
       LocalDiscovery = yes
