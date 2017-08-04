@@ -9,6 +9,7 @@
   # nix.gc.dates = "03:15";
   nix.extraOptions = ''
     build-cores = 1
+    gc-keep-outputs = true
   '';
 
   # use a http url, so that we can squid it up
