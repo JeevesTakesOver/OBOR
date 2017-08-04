@@ -17,7 +17,7 @@
   networking.firewall.allowPing = true;
 
   # traffic on the tin.core-vpn interface is not restricted by iptables
-  networking.firewall.trustedInterfaces = [ "tinc.core-vpn" ];
+  networking.firewall.trustedInterfaces = [ "tinc.core-vpn" "docker0" ];
 
   # allow internet/external access to ssh and tincd port.
   # ssh is required for provisioning, however it could be locked down to a 
