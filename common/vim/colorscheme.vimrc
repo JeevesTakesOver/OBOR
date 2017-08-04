@@ -45,6 +45,11 @@ if !filereadable(expand("~/.vim/colors/mustang.vim"))
     silent !curl -fLo ~/.vim/colors/mustang.vim https://raw.githubusercontent.com/croaker/mustang-vim/master/colors/mustang.vim
 endif
 
+if !filereadable(expand("~/.vim/colors/monokai.vim"))
+    silent !mkdir -p ~/.vim/colors
+    silent !curl -fLo ~/.vim/colors/monokai.vim https://raw.githubusercontent.com/sickill/vim-monokai/master/colors/monokai.vim
+endif
+
 
 "this colorscheme uses a white on black background with the tango pallete
 set background=dark
