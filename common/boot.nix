@@ -6,7 +6,7 @@
   # your boot until you press *.
   boot.initrd.checkJournalingFS = false;
 
-  boot.kernelPackages = pkgs.linuxPackages_4_8;
+  boot.kernelPackages = pkgs.linuxPackages_4_9;
 
   boot.blacklistedKernelModules = [ "pcspkr" "snd_pcsp" ];
 
