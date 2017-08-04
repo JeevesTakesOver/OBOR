@@ -141,7 +141,7 @@ deploy_railtrack:
 	export AWS_ACCESS_KEY_ID=VAGRANT
 	export AWS_SECRET_ACCESS_KEY=VAGRANT
 	export KEY_PAIR_NAME=vagrant-tinc-vpn
-	export KEY_FILENAME=$HOME/.vagrant.d/insecure_private_key
+	export KEY_FILENAME=$$HOME/.vagrant.d/insecure_private_key
 	export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv
 	export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv
 	export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv
