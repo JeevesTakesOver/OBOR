@@ -83,6 +83,10 @@ in {
    # https://bugs.launchpad.net/ubuntu/+source/isc-dhcp/+bug/1006937
    dhclient -4 -nw -v $INTERFACE -cf /etc/tinc/core-vpn/dhclient.conf -r
    dhclient -4 -nw -v $INTERFACE -cf /etc/tinc/core-vpn/dhclient.conf
+
+   # TODO: we're assuming a 169.254.0.0 block here, fix it
+   # reset VPN route to only send 169.254.0.0 traffic
+   nohup /etc/tinc/core-vpn/fix-route >/dev/null 2>&1 &
     '';
 
    environment.etc."tinc/core-vpn/tinc-down".mode = "0755";
@@ -131,5 +135,21 @@ in {
             ;;
     esac
     '';
+
+  environment.etc."tinc/core-vpn/fix-route".mode = "0755";
+  environment.etc."tinc/core-vpn/fix-route".text = ''
+    #!/usr/bin/env bash
+
+    sleep 15
+    # TODO: we're assuming a 169.254.0.0 block here, fix it
+    netstat -rnv | grep 169.254.0.0 | grep 0.0.0.0 >/dev/null 2>&1
+
+    if [ $? = 0 ]; then
+      # TODO: we're assuming a 169.254.0.0 block here, fix it
+      route del -net 169.254.0.0 netmask 255.255.0.0 gateway 0.0.0.0
+      route add -net 169.254.0.0 netmask 255.255.0.0 gateway `ifconfig tinc.core-vpn| grep inet | awk '{ print $2 }' `
+    fi
+    '';
+
 
 }
