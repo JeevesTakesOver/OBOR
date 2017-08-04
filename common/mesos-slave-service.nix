@@ -129,6 +129,12 @@ with lib;
         description = "Mesos user";
       };
 
+      enable_virtualbox = mkOption {
+        default = true;
+        type = with types; bool;
+        description = "Enable VirtualBox Host services?";
+      };
+
     };
   }; # close options
 
@@ -246,8 +252,12 @@ with lib;
       # enable libvirtd
       libvirtd.enable = true;
 
-      # enable virtualbox
-      virtualbox.host.enable = true;
+
+      # enable virtualbox if flag is set
+      # we don't want to enable virtualbox inside a vagrant VM
+      virtualbox.host.enable = 
+      if cfg.enable_virtualbox then true else false;
+
     }; # close virtualisation
 
 
