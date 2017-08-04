@@ -146,3 +146,30 @@ deploy_railtrack:
 	make it
 	make acceptance_tests
 
+# restart mesos-dns:
+.ONESHELL:
+restart-mesos-dns:
+	for ta in $(target)
+	do
+		echo "restarting mesos-dns on $$ta"
+		ssh $$ta systemctl restart mesos-dns
+		ssh $$ta systemctl status mesos-dns
+		echo "sleeping for 30 seconds..."
+		sleep 30
+	done
+
+
+.ONESHELL:
+restart-marathon:
+	for ta in $(target)
+	do
+		echo "stop marathon on $$ta"
+		ssh $$ta systemctl stop marathon
+	done
+	echo "sleeping for 30 seconds..."
+	sleep 30
+	for ta in $(target)
+	do
+		echo "starting marathon on $$ta"
+		ssh $$ta systemctl start marathon
+	done
