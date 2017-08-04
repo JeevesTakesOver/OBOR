@@ -154,10 +154,10 @@ with lib;
         enable = true;
         quorum = 2;
         zk = "${cfg.zk_string}";
+        ip = "${cfg.tinc_ip_address}";
         extraCmdLineOptions = [
           "--hostname=${config.networking.hostName}.${cfg.tinc_domain}"
           "--log_dir=/var/log/mesos-master"
-          "--ip='${cfg.tinc_ip_address}'"
         ];
       }; # close mesos-master
 
