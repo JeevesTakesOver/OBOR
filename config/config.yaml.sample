@@ -78,6 +78,8 @@ common: &common
     k3ud6ALnTFlKl+UrtWY199ODqK1S8lbTkso/ebLAN0zDdXXbD9KVpsSAUuNQRwop
     gpyzPAVIL9gQX373tY8y7al4cVg6hq2FHxJlAWtikFQA3dXRVH4Ix0sCAwEAAQ==
     -----END RSA PUBLIC KEY-----
+  # on vagrant you'll have to disable virtualbox
+  enable_virtualbox: true
 
 
 # [mesos_masters:] contain the list of mesos masters (3)
