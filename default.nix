@@ -28,7 +28,7 @@ stdenv.mkDerivation {
   SOURCE_DATE_EPOCH=$(date +%s)
   virtualenv --no-setuptools --clear venv 
   export PATH=$PWD/venv/bin:$PATH
-  pip install -r requirements.txt
+  pip install --quiet -r requirements.txt
   export PS1="$PS1::nix-shell()"
   '';
 }
