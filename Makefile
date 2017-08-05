@@ -184,7 +184,7 @@ restart-marathon:
 venv: ## Creates a python virtualenv and installs python modules
 	echo "running make venv ..."
 	PID=$$$$
-	python -m virtualenv --python python2.7 /tmp/$$PID/venv 
+	venv/bin/python -m virtualenv --python python2.7 /tmp/$$PID/venv 
 	. /tmp/$$PID/venv/bin/activate 
 	pip install -r requirements.txt
 	ln -s /tmp/$$PID/venv venv
