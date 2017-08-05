@@ -26,7 +26,7 @@ stdenv.mkDerivation {
   shellHook = ''
   # set SOURCE_DATE_EPOCH so that we can use python wheels
   SOURCE_DATE_EPOCH=$(date +%s)
-  virtualenv --no-setuptools venv 
+  virtualenv --no-setuptools --clear venv 
   export PATH=$PWD/venv/bin:$PATH
   pip install -r requirements.txt
   export PS1="$PS1::nix-shell()"
