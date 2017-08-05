@@ -127,8 +127,8 @@ restart-slave-services:
 
 # generates the config.json file used by the nixos configs from a config.yaml
 # file.
-config_json:
-	python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)' < $(config) > config/config.json
+config_json: venv
+	venv/python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)' < $(config) > config/config.json
 
 
 # Deploys a local Railtrack VPN using vagrant
@@ -179,3 +179,12 @@ restart-marathon:
 		echo "starting marathon on $$ta"
 		ssh $$ta systemctl start marathon
 	done
+
+.ONESHELL:
+venv: ## Creates a python virtualenv and installs python modules
+	echo "running make venv ..."
+	PID=$$$$
+	python -m virtualenv --python python2.7 /tmp/$$PID/venv 
+	. /tmp/$$PID/venv/bin/activate 
+	pip install -r requirements.txt
+	ln -s /tmp/$$PID/venv venv
