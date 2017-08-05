@@ -128,7 +128,7 @@ restart-slave-services:
 # generates the config.json file used by the nixos configs from a config.yaml
 # file.
 config_json: venv
-	venv/python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)' < $(config) > config/config.json
+	python -c 'import sys, yaml, json; json.dump(yaml.load(sys.stdin), sys.stdout, indent=4)' < $(config) > config/config.json
 
 
 # Deploys a local Railtrack VPN using vagrant
