@@ -20,7 +20,7 @@ convert-os-to-nixos:
 .ONESHELL:
 update:
 	rm -f $(target)/result
-	rsync -chavzP --rsync-path="sudo rsync" --stats --delete $(target)/ common config $(target):/etc/nixos/
+	rsync -chavzPq --rsync-path="sudo rsync" --delete $(target)/ common config $(target):/etc/nixos/
 	scp update.sh $(target):update.sh
 	ssh $(target) bash update.sh
 
@@ -30,7 +30,7 @@ vagrant_update:
 	eval `ssh-agent`
 	ssh-add ~/.vagrant.d/insecure_private_key
 	rm -f $(target)/result
-	rsync -chavzP --rsync-path="sudo rsync" --stats --delete $(target)/ common config $(target):/etc/nixos/
+	rsync -chavzPq --rsync-path="sudo rsync" --delete $(target)/ common config $(target):/etc/nixos/
 	scp update.sh $(target):update.sh
 	ssh $(target) bash update.sh
 
