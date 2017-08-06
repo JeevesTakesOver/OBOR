@@ -86,7 +86,7 @@ openssl version || sudo nix-env -i openssl
 sudo nix-env -i cacert
 git --version || sudo nix-env -i git
 test -e /nixpkgs || sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git clone https://github.com/Azulinho/mynixpkgs.git /nixpkgs
-cd /nixpkgs && sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git pull && sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git checkout local
+cd /nixpkgs && sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git pull && sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git checkout local_release_1703
 
 cd /tmp
 wget --version || sudo nix-env -i wget
