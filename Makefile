@@ -24,6 +24,17 @@ update:
 	scp update.sh $(target):update.sh
 	ssh $(target) bash update.sh
 
+
+.ONESHELL:
+vagrant_update:
+	eval `ssh-agent`
+	ssh-add ~/.vagrant.d/insecure_private_key
+	rm -f $(target)/result
+	rsync -chavzP --rsync-path="sudo rsync" --stats --delete $(target)/ common config $(target):/etc/nixos/
+	scp update.sh $(target):update.sh
+	ssh $(target) bash update.sh
+
+
 # tests for our mesos master
 .ONESHELL:
 test_mesos_masters:
