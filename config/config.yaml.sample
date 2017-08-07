@@ -189,8 +189,8 @@ mesos_masters:
   node03:
     <<: *common
     ssh_connection_string: 'root@192.168.56.203' # SSH connection string
-    public_ip_address: '192.168.100.203'
-    public_fqdn: '192.168.100.203'
+    public_ip_address: '192.168.56.203'
+    public_fqdn: '192.168.56.203'
     hostname: 'mesos-zk-03'
     tinc_ip_address: '169.254.100.3'
     tinc_hostname: 'mesos_zk_03'
