@@ -15,6 +15,8 @@ let g:airline#extensions#whitespace#enabled = 0
 "let g:airline_theme='sol'
 "let g:airline_theme = 'bubblegum'
 let g:airline_theme = 'badwolf'
+"let g:airline_theme = 'papercolor'
+
 
 
 let g:airline_left_sep = ''

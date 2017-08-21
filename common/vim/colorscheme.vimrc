@@ -50,12 +50,21 @@ if !filereadable(expand("~/.vim/colors/monokai.vim"))
     silent !curl -fLo ~/.vim/colors/monokai.vim https://raw.githubusercontent.com/sickill/vim-monokai/master/colors/monokai.vim
 endif
 
+if !filereadable(expand("~/.vim/colors/papercolor.vim"))
+    silent !mkdir -p ~/.vim/colors
+    silent !curl -fLo ~/.vim/colors/papercolor.vim https://raw.githubusercontent.com/NLKNguyen/papercolor-theme/master/colors/PaperColor.vim
+endif
+
 
 "this colorscheme uses a white on black background with the tango pallete
 set background=dark
 set t_Co=256
 colorscheme hybrid
 
+"this colorscheme uses a black on white background with the black on white  pallete
+"set background=light
+"set t_Co=256
+"colorscheme papercolor
 
 " set keyboard to change colorscheme
 nnoremap <Leader>csd1 :set background=dark<Cr>:colorscheme default<Cr>:colorscheme elive<Cr>
