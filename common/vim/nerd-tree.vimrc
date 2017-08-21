@@ -17,6 +17,12 @@ let g:NERDTreeWinSize = 40
 let g:nerdtree_tabs_smart_startup_focus=1
 let NERDTreeQuitOnOpen = 1
 
+" change the CWD every time we click on a directory
+let NERDTreeChDirMode = 2
+
+" change CWD when we open a file in NERDTree
+autocmd BufEnter * lcd %:p:h
+
 " don;t show these file types
 let NERDTreeIgnore = ['\.pyc$', '\.pyo$']
 
@@ -25,4 +31,7 @@ set guioptions-=r
 set guioptions-=L
 " Keep NERDTree window fixed between multiple toggles
 set winfixwidth
+
+
+
 " }}}
