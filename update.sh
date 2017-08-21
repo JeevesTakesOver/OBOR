@@ -18,11 +18,15 @@ echo "update.sh: making sure cacert is installed..."
 echo "update.sh: making sure git is installed..."
     which git >/dev/null 2>&1 || sudo nix-env -Q --quiet -i git >/dev/null
 
-echo "update.sh: cloning nixpkgs locally on /nixpkgs..."
-    test -e /nixpkgs || sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git clone https://github.com/Azulinho/mynixpkgs.git /nixpkgs
+echo "update.sh: configuring git for root..."
+    sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git config --global user.email "root@localhost"
+    sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git config --global user.name "root at localhost"
 
-echo "update.sh: pulling local_release_1703 branch..."
-    cd /nixpkgs && sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git pull && sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git checkout local_release_1703
+echo "update.sh: cloning nixpkgs locally on /nixpkgs..."
+    sudo rm -rf /nixpkgs ; sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git clone https://github.com/Azulinho/mynixpkgs.git /nixpkgs
+
+echo "update.sh: checking  local_release_1703 branch..."
+    cd /nixpkgs && sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git checkout local_release_1703
 
 echo "update.sh: making sure wget is installed..."
     which wget >/dev/null 2>&1|| sudo nix-env -Q --quiet -i wget >/dev/null
