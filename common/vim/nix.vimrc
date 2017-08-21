@@ -7,8 +7,8 @@ if has("autocmd")
   augroup nix
     au BufReadPre,FileReadPre *.nix setl ft=nix
     au BufNewFile,BufReadPost *.nix setl ft=nix
-    set background=dark
-    colorscheme default
-    colorscheme elive
+    "set background=dark
+    "colorscheme default
+    "colorscheme elive
   augroup END
 endif
