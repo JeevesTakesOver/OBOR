@@ -40,6 +40,12 @@ vagrant_update:
 test_mesos_masters:
 	eval `ssh-agent`
 	ssh-add ~/.vagrant.d/insecure_private_key
+	echo "running make venv ..."
+	PID=$$$$
+	python -m virtualenv --python python2.7 --clear /tmp/$$PID/venv 
+	. /tmp/$$PID/venv/bin/activate 
+	pip install --quiet -r requirements.txt
+	ln -s /tmp/$$PID/venv venv
 	testinfra --connection=ssh -v -n 9  --hosts='$(target)' -m 'dnsmasq or docker or marathon_lb or marathon or mesos-dns or mesos_master or tincd or zookeeper or dns_resolution' tests
 
 # tests for our mesos slave
@@ -47,6 +53,12 @@ test_mesos_masters:
 test_mesos_slaves:
 	eval `ssh-agent`
 	ssh-add ~/.vagrant.d/insecure_private_key
+	echo "running make venv ..."
+	PID=$$$$
+	python -m virtualenv --python python2.7 --clear /tmp/$$PID/venv 
+	. /tmp/$$PID/venv/bin/activate 
+	pip install --quiet -r requirements.txt
+	ln -s /tmp/$$PID/venv venv
 	testinfra --connection=ssh -v -n 9  --hosts='$(target)' -m 'mesos_slave or tincd or docker or dns_resolution' tests
 
 # restart all the services on our mesos master
