@@ -36,12 +36,6 @@ filetype plugin on
 filetype indent on
 
 
-" simple recursive grep
-nmap ,r :Ack 
-nmap ,wr :Ack <cword><CR>
-
-
-
 " ============================================================================
 " Plugins settings and mappings
 " Edit them as you wish.
@@ -101,7 +95,6 @@ for vimrc_file in [
         \ 'json',
         \ 'marvin',
         \ 'neocomplete',
-        \ 'nerdcommenter',
         \ 'nerdcommenter',
         \ 'nerd-tree',
         \ 'nix',
