@@ -27,7 +27,6 @@ endif
 
 " Obscure hacks done, you can now modify the rest of the .vimrc as you wish :)
 
-
 " vim-plug
 call plug#begin('~/.vim/plugged')
 
@@ -110,6 +109,7 @@ for vimrc_file in [
         \ 'slimux',
         \ 'snippets',
         \ 'srcexplorer',
+        \ 'showmarks',
         \ 'surround',
         \ 'syntastic',
         \ 'tab-completion',
