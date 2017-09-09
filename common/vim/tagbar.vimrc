@@ -1,5 +1,6 @@
 
 Plug 'majutsushi/tagbar'
+
 nmap <leader>t :TagbarToggle<CR>
 
 let g:tagbar_type_ansible = {
@@ -74,10 +75,6 @@ let g:tagbar_type_puppet = {
         \'d:definition'
       \]
     \}
-
-
-
-
 
 "TagBar is set by defaul to ,tg
 noremap <leader>tb :TagbarToggle<cr>:TagbarTogglePause<cr>
