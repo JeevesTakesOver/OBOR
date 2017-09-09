@@ -86,4 +86,4 @@ noremap <leader>tb :TagbarToggle<cr>:TagbarTogglePause<cr>
 let g:tagbar_autofocus = 1
 
 "Set taglist to the left
-let Tlist_Use_Left_Window   = 1
+let Tlist_Use_Left_Window   = 0
