@@ -104,6 +104,7 @@ for vimrc_file in [
         \ 'javascript',
         \ 'jinja',
         \ 'json',
+        \ 'marvin',
         \ 'neocomplete',
         \ 'nerdcommenter',
         \ 'nerdcommenter',
