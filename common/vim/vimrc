@@ -126,6 +126,7 @@ for vimrc_file in [
         \ 'tig',
         \ 'ui',
         \ 'vimux',
+        \ 'vimprj',
         \ 'yankring',
         \ 'yankstack',
         \ 'youcompleteme',
