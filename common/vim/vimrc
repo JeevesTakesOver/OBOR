@@ -46,12 +46,6 @@ nmap ,wr :Ack <cword><CR>
 " Plugins settings and mappings
 " Edit them as you wish.
 
-
-" Tasklist ------------------------------
-
-" show pending tasks list
-map <F2> :TaskList<CR>
-
 " Autoclose ------------------------------
 
 " Fix to let ESC work as espected with Autoclose plugin
@@ -128,6 +122,7 @@ for vimrc_file in [
         \ 'tab-completion',
         \ 'tabman',
         \ 'tagbar',
+        \ 'tasks',
         \ 'tig',
         \ 'ui',
         \ 'vimux',
