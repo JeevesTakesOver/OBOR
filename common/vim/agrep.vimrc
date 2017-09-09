@@ -1,4 +1,7 @@
 
 Plug 'rking/ag.vim'
-"map leader,a to Agrep
-nnoremap <leader>ag :Ag<space>
+
+"map leader,s to Agrep
+nnoremap <leader>s :Ag<space>
+
+
