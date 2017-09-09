@@ -97,6 +97,7 @@ for vimrc_file in [
         \ 'fastfold',
         \ 'fixedtasklist',
         \ 'ggrep',
+        \ 'gutentags',
         \ 'haskell',
         \ 'html',
         \ 'indentline',
