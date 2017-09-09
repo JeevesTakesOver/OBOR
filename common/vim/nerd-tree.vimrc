@@ -12,10 +12,10 @@ map ,nt :NERDTreeToggle<CR>:vertical resize 40<CR>
 let g:NERDTreeDirArrows=1
 let g:EasyMotion_leader_key = '<Leader>'
 let g:NERDTreeWinPos = "left"
-let g:nerdtree_tabs_open_on_console_startup=0
+let g:nerdtree_tabs_open_on_console_startup=1
 let g:NERDTreeWinSize = 40
 let g:nerdtree_tabs_smart_startup_focus=1
-let NERDTreeQuitOnOpen = 1
+let NERDTreeQuitOnOpen = 0
 
 " change the CWD every time we click on a directory
 let NERDTreeChDirMode = 2
@@ -31,7 +31,5 @@ set guioptions-=r
 set guioptions-=L
 " Keep NERDTree window fixed between multiple toggles
 set winfixwidth
-
-
 
 " }}}
