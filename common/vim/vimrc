@@ -79,7 +79,6 @@ for vimrc_file in [
         \ 'ctrlp',
         \ 'dragvisuals',
         \ 'easymotion',
-        \ 'easytags',
         \ 'eclim',
         \ 'fastfold',
         \ 'fixedtasklist',
