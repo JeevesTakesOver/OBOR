@@ -1,7 +1,7 @@
 
 Plug 'majutsushi/tagbar'
 
-nmap <leader>t :TagbarToggle<CR>
+"nmap <leader>tb :TagbarToggle<CR>
 
 let g:tagbar_type_ansible = {
     \ 'ctagstype' : 'ansible',
