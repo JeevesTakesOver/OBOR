@@ -47,6 +47,7 @@ Vagrant.configure(2) do |config|
       machine.ssh.insert_key = false
 
       machine.vm.provider "virtualbox" do |vb|
+        vb.customize ["modifyvm", :id, "--cpus", "2"] 
         vb.memory = "2048" # to compile mesos we need > 2GB of RAM
         # https://github.com/hashicorp/otto/issues/423#issuecomment-186076403
         vb.linked_clone = true if Vagrant::VERSION =~ /^1.9/ 
