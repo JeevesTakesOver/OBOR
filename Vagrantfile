@@ -64,9 +64,37 @@ Vagrant.configure(2) do |config|
         ]
       end
 
-      machine.vm.synced_folder "#{item['name']}", "/etc/nixos/"
-      machine.vm.synced_folder "common", "/etc/nixos/common"
-      machine.vm.synced_folder "config", "/etc/nixos/config"
+      # vboxsf is not available on our vagrant nixos boxes
+      # we don't need it anyway, as we will sync using rsync instead
+      machine.vm.synced_folder '.', '/vagrant', disabled: true
+
+      machine.vm.synced_folder "#{item['name']}", "/etc/nixos/",
+        type: "rsync",
+        rsync__args: [
+          "--verbose",
+          "--rsync-path='sudo rsync'",
+          "--archive",
+          "--delete",
+          "-z"
+      ]
+      machine.vm.synced_folder "common", "/etc/nixos/common",
+        type: "rsync",
+        rsync__args: [
+          "--verbose",
+          "--rsync-path='sudo rsync'",
+          "--archive",
+          "--delete",
+          "-z"
+      ]
+      machine.vm.synced_folder "config", "/etc/nixos/config",
+        type: "rsync",
+        rsync__args: [
+          "--verbose",
+          "--rsync-path='sudo rsync'",
+          "--archive",
+          "--delete",
+          "-z"
+      ]
 
       machine.vm.provision "shell", path: "update.sh"
     end
