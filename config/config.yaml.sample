@@ -79,7 +79,9 @@ common: &common
     gpyzPAVIL9gQX373tY8y7al4cVg6hq2FHxJlAWtikFQA3dXRVH4Ix0sCAwEAAQ==
     -----END RSA PUBLIC KEY-----
   # on vagrant you'll have to disable virtualbox
-  enable_virtualbox: true
+  # this is because it will bring up a vnet interface with the same
+  # network as the host-only adapter and break networking
+  enable_virtualbox: false
 
 
 # [mesos_masters:] contain the list of mesos masters (3)
