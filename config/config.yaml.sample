@@ -10,15 +10,15 @@
 #
 # [common:] contains properties available to every node
 common: &common
-  mesos_zk_node01: &mesos_zk_node01 '169.254.100.1' # mesos-zk-01.tinc-core-vpn
-  mesos_zk_node02: &mesos_zk_node02 '169.254.100.2' # mesos-zk-02.tinc-core-vpn
-  mesos_zk_node03: &mesos_zk_node03 '169.254.100.3' # mesos-zk-03.tinc-core-vpn
+  mesos_zk_node01: &mesos_zk_node01 '10.254.100.1' # mesos-zk-01.tinc-core-vpn
+  mesos_zk_node02: &mesos_zk_node02 '10.254.100.2' # mesos-zk-02.tinc-core-vpn
+  mesos_zk_node03: &mesos_zk_node03 '10.254.100.3' # mesos-zk-03.tinc-core-vpn
   # zookeeper connection string
-  zk_string: &zk_string "zk://169.254.100.1:2181,169.254.100.2:2181,169.254.100.3:2181/mesos"
+  zk_string: &zk_string "zk://10.254.100.1:2181,10.254.100.2:2181,10.254.100.3:2181/mesos"
   tinc_domain: 'tinc-core-vpn' # which domain to use for TINC ip addresses
-  mesos_dns_resolver1: '169.254.0.1' # DNS NS for the TINC network
-  mesos_dns_resolver2: '169.254.0.2' # DNS NS for the TINC network
-  elasticsearch_url: 'http://169.254.100.19:9200' # elasticsearch endpoint
+  mesos_dns_resolver1: '10.254.0.1' # DNS NS for the TINC network
+  mesos_dns_resolver2: '10.254.0.2' # DNS NS for the TINC network
+  elasticsearch_url: 'http://10.254.100.19:9200' # elasticsearch endpoint
   tinc_interface: 'tinc.core-vpn' # name of the network interface for TINC
   tinc_compression: '6' # compression level for TINC traffic
   etc_hosts_entries: |
@@ -27,10 +27,10 @@ common: &common
     192.168.56.101 core01
     192.168.56.102 core02
     192.168.56.103 core03
-  dns_nameserver_01: '169.254.100.1'
-  dns_nameserver_02: '169.254.100.2'
-  dns_nameserver_03: '169.254.100.3'
-  tinc_core_node01_tinc_ip_address: '169.254.0.1'
+  dns_nameserver_01: '10.254.100.1'
+  dns_nameserver_02: '10.254.100.2'
+  dns_nameserver_03: '10.254.100.3'
+  tinc_core_node01_tinc_ip_address: '10.254.0.1'
   tinc_core_node01_fqdn: '192.168.56.101'
   tinc_core_node01_public_key: |
     -----BEGIN RSA PUBLIC KEY-----
@@ -46,7 +46,7 @@ common: &common
     jy+PxPRYL0yn8EhPGc6z9Q7jFVuKOkgRDLDMmheLUAAYvhJj6d6MSDbWR5zShIds
     84wj88+90J2P+CrPbnhn7N78dfxTshR0wTAZQgUvJsqgDkRLovOTxmECAwEAAQ==
     -----END RSA PUBLIC KEY-----
-  tinc_core_node02_tinc_ip_address: '169.254.0.2'
+  tinc_core_node02_tinc_ip_address: '10.254.0.2'
   tinc_core_node02_fqdn: '192.168.56.102'
   tinc_core_node02_public_key: |
     -----BEGIN RSA PUBLIC KEY-----
@@ -62,7 +62,7 @@ common: &common
     WAxzMgL9PVcuHgd5IeusgW9qZk2wkqlKdYQIRhVgy1JFlqvMNYSqN28iIPuWWUuq
     oTzQuL7LdRO9TC6gS+JCrP03GAqpNS+q84BIXT/DJpi2+nJGkREbHd8CAwEAAQ==
     -----END RSA PUBLIC KEY-----
-  tinc_core_node03_tinc_ip_address: '169.254.0.3'
+  tinc_core_node03_tinc_ip_address: '10.254.0.3'
   tinc_core_node03_fqdn: '192.168.56.103'
   tinc_core_node03_public_key: |
     -----BEGIN RSA PUBLIC KEY-----
@@ -90,7 +90,7 @@ mesos_masters:
     public_ip_address: '192.168.56.201'
     public_fqdn: '192.168.56.201'
     hostname: 'mesos-zk-01' # hostname to use
-    tinc_ip_address: '169.254.100.1' # TINC ip address to assign
+    tinc_ip_address: '10.254.100.1' # TINC ip address to assign
     tinc_hostname: 'mesos_zk_01' # TINC hostname to use
     public_ip_netmask: 24
     default_gateway: '10.0.2.2'
@@ -142,7 +142,7 @@ mesos_masters:
     public_ip_address: '192.168.56.202'
     public_fqdn: '192.168.56.202'
     hostname: 'mesos-zk-02'
-    tinc_ip_address: '169.254.100.2'
+    tinc_ip_address: '10.254.100.2'
     tinc_hostname: 'mesos_zk_02'
     public_ip_netmask: 24
     default_gateway: '10.0.2.2'
@@ -192,7 +192,7 @@ mesos_masters:
     public_ip_address: '192.168.56.203'
     public_fqdn: '192.168.56.203'
     hostname: 'mesos-zk-03'
-    tinc_ip_address: '169.254.100.3'
+    tinc_ip_address: '10.254.100.3'
     tinc_hostname: 'mesos_zk_03'
     public_ip_netmask: 24
     default_gateway: '10.0.2.2'
@@ -243,7 +243,7 @@ mesos_slaves:
     ssh_connection_string: '192.168.56.204' # SSH connection string
     hostname: 'slave'
     tinc_hostname: 'slave'
-    tinc_ip_address: '169.254.100.19'
+    tinc_ip_address: '10.254.100.19'
     public_ip_address: '192.168.56.204'
     public_fqdn: '192.168.56.204'
     default_gateway: '10.0.2.2'
