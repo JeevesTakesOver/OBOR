@@ -15,6 +15,6 @@ def test_zookeeper_is_enabled(Command):
 
 @pytest.mark.mesos_dns
 def test_zookeeper_is_listening_on_port_2181_on_tinc_interface(Command):
-    cmd = Command("sudo netstat -nltp | egrep -E 'tcp *.*169.254.*:2181 *.*:.*LISTEN.*java'")
+    cmd = Command("sudo netstat -nltp | egrep -E 'tcp *.*10.254.*:2181 *.*:.*LISTEN.*java'")
     assert cmd.rc == 0
 

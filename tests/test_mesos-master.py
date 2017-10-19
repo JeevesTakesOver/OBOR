@@ -15,6 +15,6 @@ def test_mesos_master_is_enabled(Command):
 
 @pytest.mark.mesos_master
 def test_mesos_master_is_listening_on_port_5050_on_tinc_interface(Command):
-    cmd = Command("sudo netstat -nltp | egrep -E 'tcp *.*169.254.*:5050 *.*:.*LISTEN.*mesos-master'")
+    cmd = Command("sudo netstat -nltp | egrep -E 'tcp *.*10.254.*:5050 *.*:.*LISTEN.*mesos-master'")
     assert cmd.rc == 0
 
