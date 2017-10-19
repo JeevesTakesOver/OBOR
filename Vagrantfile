@@ -57,11 +57,10 @@ Vagrant.configure(2) do |config|
           vb.customize ['modifyvm', :id, '--paravirtprovider', 'kvm']
         end
         # https://www.virtualbox.org/manual/ch05.html#iocaching
-        # disable hostio-cache to save memory
         vb.customize [
           "storagectl", :id, 
           "--name", "IDE Controller",
-          "--hostiocache", "off"
+          "--hostiocache", "on"
         ]
       end
 
