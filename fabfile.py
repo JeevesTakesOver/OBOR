@@ -233,7 +233,7 @@ def test_mesos_masters():
 
 
 @task
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
+@retry(stop_max_attempt_number=3, wait_fixed=60000)
 def run_testinfra_against_mesos_masters():
     local(
         "testinfra --connection=ssh -v -n 9  --hosts='{}' "
@@ -261,7 +261,7 @@ def test_mesos_slaves():
 
 
 @task
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
+@retry(stop_max_attempt_number=3, wait_fixed=60000)
 def run_testinfra_against_mesos_slaves():
     local(
         "testinfra --connection=ssh -v -n 9  --hosts='{}' "
@@ -339,6 +339,8 @@ def jenkins_build():
 
     # check tinc network is operational
     execute(check_tinc_network_is_operational)
+
+    sleep(60)
 
     # test all the things
     execute(vagrant_test_mesos_masters)
