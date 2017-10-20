@@ -31,7 +31,8 @@ stdenv.mkDerivation {
   export VENV=/tmp/$$
   virtualenv --no-setuptools --clear $VENV
   ln -s $VENV venv
-  export PATH=$PWD/venv/bin:$PATH
+  . venv/bin/activate
+  export PATH=$VENV/bin:$PATH
   pip install --quiet -r requirements.txt
   export PS1="$PS1::nix-shell()"
   '';
