@@ -334,9 +334,6 @@ def jenkins_build():
     # spin up and provision the Cluster
     execute(spin_up_obor)
 
-    # provision the Cluster
-    execute(vagrant_update)
-
     # reload after initial provision
     execute(vagrant_reload)
 
