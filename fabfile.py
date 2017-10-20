@@ -182,8 +182,7 @@ def config_json(config_yaml):
                     yaml.load(cfg_yaml.read()), 
                     cfg_json,
                     sort_keys=True,
-                    indent=4,
-                    check_ascii=False
+                    indent=4
             )
 
     
