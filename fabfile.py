@@ -123,10 +123,10 @@ def vagrant_reload():
         vagrant_reload_vm_with_retry(vm)
 
 @task
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_destroy():
     log_green('running vagrant_destroy')
-    with cd('Railtrack'):
-        local('vagrant destroy -f')
+    local('cd Railtrack && vagrant destroy -f')
     local('vagrant destroy -f')
 
 
