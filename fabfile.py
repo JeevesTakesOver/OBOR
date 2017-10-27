@@ -340,7 +340,7 @@ def jenkins_build():
     # check tinc network is operational
     execute(check_tinc_network_is_operational)
 
-    sleep(60)
+    sleep(180)
 
     # test all the things
     execute(vagrant_test_mesos_masters)
