@@ -1,5 +1,5 @@
 # configuration.nix
-{ boot, filesystems, networking, services, swapDevices, virtualisation, ... }: 
+{ boot, filesystems, networking, services, virtualisation, swapDevices, ... }: 
 
 # import our config.json settings
 let 
@@ -84,6 +84,8 @@ in {
       "data=ordered"
     ]; 
   };
+
+  swapDevices = [ { device = "/swapfile"; size = 2048; } ];
 
   # use a nested array for defining your services, as vim indent will make it
   # a lot easier to navigate as you collapse/expand blocks.
