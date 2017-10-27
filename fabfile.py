@@ -328,26 +328,32 @@ def spin_up_railtrack():
 def jenkins_build():
     """ runs a jenkins build """
 
-    # spin up Railtrack, which is required for OBOR
-    execute(spin_up_railtrack)
+    try:
+        # spin up Railtrack, which is required for OBOR
+        execute(spin_up_railtrack)
 
-    # spin up and provision the Cluster
-    execute(spin_up_obor)
+        # spin up and provision the Cluster
+        execute(spin_up_obor)
 
-    # reload after initial provision
-    execute(vagrant_reload)
+        # reload after initial provision
+        execute(vagrant_reload)
 
-    # check tinc network is operational
-    execute(check_tinc_network_is_operational)
+        # check tinc network is operational
+        execute(check_tinc_network_is_operational)
 
-    sleep(180)
+        sleep(180)
 
-    # test all the things
-    execute(vagrant_test_mesos_masters)
-    execute(vagrant_test_mesos_slaves)
+        # test all the things
+        execute(vagrant_test_mesos_masters)
+        execute(vagrant_test_mesos_slaves)
 
-    # and now destroy Railtrack and mesos VMs
-    execute(vagrant_destroy)
+        # and now destroy Railtrack and mesos VMs
+        execute(vagrant_destroy)
+    except:
+        # and now destroy Railtrack and mesos VMs
+        execute(vagrant_destroy)
+        sys.exit(1)
+
 
 
 """
