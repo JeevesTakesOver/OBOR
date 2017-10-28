@@ -84,9 +84,10 @@ def restart_tinc_daemon_if_needed(vm):
     local('vagrant ssh %s -- ping -c1 www.google.com' % vm)
 
 
+@task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
-def check_tinc_network_is_operational():
-    log_green('running check_tinc_network_is_operational')
+def vagrant_ensure_tinc_network_is_operational():
+    log_green('running vagrant_ensure_tinc_network_is_operational')
     # this will test if we can resolve google.com using
     # the tinc core DNS servers and if we can get out through the default gw
     for vm in [
@@ -338,9 +339,13 @@ def jenkins_build():
         # reload after initial provision
         execute(vagrant_reload)
 
-        # check tinc network is operational
-        execute(check_tinc_network_is_operational)
+        # allow the different services to recover after boot
+        sleep(180)
 
+        # check tinc network is operational
+        execute(vagrant_ensure_tinc_network_is_operational)
+
+        # allow the different services to recover
         sleep(180)
 
         # test all the things
