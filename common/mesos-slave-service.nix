@@ -214,6 +214,12 @@ with lib;
           with timeout 5 seconds
           if status = 1 then alert
           if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart tinc.core-vpn"
+
+          check program check-for-docker with path "/etc/tinc/core-vpn/check-for-docker"
+          with timeout 25 seconds
+          if status = 1 then alert
+          if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart docker"
+
         '';
       };
 
@@ -265,6 +271,18 @@ with lib;
             sudo ifconfig tinc.core-vpn | grep -E  'inet [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.*netmask'
           '';
         }; 
+
+        # this is where we enable checks for docker
+        "tinc/core-vpn/check-for-docker" = {
+          mode = "0755";
+          text = ''
+            #!/usr/bin/env bash
+            set -e
+            timeout 20 sudo docker ps
+          '';
+        }; 
+
+
 
       }; # close etc block
     }; # close environment block
