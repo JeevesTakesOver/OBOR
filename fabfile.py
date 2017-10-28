@@ -250,7 +250,7 @@ def vagrant_test_mesos_masters():
                '192.168.56.202',
                '192.168.56.203']:
         with settings(host_string=vm):
-            execute(run_testinfra_against_mesos_masters)
+            execute(test_mesos_masters)
 
 
 @task
@@ -275,7 +275,7 @@ def run_testinfra_against_mesos_slaves():
 def vagrant_test_mesos_slaves():
     for vm in ['192.168.56.204']:
         with settings(host_string=vm):
-            execute(run_testinfra_against_mesos_slaves)
+            execute(test_mesos_slaves)
 
 
 @task
