@@ -122,6 +122,7 @@ def vagrant_reload():
         'vagrant-mesos-zk-03',
         'vagrant-mesos-slave']:
         vagrant_reload_vm_with_retry(vm)
+        sleep(60)
 
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
