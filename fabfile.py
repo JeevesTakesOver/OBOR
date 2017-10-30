@@ -238,7 +238,8 @@ def test_mesos_masters():
 @retry(stop_max_attempt_number=3, wait_fixed=60000)
 def run_testinfra_against_mesos_masters():
     local(
-        "testinfra --connection=ssh -v -n 9  --hosts='{}' "
+        "testinfra --connection=ssh --ssh-config=ssh.config "
+        "-v -n 9  --hosts='{}' "
         "-m 'dnsmasq or docker or marathon_lb or marathon or mesos-dns or "
         "mesos_master or tincd or zookeeper or dns_resolution' "
         "tests".format(env.host_string)
@@ -247,9 +248,9 @@ def run_testinfra_against_mesos_masters():
 
 @task
 def vagrant_test_mesos_masters():
-    for vm in ['192.168.56.201',
-               '192.168.56.202',
-               '192.168.56.203']:
+    for vm in ['vagrant@192.168.56.201',
+               'vagrant@192.168.56.202',
+               'vagrant@192.168.56.203']:
         with settings(host_string=vm):
             execute(test_mesos_masters)
 
@@ -266,7 +267,8 @@ def test_mesos_slaves():
 @retry(stop_max_attempt_number=3, wait_fixed=60000)
 def run_testinfra_against_mesos_slaves():
     local(
-        "testinfra --connection=ssh -v -n 9  --hosts='{}' "
+        "testinfra --connection=ssh --ssh-config=ssh.config "
+        "-v -n 9 --hosts='{}' "
         "-m 'mesos_slave or tincd or docker or dns_resolution' "
         "tests".format(env.host_string)
     )
@@ -274,7 +276,7 @@ def run_testinfra_against_mesos_slaves():
 
 @task
 def vagrant_test_mesos_slaves():
-    for vm in ['192.168.56.204']:
+    for vm in ['vagrant@192.168.56.204']:
         with settings(host_string=vm):
             execute(test_mesos_slaves)
 
