@@ -30,10 +30,7 @@ in {
       ConnectTo = core_network_02
       ConnectTo = core_network_03
       Cipher=aes-256-cbc
-      AutoConnect = yes
-      Forwarding = kernel
       ProcessPriority = high
-      TCPOnly = yes
     '';
 
   services.tinc.networks.core-vpn.hosts.core_network_01 = ''
