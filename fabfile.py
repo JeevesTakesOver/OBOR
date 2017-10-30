@@ -228,10 +228,7 @@ def update():
 
 @task
 def test_mesos_masters():
-    with settings(
-            user='vagrant',
-            key_filename="~/.vagrant.d/insecure_private_key"):
-        execute(run_testinfra_against_mesos_masters)
+    execute(run_testinfra_against_mesos_masters)
 
 
 @task
@@ -248,19 +245,16 @@ def run_testinfra_against_mesos_masters():
 
 @task
 def vagrant_test_mesos_masters():
-    for vm in ['vagrant@192.168.56.201',
-               'vagrant@192.168.56.202',
-               'vagrant@192.168.56.203']:
+    for vm in ['192.168.56.201',
+               '192.168.56.202',
+               '192.168.56.203']:
         with settings(host_string=vm):
             execute(test_mesos_masters)
 
 
 @task
 def test_mesos_slaves():
-    with settings(
-            user='vagrant',
-            key_filename="~/.vagrant.d/insecure_private_key"):
-        execute(run_testinfra_against_mesos_slaves)
+    execute(run_testinfra_against_mesos_slaves)
 
 
 @task
@@ -276,7 +270,7 @@ def run_testinfra_against_mesos_slaves():
 
 @task
 def vagrant_test_mesos_slaves():
-    for vm in ['vagrant@192.168.56.204']:
+    for vm in ['192.168.56.204']:
         with settings(host_string=vm):
             execute(test_mesos_slaves)
 
