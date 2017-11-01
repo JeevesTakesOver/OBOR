@@ -1,37 +1,91 @@
+# config.yaml.sample
+
+# This file contains the OBOR cluster configuration settings.
+
+
+# See the following github repos for references of the underlying stacks:
+
+# Railtrack: https://github.com/JeevesTakesOver/Railtrack
+#   - provides a DHCP/DNS layer on top of a Tinc VPN. All services are deployed
+#     to this Railtrack Tinc VPN. This assures all in/out traffic is encrypted.
+
+# Menagerie: https://github.com/JeevesTakesOver/menagerie
+#   - Railtrack probes this git repository for Tinc public keys, allowing
+#     nodes to access to the Railtrack Tinc VPN.
+#     All mesos masters/slaves, mobile workstations should have a tinc pub key
+#     commited to this repo in order to obtain an ip address on the tinc network.
+
+
+# Some implementation details:
 
 # we use IP addresses for the most of the configuration in our services
 # as we cannot yet rely on systemd to bring the different services online
-# in the correct order.
+# in the correct order (yet).
 # we also lack proper monitoring for some of those services to allow us
 # to restart them on failure through systemd.
 # addressing failures is likely to be enough to discard the dependencies
 # between services, as these would restart until their dependencies were
 # satisfied.
-#
-# [common:] contains properties available to every node
+
+
+#---------------------------------------------------------------------------
+# Common : contains common settings to every node
+#---------------------------------------------------------------------------
+
 common: &common
+  # these are the VPN IP addresses for the Mesos master nodes on the tinc network
   mesos_zk_node01: &mesos_zk_node01 '10.254.100.1' # mesos-zk-01.tinc-core-vpn
   mesos_zk_node02: &mesos_zk_node02 '10.254.100.2' # mesos-zk-02.tinc-core-vpn
   mesos_zk_node03: &mesos_zk_node03 '10.254.100.3' # mesos-zk-03.tinc-core-vpn
+
   # zookeeper connection string
   zk_string: &zk_string "zk://10.254.100.1:2181,10.254.100.2:2181,10.254.100.3:2181/mesos"
+
+  # Railtrack Tinc settings
   tinc_domain: 'tinc-core-vpn' # which domain to use for TINC ip addresses
-  mesos_dns_resolver1: '10.254.0.1' # DNS NS for the TINC network
-  mesos_dns_resolver2: '10.254.0.2' # DNS NS for the TINC network
-  elasticsearch_url: 'http://10.254.100.19:9200' # elasticsearch endpoint
   tinc_interface: 'tinc.core-vpn' # name of the network interface for TINC
   tinc_compression: '6' # compression level for TINC traffic
+
+  # entries to add to /etc/hosts
   etc_hosts_entries: |
     # at boot, DNS is not yet available for our Tinc VPN 
     # as a work a workaround lets use IP addresses for now.
+    # this assumes that our Masters have fixed IP addresses
     192.168.56.101 core01
     192.168.56.102 core02
     192.168.56.103 core03
+
+  # Primary and Secondary Railtrack DNS servers
+  mesos_dns_resolver1: '10.254.0.1' # DNS NS for the TINC network
+  mesos_dns_resolver2: '10.254.0.2' # DNS NS for the TINC network
+
+  # OBOR DNS servers:
+  # the DNS servers IP addresses for used within the Mesos Cluster
+  # dnsmasq is running on the mesos master nodes, it acts as a DNS gateway
+  # to the mesos-dns servers, and the Railtrack DNS servers (10.254.0.1..2)
   dns_nameserver_01: '10.254.100.1'
   dns_nameserver_02: '10.254.100.2'
   dns_nameserver_03: '10.254.100.3'
+
+  # on vagrant you'll have to disable virtualbox
+  # this is because on the mesos slaves it will bring up a vnet interface 
+  # with the same network as the host-only adapter and break networking
+  enable_virtualbox: false
+
+  # Where do we send logs to, currently elasticsearch and logstash are deployed
+  # as part of the OBOR deployment (to be changed)
+  elasticsearch_url: 'http://10.254.100.19:9200' # elasticsearch endpoint
+
+
+  #---------------------------------------------------------------------------
+  # Railtrack nodes settings below:
+  #---------------------------------------------------------------------------
+  
+  # the first node for Railtrack:
   tinc_core_node01_tinc_ip_address: '10.254.0.1'
   tinc_core_node01_fqdn: '192.168.56.101'
+
+  # TINC public key for our first Railtrack Tinc node
   tinc_core_node01_public_key: |
     -----BEGIN RSA PUBLIC KEY-----
     MIICCgKCAgEAozzeSS7NSQsb3s9vJS1rJAV3Z4c9ib422bAEOeK8oGcKjTKxFtaE
@@ -46,8 +100,11 @@ common: &common
     jy+PxPRYL0yn8EhPGc6z9Q7jFVuKOkgRDLDMmheLUAAYvhJj6d6MSDbWR5zShIds
     84wj88+90J2P+CrPbnhn7N78dfxTshR0wTAZQgUvJsqgDkRLovOTxmECAwEAAQ==
     -----END RSA PUBLIC KEY-----
+
+  # the second node for Railtrack:
   tinc_core_node02_tinc_ip_address: '10.254.0.2'
   tinc_core_node02_fqdn: '192.168.56.102'
+
   tinc_core_node02_public_key: |
     -----BEGIN RSA PUBLIC KEY-----
     MIICCgKCAgEA1pZWhTHR20c98RkwbHjvrVlDziK49c4nlaz1IxG3byLCKCVxNWt5
@@ -62,8 +119,11 @@ common: &common
     WAxzMgL9PVcuHgd5IeusgW9qZk2wkqlKdYQIRhVgy1JFlqvMNYSqN28iIPuWWUuq
     oTzQuL7LdRO9TC6gS+JCrP03GAqpNS+q84BIXT/DJpi2+nJGkREbHd8CAwEAAQ==
     -----END RSA PUBLIC KEY-----
+
+  # the third node for Railtrack:
   tinc_core_node03_tinc_ip_address: '10.254.0.3'
   tinc_core_node03_fqdn: '192.168.56.103'
+
   tinc_core_node03_public_key: |
     -----BEGIN RSA PUBLIC KEY-----
     MIICCgKCAgEAlimDWppur7zym2LHca10GRipVSVTz4XSPE4bEEsjI3pGkUAt1s/9
@@ -78,27 +138,29 @@ common: &common
     k3ud6ALnTFlKl+UrtWY199ODqK1S8lbTkso/ebLAN0zDdXXbD9KVpsSAUuNQRwop
     gpyzPAVIL9gQX373tY8y7al4cVg6hq2FHxJlAWtikFQA3dXRVH4Ix0sCAwEAAQ==
     -----END RSA PUBLIC KEY-----
-  # on vagrant you'll have to disable virtualbox
-  # this is because it will bring up a vnet interface with the same
-  # network as the host-only adapter and break networking
-  enable_virtualbox: false
 
 
-# [mesos_masters:] contain the list of mesos masters (3)
+#---------------------------------------------------------------------------
+# OBOR mesos master nodes settings below:
+#---------------------------------------------------------------------------
+
 mesos_masters:
+
+  # first OBOR mesos master node 
   node01:
-    <<: *common
+    <<: *common # import all the common settings 
     ssh_connection_string: 'root@192.168.56.201' # SSH connection string
     public_ip_address: '192.168.56.201'
-    public_fqdn: '192.168.56.201'
+    public_fqdn: '192.168.56.201' # we use IP addresses on vagrant
     hostname: 'mesos-zk-01' # hostname to use
-    tinc_ip_address: '10.254.100.1' # TINC ip address to assign
-    tinc_hostname: 'mesos_zk_01' # TINC hostname to use
+    tinc_ip_address: '10.254.100.1' # Railtrack tinc ip address to assign
+    tinc_hostname: 'mesos_zk_01' # Railtrack tinc hostname to use
     public_ip_netmask: 24
-    default_gateway: '10.0.2.2'
+    default_gateway: '10.0.2.2' # what about vagrant worlds ??
     public_interface: 'enp0s8'
     zookeeper_id: 0 # zookeeper id
-    # TINC public key
+
+    # TINC public key (these should be commited to 'menagerie')
     tinc_public_key: |
       -----BEGIN RSA PUBLIC KEY-----
       MIIBCgKCAQEAsvAAhroOq6Gb9zBljkRejQierqg5aw3UI05biMYp3n5JZ/v9M7iV
@@ -108,6 +170,7 @@ mesos_masters:
       QlJ9I1ZQnrWsB8B3/DiwIkqn6QGy+kVt4KBcg/3g+hy+xHQocYyLjPd5/uWt8V77
       Q4WMxn3PbRhcDnmNHkev4MGJEIPhrl+63QIDAQAB
       -----END RSA PUBLIC KEY-----
+
     # TINC private key
     tinc_private_key: |
       -----BEGIN RSA PRIVATE KEY-----
@@ -138,10 +201,11 @@ mesos_masters:
       R3ASqnqq5k7d4PAuB56wXi0VQuXHhiOmRFxgi0O2992jgFZ0jU7CQg==
       -----END RSA PRIVATE KEY-----
 
+  # second OBOR mesos master node 
   node02:
-    <<: *common
-    ssh_connection_string: 'root@192.168.56.202' # SSH connection string
-    public_ip_address: '192.168.56.202'
+    <<: *common 
+    ssh_connection_string: 'root@192.168.56.202'
+    public_ip_address: '192.168.56.202' 
     public_fqdn: '192.168.56.202'
     hostname: 'mesos-zk-02'
     tinc_ip_address: '10.254.100.2'
@@ -150,6 +214,7 @@ mesos_masters:
     default_gateway: '10.0.2.2'
     public_interface: 'enp0s8'
     zookeeper_id: 1 
+
     tinc_public_key: |
       -----BEGIN RSA PUBLIC KEY-----
       MIIBCgKCAQEAyuEFW+DPPsKMGFQkjUIiZvzRmkDibb/pdYaZR+LTEGjRh8pjK9nO
@@ -159,6 +224,7 @@ mesos_masters:
       5Q+0lF312irXtTyYGu3i9Ga3aFOyaO6XBFZXrJFIAVN0VmavhD7L5/4L8MO+J6a8
       ZKOu4uvHRDyepYIxhAXFqC2ZqYfhIJa9/QIDAQAB
       -----END RSA PUBLIC KEY-----
+
     tinc_private_key: |
       -----BEGIN RSA PRIVATE KEY-----
       MIIEpQIBAAKCAQEAyuEFW+DPPsKMGFQkjUIiZvzRmkDibb/pdYaZR+LTEGjRh8pj
@@ -188,9 +254,10 @@ mesos_masters:
       3vyMz667NxXPvFG1jvG7cBXlouqCKObrrhI4XBPFJvAOZ7sLc/egcug=
       -----END RSA PRIVATE KEY-----
 
+  # third OBOR mesos master node 
   node03:
     <<: *common
-    ssh_connection_string: 'root@192.168.56.203' # SSH connection string
+    ssh_connection_string: 'root@192.168.56.203'
     public_ip_address: '192.168.56.203'
     public_fqdn: '192.168.56.203'
     hostname: 'mesos-zk-03'
@@ -200,6 +267,7 @@ mesos_masters:
     default_gateway: '10.0.2.2'
     public_interface: 'enp0s8'
     zookeeper_id: 2 
+
     tinc_public_key: |
       -----BEGIN RSA PUBLIC KEY-----
       MIIBCgKCAQEAthCd7Omce/nHG7MyPDqYt9E5SzyC8gh3YHMPLdedsf7vgIQwPVs4
@@ -209,6 +277,7 @@ mesos_masters:
       rUIJVzpPrR2VWdI5WfnjmUu+4+Oi3fLdIOyRJlZtXnbbwKUjueaUH4oBnNIluzRK
       U+NdiEinxpvMuSOmQvy5EPL6WmJQ981ZYwIDAQAB
       -----END RSA PUBLIC KEY-----
+
     tinc_private_key: |
       -----BEGIN RSA PRIVATE KEY-----
       MIIEowIBAAKCAQEAthCd7Omce/nHG7MyPDqYt9E5SzyC8gh3YHMPLdedsf7vgIQw
@@ -238,19 +307,26 @@ mesos_masters:
       QE7NgfYEZ9dZsbdfEzd9xB+RKaFrs3VeIfSWiObxiH5ou8XysEGw
       -----END RSA PRIVATE KEY-----
 
+#---------------------------------------------------------------------------
+# OBOR mesos slaves nodes settings below:
+#---------------------------------------------------------------------------
 
 mesos_slaves:
+
+  # first OBOR mesos slave node 
   node01:
-    <<: *common
+    <<: *common # import all the common settings
     ssh_connection_string: '192.168.56.204' # SSH connection string
-    hostname: 'slave'
-    tinc_hostname: 'slave'
-    tinc_ip_address: '10.254.100.19'
+    hostname: 'slave' # hostname to use¬
+    tinc_hostname: 'slave' # Railtrack tinc hostname to use
+    tinc_ip_address: '10.254.100.19' # Railtrack tinc ip address to assign
     public_ip_address: '192.168.56.204'
-    public_fqdn: '192.168.56.204'
-    default_gateway: '10.0.2.2'
+    public_fqdn: '192.168.56.204' # we use IP addresses on vagrant
+    default_gateway: '10.0.2.2' # what about vagrant worlds ??¬
     public_interface: 'enp0s8'
     public_ip_netmask: 24
+
+    # TINC public key (these should be commited to 'menagerie')
     tinc_public_key: |
       -----BEGIN RSA PUBLIC KEY-----
       MIIBCgKCAQEA4p8OuuUaiw4TorLyZLxn3Xx1NVxcyqD5EwrslGJnKIkQrPuFb8Y8
@@ -260,6 +336,8 @@ mesos_slaves:
       c27sY8Sv7YaOnqlZpcphiHEkpZSgC5EngHq+80uNtf/CjfpihZbWN2Wn3l/3MA8f
       bhxEqnOfvT7OMhZUDNo5ny8A8C+dZBh81QIDAQAB
       -----END RSA PUBLIC KEY-----
+
+    # TINC private key
     tinc_private_key: |
       -----BEGIN RSA PRIVATE KEY-----
       MIIEpAIBAAKCAQEA4p8OuuUaiw4TorLyZLxn3Xx1NVxcyqD5EwrslGJnKIkQrPuF
