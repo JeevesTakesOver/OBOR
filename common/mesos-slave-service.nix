@@ -201,6 +201,29 @@ with lib;
         }; # close networks block
       }; # close tinc block
 
+
+      # monitor and restart tincd if we happen to not have accquired an ip
+      monit = {
+        enable = true;
+        config = ''
+          set daemon 60
+          set logfile syslog facility log_daemon
+
+
+          check program check-for-tinc-ip-address with path "/etc/tinc/core-vpn/check-for-tinc-ip-address"
+          with timeout 5 seconds
+          if status = 1 then alert
+          if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart tinc.core-vpn"
+
+          check program check-for-docker with path "/etc/tinc/core-vpn/check-for-docker"
+          with timeout 25 seconds
+          if status = 1 then alert
+          if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart docker"
+
+        '';
+      };
+
+
     }; # close services block
 
     environment = {
@@ -238,6 +261,28 @@ with lib;
             timeout 300;
           '';
         }; #close tinc/core-vpn/dhclient.conf block
+
+        # this is where we check if tinc got an ip address
+        "tinc/core-vpn/check-for-tinc-ip-address" = {
+          mode = "0755";
+          text = ''
+            #!/usr/bin/env bash
+            set -e
+            sudo ifconfig tinc.core-vpn | grep -E  'inet [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.*netmask'
+          '';
+        }; 
+
+        # this is where we enable checks for docker
+        "tinc/core-vpn/check-for-docker" = {
+          mode = "0755";
+          text = ''
+            #!/usr/bin/env bash
+            set -e
+            timeout 20 sudo docker ps
+          '';
+        }; 
+
+
 
       }; # close etc block
     }; # close environment block

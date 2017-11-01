@@ -14,49 +14,53 @@ for the mesos-slaves, including some test desktop boxes I run at home.
 All services are bound to VPN network interfaces and not exposed to the Internet.
 The VPN is based on Railtrack (tinc based VPN).
 
-The Makefile in this repository is used to deploy and generate the required config.
+This gives me a mixed on-premises and multi-cloud Mesos Cluster on top of a distributed VPN.
+
+
+The fabfile in this repository is used to deploy and generate the required config.
 
 Running :
 ``` 
-make config=<config/config.yaml.sample> config_json 
+fab config_json:config_yaml=<config/config.yaml.sample>
 ```
 
 Will generate a config/config.json file based out a YAML config.
 
 
 ```
-make target=<root@ipaddress> convert-os-to-nixos 
+fab -H <ipaddress> convert-os-to-nixos 
 ```
 
 will attempt to convert an ubuntu OS (from any cloud provider) into a NixOS OS.
 This helps the issue of the lack of cloud providers currently offering a NixOS image.
 
 ```
-make target=<hostname> update
+fab -H <hostname> update
 ```
 
 Will deploy NixOS according to our config on the target host.
 
 
 ```
-make target=<hostname> test_mesos_masters
+fab -H <hostname> run_testinfra_against_mesos_masters
 ```
 
 will run integration tests on the mesos-masters
 
 
 ```
-make target=<hostname> test_mesos_slaves
+fab -H <hostname> run_testinfra_against_mesos_slaves
 ```
 
 will run integration tests on the mesos-slaves
 
 
 ```
-make deploy_railtrack
+fab jenkins_build()
 ```
 
-will deploy a local Railtrack VPN based on Vagrant
+Will deploy a local stack of Railtrack, and then proceed to deploy OBOR
+on top of Railtrack using Vagrant.
 
 
 

@@ -1,5 +1,5 @@
 # configuration.nix
-{ boot, filesystems, networking, services, ... }: 
+{ boot, filesystems, networking, services, swapDevices, ... }: 
 
 # import our config.json settings
 let 
@@ -74,6 +74,7 @@ in {
 
 
   fileSystems."/" = { device = "/dev/sda1"; fsType = "ext4"; };
+  swapDevices = [ { device = "/swapfile"; size = 2048; } ];
 
   # use a nested array for defining your services, as vim indent will make it
   # a lot easier to navigate as you collapse/expand blocks.
@@ -99,12 +100,8 @@ in {
       dns_resolver1 = "${d.common.mesos_dns_resolver1}";
       dns_resolver2 = "${d.common.mesos_dns_resolver2}";
     };
-
-    virtualbox.enable = true;
     dbus.enable    = true;
-
   };
 
-
-
+  virtualisation.virtualbox.guest.enable = true;
 }

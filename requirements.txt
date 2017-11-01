@@ -3,3 +3,8 @@ testinfra
 pytest-xdist
 pyaml
 httpie
+fabric
+retrying
+pybookshelf
+docker-compose
+timeout_decorator

@@ -47,7 +47,8 @@ Vagrant.configure(2) do |config|
       machine.ssh.insert_key = false
 
       machine.vm.provider "virtualbox" do |vb|
-        vb.memory = "2048" # to compile mesos we need > 2GB of RAM
+        vb.customize ["modifyvm", :id, "--cpus", "2"] 
+        vb.memory = "3072" # to compile mesos we need > 2GB of RAM
         # https://github.com/hashicorp/otto/issues/423#issuecomment-186076403
         vb.linked_clone = true if Vagrant::VERSION =~ /^1.9/ 
         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
@@ -56,17 +57,44 @@ Vagrant.configure(2) do |config|
           vb.customize ['modifyvm', :id, '--paravirtprovider', 'kvm']
         end
         # https://www.virtualbox.org/manual/ch05.html#iocaching
-        # disable hostio-cache to save memory
         vb.customize [
           "storagectl", :id, 
           "--name", "IDE Controller",
-          "--hostiocache", "off"
+          "--hostiocache", "on"
         ]
       end
 
-      machine.vm.synced_folder "#{item['name']}", "/etc/nixos/"
-      machine.vm.synced_folder "common", "/etc/nixos/common"
-      machine.vm.synced_folder "config", "/etc/nixos/config"
+      # vboxsf is not available on our vagrant nixos boxes
+      # we don't need it anyway, as we will sync using rsync instead
+      machine.vm.synced_folder '.', '/vagrant', disabled: true
+
+      machine.vm.synced_folder "#{item['name']}", "/etc/nixos/",
+        type: "rsync",
+        rsync__args: [
+          "--verbose",
+          "--rsync-path='sudo rsync'",
+          "--archive",
+          "--delete",
+          "-z"
+      ]
+      machine.vm.synced_folder "common", "/etc/nixos/common",
+        type: "rsync",
+        rsync__args: [
+          "--verbose",
+          "--rsync-path='sudo rsync'",
+          "--archive",
+          "--delete",
+          "-z"
+      ]
+      machine.vm.synced_folder "config", "/etc/nixos/config",
+        type: "rsync",
+        rsync__args: [
+          "--verbose",
+          "--rsync-path='sudo rsync'",
+          "--archive",
+          "--delete",
+          "-z"
+      ]
 
       machine.vm.provision "shell", path: "update.sh"
     end

@@ -15,6 +15,6 @@ def test_mesos_dns_is_enabled(Command):
 
 @pytest.mark.mesos_dns
 def test_mesos_dns_is_listening_on_port_9153_on_tinc_interface(Command):
-    cmd = Command("sudo netstat -nltp | egrep -E 'tcp *.*169.254.*:9153 *.*:.*LISTEN.*mesos-dns'")
+    cmd = Command("sudo netstat -nltp | egrep -E 'tcp *.*10.254.*:9153 *.*:.*LISTEN.*mesos-dns'")
     assert cmd.rc == 0
 

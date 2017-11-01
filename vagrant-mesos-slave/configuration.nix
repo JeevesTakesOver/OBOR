@@ -1,5 +1,5 @@
 # configuration.nix
-{ boot, filesystems, networking, services, swapDevices, ... }: 
+{ boot, filesystems, networking, services, virtualisation, swapDevices, ... }: 
 
 # import our config.json settings
 let 
@@ -42,12 +42,9 @@ in {
     ${d.common.etc_hosts_entries}
   '';
 
-  boot.loader.grub.enable = true;
-  boot.loader.grub.version = 2;
   boot.loader.grub.device = "/dev/sda";
   boot.initrd.availableKernelModules = [ "ata_piix" ];
   boot.kernelModules = [ "kvm-intel" ];
-  boot.extraModulePackages = [ ];
 
     # Creates a "vagrant" users with password-less sudo access
   users = {
@@ -88,6 +85,8 @@ in {
     ]; 
   };
 
+  swapDevices = [ { device = "/swapfile"; size = 2048; } ];
+
   # use a nested array for defining your services, as vim indent will make it
   # a lot easier to navigate as you collapse/expand blocks.
 
@@ -108,10 +107,10 @@ in {
       zk_node01 = "${d.common.mesos_zk_node01}";
       zk_node02 = "${d.common.mesos_zk_node02}";
       zk_node03 = "${d.common.mesos_zk_node03}";
-      zookeeper_id = d.my.zookeeper_id;
+      zookeeper_id = d.my.zookeeper_id; # TODO do I need this ?
       dns_resolver1 = "${d.common.dns_nameserver_01}";
       dns_resolver2 = "${d.common.dns_nameserver_02}";
-      dns_resolver3 = "${d.common.dns_nameserver_03}";
+      dns_resolver3 = "${d.common.dns_nameserver_03}"; 
     # we have a race condition on our vagrant box when we enable the
     # virtualbox services. Our Vagrant VM uses 192.168.56.204 for its
     # vagrant private ip address (which is the host host-only vboxnet0).
@@ -119,9 +118,10 @@ in {
     # vagrant VM with a 192.168.56.1 ip address.
     # TODO: this will likely require a PR on the nixpkgs/nixos virtualbox 
     # service
-      enable_virtualbox = d.my.enable_virtualbox;
+      enable_virtualbox = d.my.enable_virtualbox; # is this evaluating to true?
     };
     dbus.enable    = true;
-    virtualbox.guest.enable = true;
   };
+
+  virtualisation.virtualbox.guest.enable = true;
 }

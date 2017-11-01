@@ -1,7 +1,7 @@
 with import <nixpkgs> {};
 with pkgs.python27Packages;
 
-stdenv.mkDerivation { 
+stdenv.mkDerivation {
   name = "impurePythonEnv";
   buildInputs = [
     # these packages are required for virtualenv and pip to work:
@@ -9,10 +9,10 @@ stdenv.mkDerivation {
     python27Full
     python27Packages.virtualenv
     python27Packages.pip
-    # the following packages are related to the dependencies of your python 
-    # project. 
-    # In this particular example the python modules listed in the 
-    # requirements.tx require the following packages to be installed locally 
+    # the following packages are related to the dependencies of your python
+    # project.
+    # In this particular example the python modules listed in the
+    # requirements.tx require the following packages to be installed locally
     # in order to compile any binary extensions they may require.
     #
     stdenv
@@ -26,8 +26,13 @@ stdenv.mkDerivation {
   shellHook = ''
   # set SOURCE_DATE_EPOCH so that we can use python wheels
   SOURCE_DATE_EPOCH=$(date +%s)
-  virtualenv --no-setuptools --clear venv 
-  export PATH=$PWD/venv/bin:$PATH
+  # create a virtualenv outside the mesos workspace
+  # due to long paths that break shebangs
+  export VENV=/tmp/$$
+  virtualenv --no-setuptools --clear $VENV
+  ln -s $VENV venv
+  . venv/bin/activate
+  export PATH=$VENV/bin:$PATH
   pip install --quiet -r requirements.txt
   export PS1="$PS1::nix-shell()"
   '';
