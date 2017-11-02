@@ -20,17 +20,8 @@ Vagrant.configure(2) do |config|
   box = ENV['VAGRANT_BOX'] || "nixos/nixos-16.09-x86_64"
 
   machines = [
-    { 'name' => 'vagrant-mesos-zk-01',
-      'ip' =>  '192.168.56.201' 
-    },
-    { 'name' => 'vagrant-mesos-zk-02',
-      'ip' =>  '192.168.56.202' 
-    },
     { 'name' => 'vagrant-mesos-zk-03',
       'ip' =>  '192.168.56.203' 
-    },
-    { 'name' => 'vagrant-mesos-slave',
-      'ip' =>  '192.168.56.204' 
     }
   ]
 
