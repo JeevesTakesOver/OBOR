@@ -32,56 +32,44 @@ import yaml
 import json
 import timeout_decorator
 import shlex
-from subprocess import Popen, PIPE
+from subprocess import Popen, PIPE, STDOUT
+from functools import partial
+from multiprocessing import Pool
 
 
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_up_vm_with_retry(vm):
-    log_green('running vagrant_up_vm_with_retry')
-    local('vagrant up %s' % vm) 
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_reload_vm_with_retry(vm):
-    log_green('running vagrant_reload_vm_with_retry')
-    vagrant_halt_vm_with_retry(vm)
-    vagrant_up_vm_with_retry(vm)
-
+def vagrant_up_vm_with_retry(vm, _):
+    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant up' % vm)
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_run_with_retry(vm, command):
-    log_green('running vagrant_run_with_retry')
-    local('vagrant ssh %s -- %s' % (vm, command))
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_halt_vm_with_retry(vm):
-    log_green('running vagrant_halt_with_retry')
-    local('vagrant halt %s' % vm)
-    local('vagrant halt %s -f' % vm)
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_provision_with_retry(vm):
-    log_green('running vagrant_provision_with_retry')
-    local('vagrant provision %s' % vm)
+def vagrant_halt_vm_with_retry(vm, _):
+    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant halt' % vm)
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def restart_tinc_daemon_if_needed(vm):
     log_green('running restart_tinc_daemon_if_needeed')
-    cmd = 'vagrant ssh %s -- ping -c1 www.google.com' % vm
-    process = Popen(shlex.split(cmd), stdout=PIPE)
-    process.communicate()
+    cmd = 'VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant ssh -- ping -c1 www.google.com' % vm
+    process = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True)
     exit_code = process.wait()
+    stderr, stdout = process.communicate()
+
+    print('return code: %s' %  exit_code)
+    print('stdout:\n %s' % stdout)
+    print('stderr:\n %s' % stderr)
 
     if exit_code != 0:
         log_green('I am restarting tincd')
         # attempt to fix the most common issue, where tinc didn't receive
         # an ip address from dhcp
-        local('vagrant ssh %s -- sudo systemctl restart tinc.core-vpn' % vm)
+        local(
+            'VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant ssh %s -- sudo systemctl restart tinc.core-vpn' % (vm, vm)
+        )
         log_green('sleeping for 90s')
         sleep(90)
 
     # and now fail for good if we still can't ping google
-    local('vagrant ssh %s -- ping -c1 www.google.com' % vm)
+    local(
+        'VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant ssh %s -- ping -c1 www.google.com' % (vm, vm)
+    )
 
 
 @task
@@ -99,18 +87,30 @@ def vagrant_ensure_tinc_network_is_operational():
         restart_tinc_daemon_if_needed(vm)
 
         # and now fail for good if we still can't ping google
-        local('vagrant ssh %s -- ping -c1 www.google.com' % vm)
+        local(
+            'VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant ssh %s -- ping -c1 www.google.com' % (vm, vm)
+        )
 
 
 @task
 def spin_up_obor():
-    log_green('running vagrant_up')
+    log_green('running spin_up_obor')
+
+    pool = Pool(processes=4)
+    results = []
+
+    
     for vm in [
         'vagrant-mesos-zk-01',
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
         'vagrant-mesos-slave']:
-        vagrant_up_vm_with_retry(vm)
+        results.append(pool.map_async(partial(vagrant_up_vm_with_retry, vm), [1]))
+
+    pool.close()
+    pool.join()
+
+    log_green('spin_up_obor completed')
 
 
 @task
@@ -121,7 +121,9 @@ def vagrant_reload():
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
         'vagrant-mesos-slave']:
-        vagrant_reload_vm_with_retry(vm)
+        vagrant_halt_vm_with_retry(vm, None)
+        vagrant_up_vm_with_retry(vm, None)
+        log_green('waiting 60s after reboot')
         sleep(60)
 
 @task
@@ -129,28 +131,12 @@ def vagrant_reload():
 def vagrant_destroy():
     log_green('running vagrant_destroy')
     local('cd Railtrack && vagrant destroy -f')
-    local('vagrant destroy -f')
-
-
-
-@task
-def vagrant_update():
-    log_green('running vagrant_update')
-    for vm, ip in [
-        ('vagrant-mesos-zk-01', '192.168.56.201'),
-        ('vagrant-mesos-zk-02', '192.168.56.202'),
-        ('vagrant-mesos-zk-03', '192.168.56.203'),
-        ('vagrant-mesos-slave', '192.168.56.204')
-    ]:
-        with settings(
-            host_string=ip,
-            user='vagrant',
-            key_filename="~/.vagrant.d/insecure_private_key"
-        ):
-            execute(update)
-            local('vagrant halt %s' % vm)
-            local('vagrant up %s --no-provision' % vm)
-            sleep(120)
+    for vm in [
+        'vagrant-mesos-zk-01',
+        'vagrant-mesos-zk-02',
+        'vagrant-mesos-zk-03',
+        'vagrant-mesos-slave']:
+        local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant destroy -f' % vm)
 
 
 @task
@@ -352,6 +338,7 @@ def jenkins_build():
         # and now destroy Railtrack and mesos VMs
         execute(vagrant_destroy)
     except:
+        print "jenkins_build() FAILED, aborting..."
         # and now destroy Railtrack and mesos VMs
         execute(vagrant_destroy)
         sys.exit(1)
