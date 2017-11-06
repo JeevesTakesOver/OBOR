@@ -37,6 +37,7 @@ from functools import partial
 from multiprocessing import Pool
 
 
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_up_vm_with_retry(vm, _):
     local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant up' % vm)
 
