@@ -117,15 +117,34 @@ def spin_up_obor():
 @task
 def vagrant_reload():
     log_green('running vagrant_reload')
+
+    pool = Pool(processes=4)
+    results = []
+
+    log_green('stopping all VMs in parallel')
     for vm in [
         'vagrant-mesos-zk-01',
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
         'vagrant-mesos-slave']:
-        vagrant_halt_vm_with_retry(vm, None)
-        vagrant_up_vm_with_retry(vm, None)
-        log_green('waiting 60s after reboot')
-        sleep(60)
+
+        results.append(pool.map_async(partial(vagrant_halt_vm_with_retry, vm, None), [1]))
+
+    pool.close()
+    pool.join()
+
+    pool = Pool(processes=4)
+    results = []
+
+    log_green('starting all VMs in parallel')
+    for vm in [
+        'vagrant-mesos-zk-01',
+        'vagrant-mesos-zk-02',
+        'vagrant-mesos-zk-03',
+        'vagrant-mesos-slave']:
+
+        results.append(pool.map_async(partial(vagrant_up_vm_with_retry, vm, None), [1]))
+
 
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
