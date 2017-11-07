@@ -1,14 +1,14 @@
 { nix, ... }:
 
 {
-  nix.maxJobs = 1;
+  nix.maxJobs = 4;
   nix.useSandbox = true;
   nix.daemonNiceLevel = 19;
   # we cleanup through our update.sh script
   # nix.gc.automatic = false;
   # nix.gc.dates = "03:15";
   nix.extraOptions = ''
-    build-cores = 1
+    build-cores = 2
     gc-keep-outputs = true
   '';
 
