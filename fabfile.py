@@ -124,8 +124,6 @@ def vagrant_reload():
         'vagrant-mesos-slave']:
         vagrant_halt_vm_with_retry(vm, None)
         vagrant_up_vm_with_retry(vm, None)
-        log_green('waiting 60s after reboot')
-        sleep(60)
 
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
@@ -157,7 +155,6 @@ def vagrant_up_railtrack():
         ):
             local('fab -f tasks/fabfile.py '
                   'vagrant_up reset_consul it vagrant_reload')
-            sleep(600)
             local('fab -f tasks/fabfile.py acceptance_tests')
 
 
@@ -304,7 +301,6 @@ def spin_up_railtrack():
         with prefix(". ./shell_env"):
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py vagrant_up it vagrant_reload")
-            sleep(600) # allow services to start properly
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py acceptance_tests")
 
@@ -323,14 +319,8 @@ def jenkins_build():
         # reload after initial provision
         execute(vagrant_reload)
 
-        # allow the different services to recover after boot
-        sleep(180)
-
         # check tinc network is operational
         execute(vagrant_ensure_tinc_network_is_operational)
-
-        # allow the different services to recover
-        sleep(180)
 
         # test all the things
         execute(vagrant_test_mesos_masters)
