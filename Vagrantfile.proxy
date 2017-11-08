@@ -1,0 +1,65 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+#
+
+begin
+  vbox_version = `VBoxManage --version`
+rescue
+  vbox_version = 0
+end
+
+Vagrant.configure(2) do |config|
+
+  box = ENV['VAGRANT_BOX'] || "maier/alpine-3.6-x86_64"
+
+  machines = [
+    { 'name' => 'squid',
+      'ip' =>  '192.168.56.205' 
+    }
+  ]
+
+  machines.each do |item|
+    config.vm.define item['name'] do |machine|
+
+      if Vagrant.has_plugin?("vagrant-vbguest")
+        config.vbguest.auto_update = false
+      end
+
+      machine.vm.box = box
+      machine.vm.hostname = item['name']
+      machine.vm.network "private_network", ip: item['ip']
+      machine.ssh.insert_key = false
+
+      machine.vm.provider "virtualbox" do |vb|
+        vb.customize ["modifyvm", :id, "--cpus", "2"] 
+        vb.memory = "512" 
+        # https://github.com/hashicorp/otto/issues/423#issuecomment-186076403
+        vb.linked_clone = true if Vagrant::VERSION =~ /^1.9/ 
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
+        vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
+        if vbox_version.to_f >= 5.0 and  Vagrant::Util::Platform.linux?
+          vb.customize ['modifyvm', :id, '--paravirtprovider', 'kvm']
+        end
+        # https://www.virtualbox.org/manual/ch05.html#iocaching
+        vb.customize [
+          "storagectl", :id, 
+          "--name", "IDE Controller",
+          "--hostiocache", "on"
+        ]
+      end
+
+      # vboxsf is not available on our vagrant alpine boxes
+      machine.vm.synced_folder '.', '/vagrant', disabled: true
+
+      machine.vm.synced_folder 'proxy', '/vagrant', type: 'rsync', rsync__exclude: ".git/"
+
+      machine.vm.provision "shell", inline: <<-SHELL
+         sudo apk update
+         sudo apk add squid
+         sudo cp /vagrant/squid.conf /etc/squid/squid.conf
+         sudo rc-update add squid default
+         sudo /etc/init.d/squid start
+      SHELL
+    end
+  end
+end

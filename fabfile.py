@@ -75,6 +75,12 @@ def restart_tinc_daemon_if_needed(vm):
 
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
+def spin_up_proxy():
+    local('VAGRANT_VAGRANTFILE=Vagrantfile.proxy vagrant up')
+
+
+@task
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_ensure_tinc_network_is_operational():
     log_green('running vagrant_ensure_tinc_network_is_operational')
     # this will test if we can resolve google.com using
@@ -131,6 +137,7 @@ def vagrant_destroy():
     log_green('running vagrant_destroy')
     local('cd Railtrack && vagrant destroy -f')
     for vm in [
+        'vagrant-proxy',
         'vagrant-mesos-zk-01',
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
@@ -264,6 +271,7 @@ def spin_up_railtrack():
     """ deploys Railtrack locally """
     local('vagrant plugin install vagrant-hostmanager')
     local('vagrant plugin install hostupdater')
+    local('vagrant plugin install vagrant-alpine')
 
     with settings(warn_only=True):
         local('git clone https://github.com/JeevesTakesOver/Railtrack.git')
@@ -310,6 +318,9 @@ def jenkins_build():
     """ runs a jenkins build """
 
     try:
+        # spin up proxy cachine box
+        execute(spin_up_proxy)
+
         # spin up Railtrack, which is required for OBOR
         execute(spin_up_railtrack)
 

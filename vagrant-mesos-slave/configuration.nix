@@ -124,4 +124,7 @@ in {
   };
 
   virtualisation.virtualbox.guest.enable = true;
+
+  # consume a local vagrant based proxy
+  networking.proxy.default = "http://192.168.56.205:3128";
 }

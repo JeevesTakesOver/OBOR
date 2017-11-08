@@ -100,8 +100,11 @@ in {
       dns_resolver1 = "${d.common.mesos_dns_resolver1}";
       dns_resolver2 = "${d.common.mesos_dns_resolver2}";
     };
+
+    virtualbox.enable = true;
     dbus.enable    = true;
   };
 
-  virtualisation.virtualbox.guest.enable = true;
+  # consume a local vagrant based proxy
+  networking.proxy.default = "http://192.168.56.205:3128";
 }
