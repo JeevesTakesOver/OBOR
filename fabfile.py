@@ -137,7 +137,7 @@ def vagrant_destroy():
     log_green('running vagrant_destroy')
     local('cd Railtrack && vagrant destroy -f')
     for vm in [
-        'vagrant-proxy',
+        'proxy',
         'vagrant-mesos-zk-01',
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
