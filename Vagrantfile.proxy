@@ -54,6 +54,7 @@ Vagrant.configure(2) do |config|
       machine.vm.synced_folder 'proxy', '/vagrant', type: 'rsync', rsync__exclude: ".git/"
 
       machine.vm.provision "shell", inline: <<-SHELL
+         set -e
          sudo apk update
          sudo apk add squid
          sudo cp /vagrant/squid.conf /etc/squid/squid.conf
