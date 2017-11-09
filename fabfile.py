@@ -76,7 +76,7 @@ def restart_tinc_daemon_if_needed(vm):
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def spin_up_proxy():
-    local('VAGRANT_VAGRANTFILE=Vagrantfile.proxy vagrant up')
+    local('VAGRANT_VAGRANTFILE=Vagrantfile.proxy vagrant up --provision')
 
 
 @task
