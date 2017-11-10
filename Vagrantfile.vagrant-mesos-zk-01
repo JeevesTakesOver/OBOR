@@ -88,10 +88,12 @@ Vagrant.configure(2) do |config|
       ]
 
       # force down the proxy settings on our Vagrant VMs
+      # we only set this on provision, so they won't persist after a restart
+      # the goal is to reduce the download traffic from the internet during
+      # the initial provisioning task
       machine.vm.provision "shell", inline: <<-SHELL
-      	echo 'export HTTP_PROXY=http://192.168.56.205:3128' > /etc/profile.local
-      	echo 'export http_proxy=http://192.168.56.205:3128' >> /etc/profile.local
-      	echo 'export CURL_NIX_FLAGS=" -x http://192.168.56.205:3128"' >> /etc/profile.local
+      iptables -t nat -A OUTPUT -p tcp -o enp0s3 --dport 80 -j DNAT --to-destination 192.168.56.205:80
+      iptables -t nat -A POSTROUTING -o enp0s8  -j MASQUERADE
       SHELL
 
       # and provision

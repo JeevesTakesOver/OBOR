@@ -10,13 +10,13 @@ echo "update.sh: cleaning old files..."
 
 echo "update.sh: making sure openssl is installed..."
     # https://github.com/NixOS/nixpkgs/issues/3382
-    openssl version >/dev/null 2>/dev/null|| sudo nix-env -Q --quiet -i openssl >/dev/null
+    openssl version >/dev/null 2>/dev/null|| sudo nix-env -Q --quiet -i openssl --option extra-binary-caches 'http://nixos.org/binary-cache' >/dev/null
 
 echo "update.sh: making sure cacert is installed..."
-    ls -l /etc/ca-bundle.crt >/dev/null 2>&1 || sudo nix-env -Q --quiet -i cacert >/dev/null
+    ls -l /etc/ca-bundle.crt >/dev/null 2>&1 || sudo nix-env -Q --quiet -i cacert --option extra-binary-caches 'http://nixos.org/binary-cache' >/dev/null
 
 echo "update.sh: making sure git is installed..."
-    which git >/dev/null 2>&1 || sudo nix-env -Q --quiet -i git >/dev/null
+    which git >/dev/null 2>&1 || sudo nix-env -Q --quiet -i git --option extra-binary-caches 'http://nixos.org/binary-cache' >/dev/null
 
 echo "update.sh: configuring git for root..."
     sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git config --global user.email "root@localhost"
@@ -29,7 +29,7 @@ echo "update.sh: checking  local_release_1703 branch..."
     cd /nixpkgs && sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git checkout local_release_1703
 
 echo "update.sh: making sure wget is installed..."
-    which wget >/dev/null 2>&1|| sudo nix-env -Q --quiet -i wget >/dev/null
+    which wget >/dev/null 2>&1|| sudo nix-env -Q --quiet -i wget --option extra-binary-caches 'http://nixos.org/binary-cache' >/dev/null
 
 echo "update.sh: making sure jdks are installed..."
     cd /tmp
@@ -46,11 +46,11 @@ echo "update.sh: making sure jdks are installed..."
 set -e
 echo "update.sh: running nixos-rebuild build..."
     # https://github.com/NixOS/nix/issues/443
-    sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild build -Q -I nixpkgs=/nixpkgs/ 2>&1 | tail 
+    sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild build -Q -I nixpkgs=/nixpkgs/ --option extra-binary-caches 'http://nixos.org/binary-cache' 2>&1 | tail 
 
 echo "update.sh: running nixos-rebuild switch..."
     # https://github.com/NixOS/nix/issues/443
-    sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild switch -Q -I nixpkgs=/nixpkgs/ 2>&1 | tail
+    sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild switch -Q -I nixpkgs=/nixpkgs/ --option extra-binary-caches 'http://nixos.org/binary-cache' 2>&1 | tail
 
 echo "update.sh: cleaning old packages..."
     sudo nix-collect-garbage -d >/dev/null 2>&1| tail

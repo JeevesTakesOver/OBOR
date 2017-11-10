@@ -94,6 +94,14 @@ Vagrant.configure(2) do |config|
       	echo 'export CURL_NIX_FLAGS=" -x http://192.168.56.205:3128"' >> /etc/profile.local
       SHELL
 
+      machine.vm.provision :nixos, :expression => {
+       networking: {
+          proxy: {
+            default: "http://192.168.56.205:3128"
+          }
+        }
+      } 
+
       # and provision
       machine.vm.provision "shell", path: "update.sh"
     end

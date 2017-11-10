@@ -272,6 +272,7 @@ def spin_up_railtrack():
     local('vagrant plugin install vagrant-hostmanager')
     local('vagrant plugin install hostupdater')
     local('vagrant plugin install vagrant-alpine')
+    local('vagrant plugin install vagrant-nixos-plugin')
 
     with settings(warn_only=True):
         local('git clone https://github.com/JeevesTakesOver/Railtrack.git')
