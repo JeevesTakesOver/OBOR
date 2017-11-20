@@ -14,3 +14,4 @@ nixpkgs
 shell_env
 *.pyc
 Railtrack
+*.un~

@@ -1,2 +1,2 @@
-Plug 'vim-scripts/Conque-Shell'
+Plug 'lrvick/Conque-Shell'
 
