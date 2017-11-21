@@ -20,6 +20,12 @@ def test_tincd_is_listening_on_port_655(Command):
 
 @pytest.mark.tincd
 def test_tincd_should_ping_tinc_nodes(Command):
-    for ip in ['10.254.100.1', '10.254.100.2', '10.254.100.3']:
+    for ip in ['10.254.0.1', '10.254.0.2', '10.254.0.3']:
+        cmd = Command("ping -c 1 %s" % ip)
+        assert cmd.rc == 0
+
+@pytest.mark.tincd
+def test_tincd_should_ping_tinc_nodes(Command):
+    for ip in ['10.254.0.1', '10.254.0.2', '10.254.0.3']:
         cmd = Command("ping -c 1 %s" % ip)
         assert cmd.rc == 0

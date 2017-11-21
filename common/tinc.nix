@@ -81,8 +81,6 @@ in {
    dhclient -4 -nw -v $INTERFACE -cf /etc/tinc/core-vpn/dhclient.conf -r
    dhclient -4 -nw -v $INTERFACE -cf /etc/tinc/core-vpn/dhclient.conf
 
-   # TODO: we're assuming a 169.254.0.0 block here, fix it
-   # reset VPN route to only send 169.254.0.0 traffic
    nohup /etc/tinc/core-vpn/fix-route >/dev/null 2>&1 &
     '';
 
@@ -117,13 +115,13 @@ in {
     # https://bugs.centos.org/view.php?id=11293
     case "$1" in
         BIND)
-            ip addr add "$3"/16 brd 169.254.255.255  scope link dev "$2"
+            ip addr add "$3"/${toString d.common.tinc_ip_netmask} brd ${d.common.tinc_broadcast_address} scope link dev "$2"
             ip route add default dev "$2" metric "$METRIC" scope link ||:
             ;;
 
         CONFLICT|UNBIND|STOP)
             ip route del default dev "$2" metric "$METRIC" scope link ||:
-            ip addr del "$3"/16 brd 169.254.255.255 scope link dev "$2"
+            ip addr del "$3"/${toString d.common.tinc_ip_netmask} brd ${d.common.tinc_broadcast_address} scope link dev "$2"
             ;;
 
         *)
@@ -138,13 +136,11 @@ in {
     #!/usr/bin/env bash
 
     sleep 15
-    # TODO: we're assuming a 169.254.0.0 block here, fix it
-    netstat -rnv | grep 169.254.0.0 | grep 0.0.0.0 >/dev/null 2>&1
+    netstat -rnv | grep ${d.common.tinc_network} | grep 0.0.0.0 >/dev/null 2>&1
 
     if [ $? = 0 ]; then
-      # TODO: we're assuming a 169.254.0.0 block here, fix it
-      route del -net 169.254.0.0 netmask 255.255.0.0 gateway 0.0.0.0
-      route add -net 169.254.0.0 netmask 255.255.0.0 gateway `ifconfig tinc.core-vpn| grep inet | awk '{ print $2 }' `
+      route del -net ${d.common.tinc_network} netmask ${d.common.tinc_network_netmask} gateway 0.0.0.0
+      route add -net ${d.common.tinc_network} netmask ${d.common.tinc_network_netmask} gateway `ifconfig ${d.common.tinc_interface}| grep inet | awk '{ print $2 }' `
     fi
     '';
 

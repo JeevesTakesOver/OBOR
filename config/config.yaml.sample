@@ -34,17 +34,18 @@
 
 common: &common
   # these are the VPN IP addresses for the Mesos master nodes on the tinc network
-  mesos_zk_node01: &mesos_zk_node01 '10.254.100.1' # mesos-zk-01.tinc-core-vpn
-  mesos_zk_node02: &mesos_zk_node02 '10.254.100.2' # mesos-zk-02.tinc-core-vpn
-  mesos_zk_node03: &mesos_zk_node03 '10.254.100.3' # mesos-zk-03.tinc-core-vpn
+  mesos_zk_node01: &mesos_zk_node01 '10.254.0.11' # mesos-zk-01.tinc-core-vpn
+  mesos_zk_node02: &mesos_zk_node02 '10.254.0.12' # mesos-zk-02.tinc-core-vpn
+  mesos_zk_node03: &mesos_zk_node03 '10.254.0.13' # mesos-zk-03.tinc-core-vpn
 
   # zookeeper connection string
-  zk_string: &zk_string "zk://10.254.100.1:2181,10.254.100.2:2181,10.254.100.3:2181/mesos"
+  zk_string: &zk_string "zk://10.254.0.11:2181,10.254.0.12:2181,10.254.0.13:2181/mesos"
 
   # Railtrack Tinc settings
   tinc_domain: 'tinc-core-vpn' # which domain to use for TINC ip addresses
   tinc_interface: 'tinc.core-vpn' # name of the network interface for TINC
   tinc_compression: '6' # compression level for TINC traffic
+
 
   # entries to add to /etc/hosts
   etc_hosts_entries: |
@@ -63,9 +64,15 @@ common: &common
   # the DNS servers IP addresses for used within the Mesos Cluster
   # dnsmasq is running on the mesos master nodes, it acts as a DNS gateway
   # to the mesos-dns servers, and the Railtrack DNS servers (10.254.0.1..2)
-  dns_nameserver_01: '10.254.100.1'
-  dns_nameserver_02: '10.254.100.2'
-  dns_nameserver_03: '10.254.100.3'
+  dns_nameserver_01: '10.254.0.11'
+  dns_nameserver_02: '10.254.0.12'
+  dns_nameserver_03: '10.254.0.13'
+
+  public_ip_netmask: 24
+  tinc_ip_netmask: 24
+  tinc_broadcast_address: '10.254.255.255'
+  tinc_network: '10.254.0.0'
+  tinc_network_netmask: '255.255.255.0'
 
   # on vagrant you'll have to disable virtualbox
   # this is because on the mesos slaves it will bring up a vnet interface 
@@ -74,7 +81,7 @@ common: &common
 
   # Where do we send logs to, currently elasticsearch and logstash are deployed
   # as part of the OBOR deployment (to be changed)
-  elasticsearch_url: 'http://10.254.100.19:9200' # elasticsearch endpoint
+  elasticsearch_url: 'http://10.254.0.19:9200' # elasticsearch endpoint
 
 
   #---------------------------------------------------------------------------
@@ -153,9 +160,8 @@ mesos_masters:
     public_ip_address: '192.168.56.201'
     public_fqdn: '192.168.56.201' # we use IP addresses on vagrant
     hostname: 'mesos-zk-01' # hostname to use
-    tinc_ip_address: '10.254.100.1' # Railtrack tinc ip address to assign
+    tinc_ip_address: '10.254.0.11' # Railtrack tinc ip address to assign
     tinc_hostname: 'mesos_zk_01' # Railtrack tinc hostname to use
-    public_ip_netmask: 24
     default_gateway: '10.0.2.2' # what about vagrant worlds ??
     public_interface: 'enp0s8'
     zookeeper_id: 0 # zookeeper id
@@ -208,9 +214,8 @@ mesos_masters:
     public_ip_address: '192.168.56.202' 
     public_fqdn: '192.168.56.202'
     hostname: 'mesos-zk-02'
-    tinc_ip_address: '10.254.100.2'
+    tinc_ip_address: '10.254.0.12'
     tinc_hostname: 'mesos_zk_02'
-    public_ip_netmask: 24
     default_gateway: '10.0.2.2'
     public_interface: 'enp0s8'
     zookeeper_id: 1 
@@ -261,9 +266,8 @@ mesos_masters:
     public_ip_address: '192.168.56.203'
     public_fqdn: '192.168.56.203'
     hostname: 'mesos-zk-03'
-    tinc_ip_address: '10.254.100.3'
+    tinc_ip_address: '10.254.0.13'
     tinc_hostname: 'mesos_zk_03'
-    public_ip_netmask: 24
     default_gateway: '10.0.2.2'
     public_interface: 'enp0s8'
     zookeeper_id: 2 
@@ -319,12 +323,11 @@ mesos_slaves:
     ssh_connection_string: '192.168.56.204' # SSH connection string
     hostname: 'slave' # hostname to use¬
     tinc_hostname: 'slave' # Railtrack tinc hostname to use
-    tinc_ip_address: '10.254.100.19' # Railtrack tinc ip address to assign
+    tinc_ip_address: '10.254.0.19' # Railtrack tinc ip address to assign
     public_ip_address: '192.168.56.204'
     public_fqdn: '192.168.56.204' # we use IP addresses on vagrant
     default_gateway: '10.0.2.2' # what about vagrant worlds ??¬
     public_interface: 'enp0s8'
-    public_ip_netmask: 24
 
     # TINC public key (these should be commited to 'menagerie')
     tinc_public_key: |
