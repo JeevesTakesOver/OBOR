@@ -34,8 +34,7 @@ stdenv.mkDerivation {
   . venv/bin/activate
   export PATH=$VENV/bin:$PATH
   pip install --quiet -r requirements.txt
-  pip install --quiet jedi
-  pip install --quiet ipython==5.2.0
+  pip install --quiet -r dev-requirements.txt
   export PS1="$PS1::nix-shell()"
   '';
 }
