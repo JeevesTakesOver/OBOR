@@ -1,2 +1,0 @@
-Plug 'vim-scripts/ShowMarks'
-
