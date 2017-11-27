@@ -3,6 +3,7 @@
 " Vim settings and mappings
 " You can edit them as you wish
 
+
 " no vi-compatible
 set nocompatible
 
@@ -39,11 +40,6 @@ filetype indent on
 " Plugins settings and mappings
 " Edit them as you wish.
 
-" Autoclose ------------------------------
-
-" Fix to let ESC work as espected with Autoclose plugin
-let g:AutoClosePumvisible = {"ENTER": "\<C-Y>", "ESC": "\<ESC>"}
-
 
 " Signify ------------------------------
 
@@ -66,22 +62,15 @@ highlight SignifySignChange cterm=bold ctermbg=237  ctermfg=227
 for vimrc_file in [ 
         \ 'agrep',
         \ 'airline',
-        \ 'ansible',
-        \ 'autoclose',
         \ 'backup',
         \ 'buffers',
-        \ 'choosewin',
         \ 'colorscheme',
-        \ 'conque-term',
         \ 'ctrlp',
-        \ 'dragvisuals',
         \ 'editorconfig',
         \ 'easymotion',
-        \ 'eclim',
         \ 'fastfold',
-        \ 'ggrep',
+        \ 'python',
         \ 'gutentags',
-        \ 'html',
         \ 'indentline',
         \ 'indexedsearch',
         \ 'jenkins',
@@ -91,8 +80,6 @@ for vimrc_file in [
         \ 'nerdcommenter',
         \ 'nerd-tree',
         \ 'nix',
-        \ 'python',
-        \ 'rainbow',
         \ 'ruby',
         \ 'saltstack',
         \ 'search',
@@ -102,15 +89,11 @@ for vimrc_file in [
         \ 'surround',
         \ 'syntastic',
         \ 'tab-completion',
-        \ 'tabman',
         \ 'tagbar',
         \ 'tig',
         \ 'ui',
-        \ 'vimux',
         \ 'vimprj',
-        \ 'yankring',
-        \ 'yankstack',
-        \ 'youcompleteme',
+        \ 'yankring'
         \ ]
     let full_path = '/etc/nixos/common/vim/' . vimrc_file . '.vimrc'
     if filereadable(full_path)
