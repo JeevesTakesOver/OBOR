@@ -1,2 +1,0 @@
-Plug 'lrvick/Conque-Shell'
-
