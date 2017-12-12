@@ -15,3 +15,5 @@ shell_env
 *.pyc
 Railtrack
 *.un~
+*.box
+mc

@@ -33,8 +33,8 @@ stdenv.mkDerivation {
   ln -s $VENV venv
   . venv/bin/activate
   export PATH=$VENV/bin:$PATH
-  pip install --quiet -r requirements.txt
-  pip install --quiet -r dev-requirements.txt
+  pip install --quiet --upgrade -r requirements.txt
+  pip install --quiet --upgrade -r dev-requirements.txt
   export PS1="$PS1::nix-shell()"
   '';
 }
