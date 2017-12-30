@@ -18,6 +18,7 @@
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.setrecursionlimit(30000)
 
 from time import sleep
 
@@ -34,7 +35,7 @@ import timeout_decorator
 import shlex
 from subprocess import Popen, PIPE, STDOUT
 from functools import partial
-from multiprocessing import Pool
+from pathos.multiprocessing import ProcessingPool as Pool
 import re
 
 
@@ -43,11 +44,16 @@ def vagrant_package(vm, _):
     local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant up' % vm)
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_up_vm_with_retry(vm, _):
-    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant up' % vm)
+def vagrant_up_vm_with_retry(vm):
+    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant up --no-provision' % vm)
+
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_halt_vm_with_retry(vm, _):
+def vagrant_provision_vm_with_retry(vm):
+    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant provision' % vm)
+
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+def vagrant_halt_vm_with_retry(vm):
     local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant halt' % vm)
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
@@ -97,7 +103,6 @@ def vagrant_ensure_tinc_network_is_operational():
             'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
             'vagrant ssh %s -- ping -c1 www.google.com' % (vm, vm)
         )
-
 
 
 
@@ -215,19 +220,37 @@ def spin_up_obor():
     pool = Pool(processes=4)
     results = []
 
+    for vm in [
+        'vagrant-mesos-zk-01',
+        'vagrant-mesos-zk-02',
+        'vagrant-mesos-zk-03',
+        'vagrant-mesos-slave']:
+        results.append(pool.apipe(vagrant_up_vm_with_retry, vm))
+
+    for stream in results:
+        stream.get()
+
+    log_green('spin_up_obor completed')
+
+
+@task
+def provision_obor():
+    log_green('running provision_obor')
+
+    pool = Pool(processes=4)
+    results = []
 
     for vm in [
         'vagrant-mesos-zk-01',
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
         'vagrant-mesos-slave']:
-        results.append(pool.map_async(partial(vagrant_up_vm_with_retry, vm), [1]))
+        results.append(pool.apipe(vagrant_provision_vm_with_retry, vm))
 
-    pool.close()
-    pool.join()
+    for stream in results:
+        stream.get()
 
-    log_green('spin_up_obor completed')
-
+    log_green('provision_obor completed')
 
 @task
 def vagrant_reload():
@@ -237,8 +260,8 @@ def vagrant_reload():
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
         'vagrant-mesos-slave']:
-        vagrant_halt_vm_with_retry(vm, None)
-        vagrant_up_vm_with_retry(vm, None)
+        vagrant_halt_vm_with_retry(vm)
+        vagrant_up_vm_with_retry(vm)
 
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
@@ -415,7 +438,38 @@ def spin_up_railtrack():
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):
             local("cd Railtrack && "
-                  "fab -f tasks/fabfile.py vagrant_up run_it vagrant_reload")
+                  "fab -f tasks/fabfile.py vagrant_up")
+
+@task
+def provision_railtrack():
+    """ deploys Railtrack locally """
+
+    RAILTRACK_ENV = [
+        "export AWS_ACCESS_KEY_ID=VAGRANT",
+        "export AWS_SECRET_ACCESS_KEY=VAGRANT",
+        "export KEY_PAIR_NAME=vagrant-tinc-vpn",
+        "export KEY_FILENAME=$HOME/.vagrant.d/insecure_private_key",
+        "export TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv",
+        "export TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv",
+        "export TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv",
+        "export TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv",
+        "export CONFIG_YAML=config/config.yaml",
+        "eval `ssh-agent`",
+        "ssh-add Railtrack/key-pairs/*.priv",
+        ". venv/bin/activate"
+    ]
+
+    # local() doesn't support most context managers
+    # so let's bake a local environment file and consume as a prefix()
+    with open('shell_env', 'w') as f:
+        for line in RAILTRACK_ENV:
+            f.write(line + '\n')
+    local('chmod +x shell_env')
+
+    with settings(shell='/run/current-system/sw/bin/bash -l -c'):
+        with prefix(". ./shell_env"):
+            local("cd Railtrack && "
+                  "fab -f tasks/fabfile.py run_it vagrant_reload")
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py acceptance_tests")
 
@@ -425,11 +479,15 @@ def jenkins_build():
     """ runs a jenkins build """
 
     try:
+        pool = Pool(processes=3)
+        results = []
         # spin up Railtrack, which is required for OBOR
-        execute(spin_up_railtrack)
-
+        results.append(pool.apipe(local, 'fab spin_up_railtrack provision_railtrack'))
         # spin up and provision the Cluster
-        execute(spin_up_obor)
+        results.append(pool.apipe(local, 'fab spin_up_obor provision_obor'))
+
+        for stream in results:
+            stream.get()
 
         # reload after initial provision
         execute(vagrant_reload)

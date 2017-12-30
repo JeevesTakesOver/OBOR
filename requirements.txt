@@ -9,3 +9,5 @@ pybookshelf
 docker-compose
 timeout_decorator
 six>=1.10.0
+pathos
+dill
