@@ -196,14 +196,14 @@ def bake_obor_box():
 	# s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
 	# gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
 	#
-	# SET MC_SERVICE to the name of the S3 endpoint 
+	# SET MC_SERVICE to the name of the S3 endpoint
 	# (minio/s3/gcs) as the example above
 	#
 	# SET MC_PATH to the S3 bucket folder path
 
     local('./mc config host add %s' % os.getenv('MC_CONFIG_STRING'))
     local('./mc cp package.box %s/%s/vagrant-obor.box' % (
-        os.getenv('MC_SERVICE'), 
+        os.getenv('MC_SERVICE'),
         os.getenv('MC_PATH'))
     )
 
@@ -282,7 +282,7 @@ def vagrant_reload():
     for stream in results:
         stream.get()
 
-    sleep(90)
+    sleep(120)
 
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
