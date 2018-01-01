@@ -282,7 +282,7 @@ def vagrant_reload():
     for stream in results:
         stream.get()
 
-    sleep(120)
+    sleep(150)
 
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
