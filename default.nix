@@ -35,6 +35,10 @@ stdenv.mkDerivation {
   export PATH=$VENV/bin:$PATH
   pip install --quiet --upgrade -r requirements.txt
   pip install --quiet --upgrade -r dev-requirements.txt
+  pip install --quiet jedi
+  pip install --quiet ipython==5.2.0
+  pip install --quiet flake8
+  pip install --quiet pylint
   export PS1="$PS1::nix-shell()"
   '';
 }

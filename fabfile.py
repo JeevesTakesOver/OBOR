@@ -15,6 +15,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 import os
 import sys
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -333,7 +334,21 @@ def update():
     ):
         rsync_project(
                 remote_dir='/etc/nixos/',
-                local_dir=env.host_string,
+                local_dir=env.host_string + '/',
+                delete=True,
+                extra_opts='--rsync-path="sudo rsync"',
+                default_opts='-chavzPq'
+        )
+        rsync_project(
+                remote_dir='/etc/nixos/common/',
+                local_dir='common/*',
+                delete=True,
+                extra_opts='--rsync-path="sudo rsync"',
+                default_opts='-chavzPq'
+        )
+        rsync_project(
+                remote_dir='/etc/nixos/config/',
+                local_dir='config/*',
                 delete=True,
                 extra_opts='--rsync-path="sudo rsync"',
                 default_opts='-chavzPq'
@@ -346,6 +361,7 @@ def update():
             shell='/run/current-system/sw/bin/bash -l -c'
     ):
         run('bash update.sh')
+        sudo('rm -rf /etc/nixos/config/*')
 
 
 @task
