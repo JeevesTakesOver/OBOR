@@ -451,9 +451,7 @@ def provision_railtrack():
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):
             local("cd Railtrack && "
-                  "fab -f tasks/fabfile.py run_it vagrant_reload")
-            local("cd Railtrack && "
-                  "fab -f tasks/fabfile.py acceptance_tests")
+                  "venv/bin/fab -f tasks/fabfile.py run_it acceptance_tests")
 
 
 @task
