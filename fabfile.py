@@ -434,7 +434,6 @@ def spin_up_railtrack():
     local('cd Railtrack && '
           'virtualenv venv && venv/bin/pip install -r requirements.txt')
 
-
     RAILTRACK_ENV = [
         "eval `ssh-agent`",
         "ssh-add Railtrack/key-pairs/*.priv",
@@ -451,7 +450,7 @@ def spin_up_railtrack():
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):
             local("cd Railtrack && "
-                  "venv/bin/fab -f tasks/fabfile.py clean")
+                  "venv/bin/fab -f tasks/fabfile.py step_01_create_hosts")
 
 
 @task
