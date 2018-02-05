@@ -222,8 +222,7 @@ with lib;
           server=/kubernetes.io/${cfg.tinc_ip_address}#7153
           server=/${cfg.tinc_domain}/${cfg.dns_resolver1}
           server=/${cfg.tinc_domain}/${cfg.dns_resolver2}
-          listen-address=127.0.0.1
-          listen-address=${cfg.tinc_ip_address}
+          listen-address=0.0.0.0
           bind-interfaces
           # strict-order slows down queries to tinc-core-vpn by 10ms
           # strict-order
