@@ -483,13 +483,12 @@ def jenkins_build():
         execute(vagrant_test_mesos_slaves)
 
         # and now destroy Railtrack and mesos VMs
-        execute(vagrant_destroy)
-    except:
-        print "jenkins_build() FAILED, aborting..."
-        # and now destroy Railtrack and mesos VMs
-        execute(vagrant_destroy)
+        execute(clean)
+    except:  # noqa: E722 pylint: disable=bare-except
+        log_red("jenkins_build() FAILED, aborting...")
+        execute(clean)
+        execute(clean)
         sys.exit(1)
-
 
 
 """
