@@ -233,18 +233,14 @@ def bake_obor_box():
 def spin_up_obor():
     log_green('running spin_up_obor')
 
-    pool = Pool(processes=4)
-    results = []
-
     for vm in [
         'vagrant-mesos-zk-01',
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
-        'vagrant-mesos-slave']:
-        results.append(pool.apipe(vagrant_up_vm_with_retry, vm))
-
-    for stream in results:
-        stream.get()
+        'vagrant-mesos-slave'
+    ]:
+        vagrant_up_vm_with_retry(vm)
+        sleep(5)
 
     log_green('spin_up_obor completed')
 
