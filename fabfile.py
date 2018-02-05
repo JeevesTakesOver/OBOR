@@ -43,6 +43,7 @@ import re
 def vagrant_package(vm, _):
     local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant up' % vm)
 
+
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_up_vm_with_retry(vm):
     local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant up --no-provision' % vm)
@@ -52,19 +53,22 @@ def vagrant_up_vm_with_retry(vm):
 def vagrant_provision_vm_with_retry(vm):
     local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant provision' % vm)
 
+
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_halt_vm_with_retry(vm):
     local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant halt' % vm)
 
+
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def restart_tinc_daemon_if_needed(vm):
     log_green('running restart_tinc_daemon_if_needeed')
-    cmd = 'VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant ssh -- ping -c1 www.google.com' % vm
+    cmd = 'VAGRANT_VAGRANTFILE=Vagrantfile.%s ' % vm + \
+          'vagrant ssh -- ping -c1 www.google.com'
     process = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True)
     exit_code = process.wait()
     stderr, stdout = process.communicate()
 
-    print('return code: %s' %  exit_code)
+    print('return code: %s' % exit_code)
     print('stdout:\n %s' % stdout)
     print('stderr:\n %s' % stderr)
 
@@ -73,14 +77,16 @@ def restart_tinc_daemon_if_needed(vm):
         # attempt to fix the most common issue, where tinc didn't receive
         # an ip address from dhcp
         local(
-            'VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant ssh %s -- sudo systemctl restart tinc.core-vpn' % (vm, vm)
+            'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
+            'vagrant ssh -- sudo systemctl restart tinc.core-vpn' % vm
         )
         log_green('sleeping for 90s')
         sleep(90)
 
     # and now fail for good if we still can't ping google
     local(
-        'VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant ssh %s -- ping -c1 www.google.com' % (vm, vm)
+        'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
+        'vagrant ssh -- ping -c1 www.google.com' % vm
     )
 
 
@@ -101,9 +107,8 @@ def vagrant_ensure_tinc_network_is_operational():
         # and now fail for good if we still can't ping google
         local(
             'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-            'vagrant ssh %s -- ping -c1 www.google.com' % (vm, vm)
+            'vagrant ssh -- ping -c1 www.google.com' % vm
         )
-
 
 
 @task
@@ -127,56 +132,61 @@ def bake_obor_box():
 
     host, user, port, ssh_file = m.groups()
 
-
-    local('rsync --delete -chavzPq --rsync-path="sudo rsync" '
-          '--rsh="ssh -F ssh.config -i {} -p {} " '
-          'vagrant-mesos-zk-01 {}@{}:/etc/nixos/'.format(ssh_file,
-                                                         port,
-                                                         user,
-                                                         host)
+    local(
+        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
+        '--rsh="ssh -F ssh.config -i {} -p {} " '
+        'vagrant-mesos-zk-01 {}@{}:/etc/nixos/'.format(ssh_file,
+                                                       port,
+                                                       user,
+                                                       host)
     )
 
-    local('rsync --delete -chavzPq --rsync-path="sudo rsync" '
-          '--rsh="ssh -F ssh.config -i {} -p {} " '
-          'common {}@{}:/etc/nixos/common'.format(ssh_file,
-                                                  port,
-                                                  user,
-                                                  host)
+    local(
+        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
+        '--rsh="ssh -F ssh.config -i {} -p {} " '
+        'common {}@{}:/etc/nixos/common'.format(ssh_file,
+                                                port,
+                                                user,
+                                                host)
     )
-    local('rsync --delete -chavzPq --rsync-path="sudo rsync" '
-          '--rsh="ssh -F ssh.config -i {} -p {} " '
-          'config {}@{}:/etc/nixos/config'.format(ssh_file,
-                                                  port,
-                                                  user,
-                                                  host)
+    local(
+        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
+        '--rsh="ssh -F ssh.config -i {} -p {} " '
+        'config {}@{}:/etc/nixos/config'.format(ssh_file,
+                                                port,
+                                                user,
+                                                host)
     )
 
     local(
         'VAGRANT_VAGRANTFILE=Vagrantfile.vagrant-obor-box vagrant  provision'
     )
 
-    local('rsync --delete -chavzPq --rsync-path="sudo rsync" '
-          '--rsh="ssh -F ssh.config -i {} -p {} " '
-          'vagrant-mesos-slave {}@{}:/etc/nixos/'.format(ssh_file,
-                                                         port,
-                                                         user,
-                                                         host)
+    local(
+        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
+        '--rsh="ssh -F ssh.config -i {} -p {} " '
+        'vagrant-mesos-slave {}@{}:/etc/nixos/'.format(ssh_file,
+                                                       port,
+                                                       user,
+                                                       host)
     )
 
-    local('rsync --delete -chavzPq --rsync-path="sudo rsync" '
-          '--rsh="ssh -F ssh.config  -i {} -p {} " '
-          'common {}@{}:/etc/nixos/common'.format(ssh_file,
-                                                  port,
-                                                  user,
-                                                  host)
+    local(
+        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
+        '--rsh="ssh -F ssh.config  -i {} -p {} " '
+        'common {}@{}:/etc/nixos/common'.format(ssh_file,
+                                                port,
+                                                user,
+                                                host)
     )
 
-    local('rsync --delete -chavzPq --rsync-path="sudo rsync" '
-          '--rsh="ssh -F ssh.config -i {} -p {} " '
-          'config {}@{}:/etc/nixos/config'.format(ssh_file,
-                                                  port,
-                                                  user,
-                                                  host)
+    local(
+        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
+        '--rsh="ssh -F ssh.config -i {} -p {} " '
+        'config {}@{}:/etc/nixos/config'.format(ssh_file,
+                                                port,
+                                                user,
+                                                host)
     )
 
     local(
@@ -187,23 +197,29 @@ def bake_obor_box():
 
     local('VAGRANT_VAGRANTFILE=Vagrantfile.vagrant-obor-box vagrant package')
 
-	# https://github.com/minio/mc
+    # https://github.com/minio/mc
     local('wget -c https://dl.minio.io/client/mc/release/linux-amd64/mc')
     local('chmod +x mc')
 
-	# SET MC_CONFIG_STRING to your S3 compatible endpoint
-	# minio http://192.168.1.51 BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-	# s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-	# gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
-	#
-	# SET MC_SERVICE to the name of the S3 endpoint 
-	# (minio/s3/gcs) as the example above
-	#
-	# SET MC_PATH to the S3 bucket folder path
+    # SET MC_CONFIG_STRING to your S3 compatible endpoint
+
+    # minio http://192.168.1.51 \
+    #    BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+
+    #    s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB \
+    #    V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
+
+    #    gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB \
+    #    V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
+    #
+    # SET MC_SERVICE to the name of the S3 endpoint
+    # (minio/s3/gcs) as the example above
+    #
+    # SET MC_PATH to the S3 bucket folder path
 
     local('./mc config host add %s' % os.getenv('MC_CONFIG_STRING'))
     local('./mc cp package.box %s/%s/vagrant-obor.box' % (
-        os.getenv('MC_SERVICE'), 
+        os.getenv('MC_SERVICE'),
         os.getenv('MC_PATH'))
     )
 
@@ -244,13 +260,15 @@ def provision_obor():
         'vagrant-mesos-zk-01',
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
-        'vagrant-mesos-slave']:
+        'vagrant-mesos-slave'
+    ]:
         results.append(pool.apipe(vagrant_provision_vm_with_retry, vm))
 
     for stream in results:
         stream.get()
 
     log_green('provision_obor completed')
+
 
 @task
 def vagrant_reload():
@@ -259,42 +277,25 @@ def vagrant_reload():
         'vagrant-mesos-zk-01',
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
-        'vagrant-mesos-slave']:
+        'vagrant-mesos-slave'
+    ]:
         vagrant_halt_vm_with_retry(vm)
+        sleep(5)
         vagrant_up_vm_with_retry(vm)
+
 
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_destroy():
-    log_green('running vagrant_destroy')
-    local('cd Railtrack && vagrant destroy -f')
+def clean():
+    log_green('running clean')
+    destroy_railtrack()
     for vm in [
         'vagrant-mesos-zk-01',
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
-        'vagrant-mesos-slave']:
+        'vagrant-mesos-slave'
+    ]:
         local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant destroy -f' % vm)
-
-
-@task
-def vagrant_up_railtrack():
-    log_green('running vagrant_up_railtrack')
-    with cd('Railtrack'):
-        with shell_env(
-           'AWS_ACCESS_KEY_ID=VAGRANT',
-           'AWS_SECRET_ACCESS_KEY=VAGRANT',
-           'KEY_PAIR_NAME=vagrant-tinc-vpn',
-           'KEY_FILENAME=$HOME/.vagrant.d/insecure_private_key',
-           'TINC_KEY_FILENAME_CORE_NETWORK_01=key-pairs/core01.priv',
-           'TINC_KEY_FILENAME_CORE_NETWORK_02=key-pairs/core02.priv',
-           'TINC_KEY_FILENAME_CORE_NETWORK_03=key-pairs/core03.priv',
-           'TINC_KEY_FILENAME_GIT2CONSUL=key-pairs/git2consul.priv',
-           'CONFIG_YAML=config/config.yaml'
-        ):
-            local('fab -f tasks/fabfile.py '
-                  'vagrant_up reset_consul run_it vagrant_reload')
-            local('fab -f tasks/fabfile.py acceptance_tests')
-
 
 
 @task
@@ -303,10 +304,10 @@ def config_json(config_yaml):
     with open(config_yaml, 'r') as cfg_yaml:
         with open('config/config.json', 'w') as cfg_json:
             json.dump(
-                    yaml.load(cfg_yaml.read()),
-                    cfg_json,
-                    sort_keys=True,
-                    indent=4
+                yaml.load(cfg_yaml.read()),
+                cfg_json,
+                sort_keys=True,
+                indent=4
             )
 
 
@@ -315,7 +316,7 @@ def config_json(config_yaml):
 def convert_os_to_nixos():
     """
         Converts most Cloud instances to nixos automatically.
-        Since hardly any cloud providers have nixos images, we use 'nixos-infect'
+        Since hardly any cloud providers have nixos images, we use nixos-infect
         to recycle an existing OS into a nixos box.
     """
     put('convert-os-to-nixos.sh', 'convert-os-to-nixos.sh', mode=0755)
@@ -332,11 +333,11 @@ def update():
             shell='/run/current-system/sw/bin/bash -l -c'
     ):
         rsync_project(
-                remote_dir='/etc/nixos/',
-                local_dir=env.host_string,
-                delete=True,
-                extra_opts='--rsync-path="sudo rsync"',
-                default_opts='-chavzPq'
+            remote_dir='/etc/nixos/',
+            local_dir=env.host_string,
+            delete=True,
+            extra_opts='--rsync-path="sudo rsync"',
+            default_opts='-chavzPq'
         )
 
     put('update.sh', 'update.sh', mode=0755)
@@ -481,10 +482,13 @@ def jenkins_build():
     try:
         pool = Pool(processes=3)
         results = []
-        # spin up Railtrack, which is required for OBOR
-        results.append(pool.apipe(local, 'fab spin_up_railtrack provision_railtrack'))
         # spin up and provision the Cluster
-        results.append(pool.apipe(local, 'fab spin_up_obor provision_obor'))
+        results.append(pool.apipe(
+            local, 'venv/bin/fab spin_up_obor provision_obor'))
+        # spin up Railtrack, which is required for OBOR
+        results.append(
+            pool.apipe(
+                local, 'venv/bin/fab spin_up_railtrack provision_railtrack'))
 
         for stream in results:
             stream.get()
