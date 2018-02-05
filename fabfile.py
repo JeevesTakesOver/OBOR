@@ -397,8 +397,6 @@ def vagrant_test_mesos_slaves():
 @task
 def spin_up_railtrack():
     """ deploys Railtrack locally """
-    local('vagrant plugin install vagrant-hostmanager')
-    local('vagrant plugin install hostupdater')
 
     with settings(warn_only=True):
         local('git clone https://github.com/JeevesTakesOver/Railtrack.git')
