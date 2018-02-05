@@ -412,7 +412,7 @@ def spin_up_railtrack():
     RAILTRACK_ENV = [
         "eval `ssh-agent`",
         "ssh-add Railtrack/key-pairs/*.priv",
-        ". venv/bin/activate"
+        ". Railtrack/venv/bin/activate"
     ]
 
     # local() doesn't support most context managers
@@ -434,7 +434,7 @@ def provision_railtrack():
     RAILTRACK_ENV = [
         "eval `ssh-agent`",
         "ssh-add Railtrack/key-pairs/*.priv",
-        ". venv/bin/activate"
+        ". Railtrack/venv/bin/activate"
     ]
 
     # local() doesn't support most context managers
