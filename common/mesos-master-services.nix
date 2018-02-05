@@ -364,11 +364,7 @@ with lib;
         "resolv.conf" = {
           mode = "0644";
           text = ''
-            nameserver ${cfg.tinc_ip_address} 
-            nameserver ${cfg.dns_resolver1} 
-            nameserver ${cfg.dns_resolver2} 
-            nameserver 8.8.8.8
-            nameserver 8.8.4.4 
+            nameserver 127.0.0.1 
             options attempts:1
             options timeout:1
             options rotate
@@ -441,9 +437,7 @@ with lib;
       # so to avoid DNS errors, we add the Google DNS servers too.
       # requests will try every DNS server in the list
       nameservers = [ 
-        "${cfg.tinc_ip_address}" 
-        "${cfg.dns_resolver1}" 
-        "${cfg.dns_resolver2}" 
+        "127.0.0.1" 
         "8.8.8.8"
         "8.8.4.4" 
         ];
