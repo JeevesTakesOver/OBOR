@@ -395,6 +395,32 @@ def vagrant_test_mesos_slaves():
 
 
 @task
+def destroy_railtrack():
+    """ destroys Railtrack VMs """
+
+    local('cd Railtrack && '
+          'virtualenv venv && venv/bin/pip install -r requirements.txt')
+
+    RAILTRACK_ENV = [
+        "eval `ssh-agent`",
+        "ssh-add Railtrack/key-pairs/*.priv",
+        ". Railtrack/venv/bin/activate"
+    ]
+
+    # local() doesn't support most context managers
+    # so let's bake a local environment file and consume as a prefix()
+    with open('shell_env', 'w') as f:
+        for line in RAILTRACK_ENV:
+            f.write(line + '\n')
+    local('chmod +x shell_env')
+
+    with settings(shell='/run/current-system/sw/bin/bash -l -c'):
+        with prefix(". ./shell_env"):
+            local("cd Railtrack && "
+                  "venv/bin/fab -f tasks/fabfile.py clean")
+
+
+@task
 def spin_up_railtrack():
     """ deploys Railtrack locally """
 
