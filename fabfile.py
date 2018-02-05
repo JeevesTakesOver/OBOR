@@ -405,7 +405,8 @@ def spin_up_railtrack():
     local('chmod 700 Railtrack')
     local('chmod 400 Railtrack/key-pairs/*.priv')
 
-    local('cd Railtrack && virtualenv venv && pip install -r requirements.txt')
+    local('cd Railtrack && '
+          'virtualenv venv && venv/bin/pip install -r requirements.txt')
 
 
     RAILTRACK_ENV = [
