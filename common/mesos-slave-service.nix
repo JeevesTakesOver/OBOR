@@ -325,6 +325,7 @@ with lib;
 
       resolvconfOptions = [
         "attempts:1" 
+        "timeout:1" 
       ];
     }; # close networking block
 
