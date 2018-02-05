@@ -22,19 +22,16 @@ sys.setrecursionlimit(30000)
 
 from time import sleep
 
-from fabric.api import task, env, execute, local, parallel, sudo
+from fabric.api import task, env, execute, local, parallel
 from fabric.operations import put, run
 from fabric.contrib.project import rsync_project
-from fabric.context_managers import settings, cd, shell_env, prefix
+from fabric.context_managers import settings, prefix
 
-from bookshelf.api_v2.logging_helpers import log_green
+from bookshelf.api_v2.logging_helpers import (log_green, log_red)
 from retrying import retry
 import yaml
 import json
-import timeout_decorator
-import shlex
 from subprocess import Popen, PIPE, STDOUT
-from functools import partial
 from pathos.multiprocessing import ProcessingPool as Pool
 import re
 
