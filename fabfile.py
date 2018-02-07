@@ -60,7 +60,7 @@ def vagrant_halt_vm_with_retry(vm):
 def restart_tinc_daemon_if_needed(vm):
     log_green('running restart_tinc_daemon_if_needeed')
     cmd = 'VAGRANT_VAGRANTFILE=Vagrantfile.%s ' % vm + \
-          'vagrant ssh -- ping -c1 www.google.com'
+          'vagrant ssh -- nslookup leader.mesos'
     process = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True)
     exit_code = process.wait()
     stderr, stdout = process.communicate()
@@ -83,7 +83,7 @@ def restart_tinc_daemon_if_needed(vm):
     # and now fail for good if we still can't ping google
     local(
         'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-        'vagrant ssh -- ping -c1 www.google.com' % vm
+        'vagrant ssh -- nslookup leader.mesos' % vm
     )
 
 
@@ -91,7 +91,7 @@ def restart_tinc_daemon_if_needed(vm):
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_ensure_tinc_network_is_operational():
     log_green('running vagrant_ensure_tinc_network_is_operational')
-    # this will test if we can resolve google.com using
+    # this will test if we can resolve leader.mesos using
     # the tinc core DNS servers and if we can get out through the default gw
     for vm in [
         'vagrant-mesos-zk-01',
@@ -104,7 +104,7 @@ def vagrant_ensure_tinc_network_is_operational():
         # and now fail for good if we still can't ping google
         local(
             'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-            'vagrant ssh -- ping -c1 www.google.com' % vm
+            'vagrant ssh -- nslookup leader.mesos' % vm
         )
 
 
