@@ -396,12 +396,11 @@ def destroy_railtrack():
     """ destroys Railtrack VMs """
 
     local('cd Railtrack && '
-          'virtualenv venv && venv/bin/pip install -r requirements.txt')
+          'pip install -r requirements.txt')
 
     RAILTRACK_ENV = [
         "eval `ssh-agent`",
-        "ssh-add Railtrack/key-pairs/*.priv",
-        ". Railtrack/venv/bin/activate"
+        "ssh-add Railtrack/key-pairs/*.priv"
     ]
 
     # local() doesn't support most context managers
@@ -414,7 +413,7 @@ def destroy_railtrack():
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):
             local("cd Railtrack && "
-                  "venv/bin/fab -f tasks/fabfile.py clean")
+                  "fab -f tasks/fabfile.py clean")
 
 
 @task
@@ -429,12 +428,11 @@ def spin_up_railtrack():
     local('chmod 400 Railtrack/key-pairs/*.priv')
 
     local('cd Railtrack && '
-          'virtualenv venv && venv/bin/pip install -r requirements.txt')
+          'pip install -r requirements.txt')
 
     RAILTRACK_ENV = [
         "eval `ssh-agent`",
-        "ssh-add Railtrack/key-pairs/*.priv",
-        ". Railtrack/venv/bin/activate"
+        "ssh-add Railtrack/key-pairs/*.priv"
     ]
 
     # local() doesn't support most context managers
@@ -447,7 +445,7 @@ def spin_up_railtrack():
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):
             local("cd Railtrack && "
-                  "venv/bin/fab -f tasks/fabfile.py step_01_create_hosts")
+                  "fab -f tasks/fabfile.py step_01_create_hosts")
 
 
 @task
@@ -455,12 +453,11 @@ def provision_railtrack():
     """ deploys Railtrack locally """
 
     local('cd Railtrack && '
-          'virtualenv venv && venv/bin/pip install -r requirements.txt')
+          'pip install -r requirements.txt')
 
     RAILTRACK_ENV = [
         "eval `ssh-agent`",
-        "ssh-add Railtrack/key-pairs/*.priv",
-        ". Railtrack/venv/bin/activate"
+        "ssh-add Railtrack/key-pairs/*.priv"
     ]
 
     # local() doesn't support most context managers
@@ -473,7 +470,7 @@ def provision_railtrack():
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):
             local("cd Railtrack && "
-                  "venv/bin/fab -f tasks/fabfile.py run_it acceptance_tests")
+                  "fab -f tasks/fabfile.py run_it acceptance_tests")
 
 
 @task
@@ -485,11 +482,11 @@ def jenkins_build():
         results = []
         # spin up and provision the Cluster
         results.append(pool.apipe(
-            local, 'venv/bin/fab spin_up_obor provision_obor'))
+            local, 'fab spin_up_obor provision_obor'))
         # spin up Railtrack, which is required for OBOR
         results.append(
             pool.apipe(
-                local, 'venv/bin/fab spin_up_railtrack provision_railtrack'))
+                local, 'fab spin_up_railtrack provision_railtrack'))
 
         for stream in results:
             stream.get()
