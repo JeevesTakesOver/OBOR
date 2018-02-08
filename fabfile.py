@@ -506,7 +506,6 @@ def jenkins_build():
     except:  # noqa: E722 pylint: disable=bare-except
         log_red("jenkins_build() FAILED, aborting...")
         execute(clean)
-        execute(clean)
         sys.exit(1)
 
 
