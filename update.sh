@@ -20,7 +20,7 @@ echo "update.sh: configuring git for root..."
     sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git config --global user.name "root at localhost"
 
 echo "update.sh: cloning nixpkgs locally on /nixpkgs..."
-    sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git clone -q https://github.com/Azulinho/mynixpkgs.git /nixpkgs
+    ls -l /nixpkgs >/dev/null 2>&1 || sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git clone -q https://github.com/Azulinho/mynixpkgs.git /nixpkgs
 
 echo "update.sh: git pull on /nixpkgs..."
     cd /nixpkgs && sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git pull
