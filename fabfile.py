@@ -213,15 +213,24 @@ def provision_obor():
 @task
 def vagrant_reload():
     log_green('running vagrant_reload')
+
+    pool = Pool()
+    results = []
+
+    def flow(vm):
+        vagrant_halt_vm_with_retry(vm)
+        vagrant_up_vm_with_retry(vm)
+
     for vm in [
         'vagrant-mesos-zk-01',
         'vagrant-mesos-zk-02',
         'vagrant-mesos-zk-03',
         'vagrant-mesos-slave'
     ]:
-        vagrant_halt_vm_with_retry(vm)
-        sleep(5)
-        vagrant_up_vm_with_retry(vm)
+        results.append(pool.apipe(flow, vm))
+
+    for stream in results:
+        stream.get()
 
 
 @task
