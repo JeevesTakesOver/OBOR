@@ -222,8 +222,7 @@ with lib;
           server=/kubernetes.io/${cfg.tinc_ip_address}#7153
           server=/${cfg.tinc_domain}/${cfg.dns_resolver1}
           server=/${cfg.tinc_domain}/${cfg.dns_resolver2}
-          listen-address=127.0.0.1
-          listen-address=${cfg.tinc_ip_address}
+          listen-address=0.0.0.0
           bind-interfaces
           # strict-order slows down queries to tinc-core-vpn by 10ms
           # strict-order
@@ -300,6 +299,11 @@ with lib;
           with timeout 15 seconds
           if status = 1 then alert
           if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart mesos-dns"
+
+          check program check-for-zookeeper with path "/etc/tinc/core-vpn/check-for-zookeeper"
+          with timeout 15 seconds
+          if status = 1 then alert
+          if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart zookeeper"
         '';
 
 
@@ -365,11 +369,7 @@ with lib;
         "resolv.conf" = {
           mode = "0644";
           text = ''
-            nameserver ${cfg.tinc_ip_address} 
-            nameserver ${cfg.dns_resolver1} 
-            nameserver ${cfg.dns_resolver2} 
-            nameserver 8.8.8.8
-            nameserver 8.8.4.4 
+            nameserver 127.0.0.1 
             options attempts:1
             options timeout:1
             options rotate
@@ -416,6 +416,17 @@ with lib;
           '';
         }; 
 
+        # this is where we enable checks for zookeeper
+        "tinc/core-vpn/check-for-zookeeper" = {
+          mode = "0755";
+          text = ''
+            #!/usr/bin/env bash
+            set -e
+            ip=`sudo ifconfig tinc.core-vpn | grep -E  'inet [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.*netmask' | awk '{ print $2 }'`
+            timeout 1 echo stats | nc $ip 2181 | grep Mode | awk '{ print $NF }' | egrep -E 'follower|leader'
+          '';
+        }; 
+
 
       }; # close etc block
     }; # close environment block
@@ -442,9 +453,7 @@ with lib;
       # so to avoid DNS errors, we add the Google DNS servers too.
       # requests will try every DNS server in the list
       nameservers = [ 
-        "${cfg.tinc_ip_address}" 
-        "${cfg.dns_resolver1}" 
-        "${cfg.dns_resolver2}" 
+        "127.0.0.1" 
         "8.8.8.8"
         "8.8.4.4" 
         ];

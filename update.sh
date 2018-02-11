@@ -12,9 +12,6 @@ echo "update.sh: making sure openssl is installed..."
     # https://github.com/NixOS/nixpkgs/issues/3382
     openssl version >/dev/null 2>/dev/null|| sudo nix-env -Q --quiet -i openssl >/dev/null
 
-echo "update.sh: making sure cacert is installed..."
-    ls -l /etc/ca-bundle.crt >/dev/null 2>&1 || sudo nix-env -Q --quiet -i cacert >/dev/null
-
 echo "update.sh: making sure git is installed..."
     which git >/dev/null 2>&1 || sudo nix-env -Q --quiet -i git >/dev/null
 
@@ -23,7 +20,10 @@ echo "update.sh: configuring git for root..."
     sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git config --global user.name "root at localhost"
 
 echo "update.sh: cloning nixpkgs locally on /nixpkgs..."
-    sudo rm -rf /nixpkgs ; sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git clone -q https://github.com/Azulinho/mynixpkgs.git /nixpkgs
+    ls -l /nixpkgs >/dev/null 2>&1 || sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git clone -q https://github.com/Azulinho/mynixpkgs.git /nixpkgs
+
+echo "update.sh: git pull on /nixpkgs..."
+    cd /nixpkgs && sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git pull
 
 echo "update.sh: checking  local_release_1703 branch..."
     cd /nixpkgs && sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt git checkout local_release_1703
@@ -33,12 +33,6 @@ echo "update.sh: making sure wget is installed..."
 
 echo "update.sh: making sure jdks are installed..."
     cd /tmp
-
-    sudo wget -q --no-check-certificate -c --header='Cookie: oraclelicense=accept-securebackup-cookie' http://download.oracle.com/otn-pub/java/jdk/8u111-b14/jdk-8u111-linux-x64.tar.gz || echo
-    sudo nix-store -Q --quiet  --add-fixed sha256 jdk-8u111-linux-x64.tar.gz >/dev/null
-
-    sudo wget -q --no-check-certificate -c --header='Cookie: oraclelicense=accept-securebackup-cookie' http://download.oracle.com/otn-pub/java/jdk/8u121-b13/e9e7ea248e2c4826b92b3f075a80e441/jdk-8u121-linux-x64.tar.gz || echo
-    sudo nix-store -Q --quiet --add-fixed sha256 jdk-8u121-linux-x64.tar.gz >/dev/null
 
     sudo wget -q --no-check-certificate -c --header='Cookie: oraclelicense=accept-securebackup-cookie' http://download.oracle.com/otn-pub/java/jdk/8u131-b11/d54c1d3a095b4ff2b6607d096fa80163/jdk-8u131-linux-x64.tar.gz || echo
     sudo nix-store -Q --quiet  --add-fixed sha256 jdk-8u131-linux-x64.tar.gz >/dev/null

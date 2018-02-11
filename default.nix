@@ -21,6 +21,7 @@ stdenv.mkDerivation {
     libxslt
     libzip
     zlib
+    unzip
   ];
   src = null;
   shellHook = ''

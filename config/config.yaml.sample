@@ -52,9 +52,9 @@ common: &common
     # at boot, DNS is not yet available for our Tinc VPN 
     # as a work a workaround lets use IP addresses for now.
     # this assumes that our Masters have fixed IP addresses
-    192.168.56.11 core01
-    192.168.56.12 core02
-    192.168.56.13 core03
+    # 192.168.56.11 core01
+    # 192.168.56.12 core02
+    # 192.168.56.13 core03
 
   # Primary and Secondary Railtrack DNS servers
   mesos_dns_resolver1: '10.254.0.1' # DNS NS for the TINC network
@@ -89,8 +89,8 @@ common: &common
   #---------------------------------------------------------------------------
   
   # the first node for Railtrack:
-  tinc_core_node01_tinc_ip_address: '10.254.0.1'
-  tinc_core_node01_fqdn: '192.168.56.11'
+  tinc_core_node01_tinc_ip_address: '1.1.1.1'
+  tinc_core_node01_fqdn: 'core01-public.aws.azulinho.com'
 
   # TINC public key for our first Railtrack Tinc node
   tinc_core_node01_public_key: |
@@ -109,8 +109,8 @@ common: &common
     -----END RSA PUBLIC KEY-----
 
   # the second node for Railtrack:
-  tinc_core_node02_tinc_ip_address: '10.254.0.2'
-  tinc_core_node02_fqdn: '192.168.56.12'
+  tinc_core_node02_tinc_ip_address: '1.1.1.1'
+  tinc_core_node02_fqdn: 'core02-public.aws.azulinho.com'
 
   tinc_core_node02_public_key: |
     -----BEGIN RSA PUBLIC KEY-----
@@ -128,8 +128,8 @@ common: &common
     -----END RSA PUBLIC KEY-----
 
   # the third node for Railtrack:
-  tinc_core_node03_tinc_ip_address: '10.254.0.3'
-  tinc_core_node03_fqdn: '192.168.56.13'
+  tinc_core_node03_tinc_ip_address: '1.1.1.1'
+  tinc_core_node03_fqdn: 'core03-public.aws.azulinho.com'
 
   tinc_core_node03_public_key: |
     -----BEGIN RSA PUBLIC KEY-----

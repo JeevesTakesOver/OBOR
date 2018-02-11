@@ -14,13 +14,8 @@ def test_dnsmasq_is_enabled( Command):
     assert cmd.rc == 0
 
 @pytest.mark.dnsmasq
-def test_dnsmasq_is_listening_on_port_53_on_localhost( Command):
-    cmd = Command("sudo netstat -nltp | egrep -E 'tcp *.*127.0.0.1:53 *.*:.*LISTEN.*dnsmasq'")
-    assert cmd.rc == 0
-
-@pytest.mark.dnsmasq
-def test_dnsmasq_is_listening_on_port_53_on_tinc_interface( Command):
-    cmd = Command("sudo netstat -nltp | egrep -E 'tcp *.*10.254.*:53 *.*:.*LISTEN.*dnsmasq'")
+def test_dnsmasq_is_listening_on_port_53( Command):
+    cmd = Command("sudo netstat -nltp | egrep -E 'tcp *.*0.0.0.0:53 *.*:.*LISTEN.*dnsmasq'")
     assert cmd.rc == 0
 
 @pytest.mark.dnsmasq

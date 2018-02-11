@@ -320,13 +320,12 @@ with lib;
       nameservers = [ 
         "${cfg.dns_resolver1}" 
         "${cfg.dns_resolver2}" 
-        "${cfg.dns_resolver3}" 
         "8.8.8.8"
-        "8.8.4.4" 
         ];
 
       resolvconfOptions = [
         "attempts:1" 
+        "timeout:1" 
       ];
     }; # close networking block
 
