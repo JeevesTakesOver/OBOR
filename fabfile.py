@@ -31,7 +31,6 @@ from bookshelf.api_v2.logging_helpers import (log_green, log_red)
 from retrying import retry
 import yaml
 import json
-from subprocess import Popen, PIPE, STDOUT
 from pathos.multiprocessing import ProcessingPool as Pool
 import re
 
@@ -54,58 +53,6 @@ def vagrant_provision_vm_with_retry(vm):
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def vagrant_halt_vm_with_retry(vm):
     local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant halt' % vm)
-
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def restart_tinc_daemon_if_needed(vm):
-    log_green('running restart_tinc_daemon_if_needeed')
-    cmd = 'VAGRANT_VAGRANTFILE=Vagrantfile.%s ' % vm + \
-          'vagrant ssh -- nslookup leader.mesos'
-    process = Popen(cmd, stdout=PIPE, stderr=STDOUT, shell=True)
-    exit_code = process.wait()
-    stderr, stdout = process.communicate()
-
-    print('return code: %s' % exit_code)
-    print('stdout:\n %s' % stdout)
-    print('stderr:\n %s' % stderr)
-
-    if exit_code != 0:
-        log_green('I am restarting tincd')
-        # attempt to fix the most common issue, where tinc didn't receive
-        # an ip address from dhcp
-        local(
-            'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-            'vagrant ssh -- sudo systemctl restart tinc.core-vpn' % vm
-        )
-        log_green('sleeping for 90s')
-        sleep(90)
-
-    # and now fail for good if we still can't ping google
-    local(
-        'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-        'vagrant ssh -- nslookup leader.mesos' % vm
-    )
-
-
-@task
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_ensure_tinc_network_is_operational():
-    log_green('running vagrant_ensure_tinc_network_is_operational')
-    # this will test if we can resolve leader.mesos using
-    # the tinc core DNS servers and if we can get out through the default gw
-    for vm in [
-        'vagrant-mesos-zk-01',
-        'vagrant-mesos-zk-02',
-        'vagrant-mesos-zk-03',
-        'vagrant-mesos-slave'
-    ]:
-        restart_tinc_daemon_if_needed(vm)
-
-        # and now fail for good if we still can't ping google
-        local(
-            'VAGRANT_VAGRANTFILE=Vagrantfile.%s '
-            'vagrant ssh -- nslookup leader.mesos' % vm
-        )
 
 
 @task
@@ -494,8 +441,7 @@ def jenkins_build():
         # reload after initial provision
         execute(vagrant_reload)
 
-        # check tinc network is operational
-        execute(vagrant_ensure_tinc_network_is_operational)
+        sleep(300)  # give it enough time for all services to start
 
         # test all the things
         execute(vagrant_test_mesos_masters)
