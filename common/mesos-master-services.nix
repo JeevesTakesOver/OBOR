@@ -299,6 +299,11 @@ with lib;
           with timeout 15 seconds
           if status = 1 then alert
           if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart mesos-dns"
+
+          check program check-for-zookeeper with path "/etc/tinc/core-vpn/check-for-zookeeper"
+          with timeout 15 seconds
+          if status = 1 then alert
+          if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart zookeeper"
         '';
 
 
@@ -408,6 +413,17 @@ with lib;
             #!/usr/bin/env bash
             set -e
             timeout 5 nslookup leader.mesos
+          '';
+        }; 
+
+        # this is where we enable checks for zookeeper
+        "tinc/core-vpn/check-for-zookeeper" = {
+          mode = "0755";
+          text = ''
+            #!/usr/bin/env bash
+            set -e
+            ip=`sudo ifconfig tinc.core-vpn | grep -E  'inet [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.*netmask' | awk '{ print $2 }'`
+            timeout 1 echo stats | nc $ip 2181 | grep Mode | awk '{ print $NF }' | egrep -E 'follower|leader'
           '';
         }; 
 
