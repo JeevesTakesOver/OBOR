@@ -55,6 +55,11 @@ def vagrant_halt_vm_with_retry(vm):
     local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant halt' % vm)
 
 
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+def vagrant_rsync_vm_with_retry(vm):
+    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant rsync' % vm)
+
+
 @task
 def bake_obor_box():
     """ bakes a vagrant box for OBOR """
@@ -185,6 +190,7 @@ def spin_up_obor():
     ]:
         vagrant_up_vm_with_retry(vm)
         sleep(5)
+        vagrant_rsync_vm_with_retry(vm)
 
     log_green('spin_up_obor completed')
 
@@ -304,7 +310,7 @@ def test_mesos_masters():
 
 
 @task
-@retry(stop_max_attempt_number=3, wait_fixed=60000)
+@retry(stop_max_attempt_number=6, wait_fixed=90000)
 def run_testinfra_against_mesos_masters():
     local(
         "testinfra --connection=ssh --ssh-config=ssh.config "
@@ -330,7 +336,7 @@ def test_mesos_slaves():
 
 
 @task
-@retry(stop_max_attempt_number=3, wait_fixed=60000)
+@retry(stop_max_attempt_number=6, wait_fixed=90000)
 def run_testinfra_against_mesos_slaves():
     local(
         "testinfra --connection=ssh --ssh-config=ssh.config "
@@ -450,7 +456,7 @@ def jenkins_build():
         # reload after initial provision
         execute(vagrant_reload)
 
-        sleep(300)  # give it enough time for all services to start
+        sleep(180)
 
         # test all the things
         execute(vagrant_test_mesos_masters)
