@@ -55,6 +55,11 @@ def vagrant_halt_vm_with_retry(vm):
     local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant halt' % vm)
 
 
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
+def vagrant_rsync_vm_with_retry(vm):
+    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant rsync' % vm)
+
+
 @task
 def bake_obor_box():
     """ bakes a vagrant box for OBOR """
@@ -185,6 +190,7 @@ def spin_up_obor():
     ]:
         vagrant_up_vm_with_retry(vm)
         sleep(5)
+        vagrant_rsync_vm_with_retry(vm)
 
     log_green('spin_up_obor completed')
 
