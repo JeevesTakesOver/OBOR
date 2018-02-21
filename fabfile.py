@@ -283,7 +283,7 @@ def update():
     ):
         rsync_project(
             remote_dir='/etc/nixos/',
-            local_dir=env.host_string,
+            local_dir=env.host_string + '/',
             delete=True,
             extra_opts='--rsync-path="sudo rsync"',
             default_opts='-chavzPq'
