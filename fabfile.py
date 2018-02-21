@@ -288,6 +288,20 @@ def update():
             extra_opts='--rsync-path="sudo rsync"',
             default_opts='-chavzPq'
         )
+        rsync_project(
+            remote_dir='/etc/nixos/common',
+            local_dir='common/',
+            delete=True,
+            extra_opts='--rsync-path="sudo rsync"',
+            default_opts='-chavzPq'
+        )
+        rsync_project(
+            remote_dir='/etc/nixos/config',
+            local_dir='config/',
+            delete=True,
+            extra_opts='--rsync-path="sudo rsync"',
+            default_opts='-chavzPq'
+        )
 
     put('update.sh', 'update.sh', mode=0755)
 
