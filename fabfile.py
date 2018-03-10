@@ -33,6 +33,47 @@ import yaml
 import json
 from pathos.multiprocessing import ProcessingPool as Pool
 import re
+from jinja2 import Template
+from profilehooks import timecall
+
+
+@timecall(immediate=True)
+def install_terraform():
+    """ Installs Terraform locally """
+
+    local('wget -q -c https://releases.hashicorp.com/terraform/0.11.2/'
+          'terraform_0.11.2_linux_amd64.zip')
+    local('rm -f terraform')
+    local('unzip -qq terraform_0.11.2_linux_amd64.zip')
+    local('chmod +x terraform')
+
+
+@task
+@timecall(immediate=True)
+def step_01_create_hosts():
+    """ provisions new EC2 instances """
+    t = Template(open('templates/main.tf.j2').read())
+
+    # we need to read the json to get the CFG values
+    # and we also need to set them, as they won't be set on OBOR configs
+
+    with open('config/config.json') as json_data:
+        CFG = json.load(json_data)
+ 
+    with open('main.tf', 'w') as f:
+        f.write(
+            t.render(
+                key_pair=CFG['aws']['key_pair'],
+                key_filename=CFG['aws']['key_filename'],
+                aws_dns_domain=CFG['aws']['aws_dns_domain'],
+                region=CFG['aws']['region'],
+                instance_type=CFG['aws']['instance_type']
+            )
+        )
+
+    install_terraform()
+    local("./terraform init")
+    local("echo yes | ./terraform apply")
 
 
 @retry(stop_max_attempt_number=3, wait_fixed=10000)

@@ -12,3 +12,4 @@ six>=1.10.0
 pathos
 dill
 profilehooks
+jinja2
