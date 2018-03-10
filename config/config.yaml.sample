@@ -100,7 +100,7 @@ common: &common
   #---------------------------------------------------------------------------
   
   # the first node for Railtrack:
-  tinc_core_node01_tinc_ip_address: '1.1.1.1'
+  tinc_core_node01_tinc_ip_address: '10.254.0.1'
   tinc_core_node01_fqdn: 'core01-public.aws.azulinho.com'
 
   # TINC public key for our first Railtrack Tinc node
@@ -120,7 +120,7 @@ common: &common
     -----END RSA PUBLIC KEY-----
 
   # the second node for Railtrack:
-  tinc_core_node02_tinc_ip_address: '1.1.1.1'
+  tinc_core_node02_tinc_ip_address: '10.254.0.2'
   tinc_core_node02_fqdn: 'core02-public.aws.azulinho.com'
 
   tinc_core_node02_public_key: |
@@ -139,7 +139,7 @@ common: &common
     -----END RSA PUBLIC KEY-----
 
   # the third node for Railtrack:
-  tinc_core_node03_tinc_ip_address: '1.1.1.1'
+  tinc_core_node03_tinc_ip_address: '10.254.0.3'
   tinc_core_node03_fqdn: 'core03-public.aws.azulinho.com'
 
   tinc_core_node03_public_key: |
@@ -167,13 +167,11 @@ mesos_masters:
   # first OBOR mesos master node 
   node01:
     <<: *common # import all the common settings 
-    ssh_connection_string: 'root@192.168.56.201' # SSH connection string
-    public_ip_address: '192.168.56.201'
-    public_fqdn: '192.168.56.201' # we use IP addresses on vagrant
+    ssh_connection_string: 'root@mesos-zk-01-public.aws.azulinho.com' # SSH connection string
+    public_fqdn: 'mesos-zk-01-public.aws.azulinho.com'
     hostname: 'mesos-zk-01' # hostname to use
     tinc_ip_address: '10.254.0.11' # Railtrack tinc ip address to assign
     tinc_hostname: 'mesos_zk_01' # Railtrack tinc hostname to use
-    default_gateway: '10.0.2.2' # what about vagrant worlds ??
     public_interface: 'enp0s8'
     zookeeper_id: 0 # zookeeper id
 
@@ -221,13 +219,11 @@ mesos_masters:
   # second OBOR mesos master node 
   node02:
     <<: *common 
-    ssh_connection_string: 'root@192.168.56.202'
-    public_ip_address: '192.168.56.202' 
-    public_fqdn: '192.168.56.202'
+    ssh_connection_string: 'root@mesos-zk-02-public.aws.azulinho.com'
+    public_fqdn: 'mesos-zk-02-public.aws.azulinho.com'
     hostname: 'mesos-zk-02'
     tinc_ip_address: '10.254.0.12'
     tinc_hostname: 'mesos_zk_02'
-    default_gateway: '10.0.2.2'
     public_interface: 'enp0s8'
     zookeeper_id: 1 
 
@@ -273,13 +269,11 @@ mesos_masters:
   # third OBOR mesos master node 
   node03:
     <<: *common
-    ssh_connection_string: 'root@192.168.56.203'
-    public_ip_address: '192.168.56.203'
-    public_fqdn: '192.168.56.203'
+    ssh_connection_string: 'root@mesos-zk-03-public.aws.azulinho.com'
+    public_fqdn: 'mesos-zk-03-public.aws.azulinho.com'
     hostname: 'mesos-zk-03'
     tinc_ip_address: '10.254.0.13'
     tinc_hostname: 'mesos_zk_03'
-    default_gateway: '10.0.2.2'
     public_interface: 'enp0s8'
     zookeeper_id: 2 
 
@@ -331,13 +325,11 @@ mesos_slaves:
   # first OBOR mesos slave node 
   node01:
     <<: *common # import all the common settings
-    ssh_connection_string: '192.168.56.204' # SSH connection string
+    ssh_connection_string: 'root@mesos-slave-public.aws.azulinho.com' # SSH connection string
     hostname: 'slave' # hostname to use¬
     tinc_hostname: 'slave' # Railtrack tinc hostname to use
     tinc_ip_address: '10.254.0.19' # Railtrack tinc ip address to assign
-    public_ip_address: '192.168.56.204'
-    public_fqdn: '192.168.56.204' # we use IP addresses on vagrant
-    default_gateway: '10.0.2.2' # what about vagrant worlds ??¬
+    public_fqdn: 'mesos-slave-public.aws.azulinho.com'
     public_interface: 'enp0s8'
 
     # TINC public key (these should be commited to 'menagerie')
