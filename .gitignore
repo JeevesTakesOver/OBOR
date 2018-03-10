@@ -8,7 +8,6 @@ __pycache__
 config/config.yaml
 config/config.json
 *.vdi
-root@*
 localhost
 nixpkgs
 shell_env
@@ -17,3 +16,8 @@ Railtrack
 *.un~
 *.box
 mc
+terraform*
+tags
+.terraform/
+.pytest_cache
+main.tf
