@@ -272,44 +272,68 @@ with lib;
         }; # close networks block
       }; # close tinc block
 
-      # monitor and restart tincd if we happen to not have accquired an ip
-      monit = {
+
+      # enable the obor-watchdog
+      obor-watchdog =  {
         enable = true;
-        config = ''
-          set daemon  60
-          set logfile syslog facility log_daemon
+        monitor_block = ''
+            #!/run/current-system/sw/bin/bash
+            export PATH=$PATH:/run/current-system/sw/bin/:/run/wrappers/bin/
 
+            function tinc_ip_address() {
+              ifconfig tinc.core-vpn | grep -E  'inet [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.*netmask' | awk '{ print $2 }' | head -1 | tr -d "\n"
+            }
 
-          check program check-for-tinc-ip-address with path "/etc/tinc/core-vpn/check-for-tinc-ip-address"
-          with timeout 5 seconds
-          if status = 1 then alert
-          if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart tinc.core-vpn"
+            function check_tinc_vpn() {
+              tinc_ip_address > /dev/null 2>&1
+              return $?
+            }
 
-          check program check-for-docker with path "/etc/tinc/core-vpn/check-for-docker"
-          with timeout 25 seconds
-          if status = 1 then alert
-          if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart docker"
+            function check_zookeeper() {
+              ip=`tinc_ip_address`
+              timeout 1 echo stats | nc $ip 2181 | grep Mode | awk '{ print $NF }' | egrep -E 'follower|leader' > /dev/null 2>&1
+              return $?
+            }
 
-          check program check-for-dnsmasq with path "/etc/tinc/core-vpn/check-for-dnsmasq"
-          with timeout 15 seconds
-          if status = 1 then alert
-          if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart dnsmasq"
+            function check_marathon() {
+              ip=`tinc_ip_address`
+              netstat -nltp | grep "$ip:8080" > /dev/null 2>&1
+              return $?
+            }
 
-          check program check-for-mesos-dns with path "/etc/tinc/core-vpn/check-for-mesos-dns"
-          with timeout 15 seconds
-          if status = 1 then alert
-          if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart mesos-dns"
+            function check_marathon_lb() {
+              netstat -nltp | grep '.*:443 .*/haproxy' > /dev/null 2>&1
+              return $?
+            }
 
-          check program check-for-zookeeper with path "/etc/tinc/core-vpn/check-for-zookeeper"
-          with timeout 15 seconds
-          if status = 1 then alert
-          if status = 1 for 3 cycles then exec "/run/current-system/sw/bin/systemctl restart zookeeper"
+            function check_dockerd() {
+              timeout 20 docker ps >/dev/null 2>&1
+              return $?
+            }
+
+            function check_dnsmasq() {
+              timeout 5 nslookup www.google.com > /dev/null 2>&1
+              return $?
+            }
+
+            function check_mesos_dns() {
+              timeout 5 nslookup leader.mesos > /dev/null 2>&1
+              return $?
+            }
+
+            while true; do
+              check_tinc_vpn || (systemctl restart tinc.core-vpn; logger -t obor-watchdog 'restarting tinc.core-vpn')
+              check_dockerd || (systemctl restart docker; logger -t obor-watchdog 'restarting docker')
+              check_dnsmasq || (systemctl restart dnsmasq; logger -t obor-watchdog 'restarting dnsmasq')
+              check_mesos_dns || (systemctl restart mesos-dns'; logger -t obor-watchdog 'restarting mesos-dns')
+              check_zookeeper || (systemctl restart zookeeper; logger -t obor-watchdog 'restarting zookeeper')
+              check_marathon || (systemctl restart marathon; logger -t obor-watchdog 'restarting marathon')
+              check_marathon_lb || (systemctl restart marathon-lb' ; logger -t obor-watchdog 'restarting marathon-lb')
+
+              sleep 60
+            done
         '';
-
-
       };
-
-
 
     }; # close services block
 
@@ -375,58 +399,6 @@ with lib;
             options rotate
           '';
         };
-
-        # this is where we check if tinc got an ip address
-        "tinc/core-vpn/check-for-tinc-ip-address" = {
-          mode = "0755";
-          text = ''
-            #!/usr/bin/env bash
-            set -e
-            sudo ifconfig tinc.core-vpn | grep -E  'inet [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.*netmask'
-          '';
-        }; 
-
-        # this is where we enable checks for docker
-        "tinc/core-vpn/check-for-docker" = {
-          mode = "0755";
-          text = ''
-            #!/usr/bin/env bash
-            set -e
-            timeout 20 sudo docker ps
-          '';
-        }; 
-
-        # this is where we enable checks for dnsmasq
-        "tinc/core-vpn/check-for-dnsmasq" = {
-          mode = "0755";
-          text = ''
-            #!/usr/bin/env bash
-            set -e
-            timeout 5 nslookup www.google.com
-          '';
-        }; 
-
-        # this is where we enable checks for mesos-dns
-        "tinc/core-vpn/check-for-mesos-dns" = {
-          mode = "0755";
-          text = ''
-            #!/usr/bin/env bash
-            set -e
-            timeout 5 nslookup leader.mesos
-          '';
-        }; 
-
-        # this is where we enable checks for zookeeper
-        "tinc/core-vpn/check-for-zookeeper" = {
-          mode = "0755";
-          text = ''
-            #!/usr/bin/env bash
-            set -e
-            ip=`sudo ifconfig tinc.core-vpn | grep -E  'inet [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.*netmask' | awk '{ print $2 }'`
-            timeout 1 echo stats | nc $ip 2181 | grep Mode | awk '{ print $NF }' | egrep -E 'follower|leader'
-          '';
-        }; 
-
 
       }; # close etc block
     }; # close environment block

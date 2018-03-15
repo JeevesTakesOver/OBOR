@@ -17,6 +17,7 @@ in {
     ./common/imports.nix
     ./pkgs.nix
     /etc/nixos/common/mesos-master-services.nix
+    /etc/nixos/common/obor-watchdog.nix
     # we need to import this only if we're on AWS
     <nixpkgs/nixos/modules/virtualisation/amazon-image.nix>
   ];

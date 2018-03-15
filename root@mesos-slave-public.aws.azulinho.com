@@ -1,1 +1,1 @@
-nixos-config-mesos-slave
+nixos-config-mesos-slave-01
