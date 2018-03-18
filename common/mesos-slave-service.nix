@@ -179,7 +179,7 @@ with lib;
 
 
       logstash = {
-        address = "$cfg.tinc_ip_address}";
+        listenAddress = "$cfg.tinc_ip_address}";
       }; # close logstash
 
 
