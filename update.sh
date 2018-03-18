@@ -63,7 +63,7 @@ echo "update.sh: running nixos-rebuild build..."
 
 echo "update.sh: running nixos-rebuild switch..."
     # https://github.com/NixOS/nix/issues/443
-    retry 3 sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild switch -Q -I nixpkgs=/nixpkgs/
+    retry 3 sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild boot -Q -I nixpkgs=/nixpkgs/
 
 echo "update.sh: cleaning old packages..."
     sudo nix-collect-garbage -d >/dev/null 
