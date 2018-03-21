@@ -42,14 +42,14 @@ Will deploy NixOS according to our config on the target host.
 
 
 ```
-fab -H <hostname> run_testinfra_against_mesos_masters
+fab -H <hostname> acceptance_tests_mesos_master
 ```
 
 will run integration tests on the mesos-masters
 
 
 ```
-fab -H <hostname> run_testinfra_against_mesos_slaves
+fab -H <hostname> acceptance_tests_mesos_slave
 ```
 
 will run integration tests on the mesos-slaves
@@ -59,10 +59,5 @@ will run integration tests on the mesos-slaves
 fab jenkins_build()
 ```
 
-Will deploy a local stack of Railtrack, and then proceed to deploy OBOR
-on top of Railtrack using Vagrant.
-
-
-
-
-
+Will deploy an AWS stack of Railtrack, and then proceed to deploy OBOR
+on top of Railtrack on AWS.
