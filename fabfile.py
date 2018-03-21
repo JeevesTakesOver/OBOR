@@ -1,4 +1,5 @@
 # vim: ai ts=4 sts=4 et sw=4 ft=python fdm=indent et
+""" OBOR fabfile.py """
 
 # Copyright (C) 2016 Jorge Costa
 
@@ -17,27 +18,25 @@
 
 import os
 import sys
-sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-sys.setrecursionlimit(30000)
-
+import json
 from time import sleep
-
-from fabric.api import task, env, execute, local, parallel
-from fabric.operations import put, run
-from fabric.contrib.project import rsync_project
-from fabric.context_managers import settings, prefix
-
-from bookshelf.api_v2.logging_helpers import (log_green, log_red)
+from multiprocessing import Process as mp
+from profilehooks import timecall
+from jinja2 import Template
 from retrying import retry
 import yaml
-import json
-from pathos.multiprocessing import ProcessingPool as Pool
-import re
-from jinja2 import Template
-from profilehooks import timecall
+from fabric.api import task, env, local, parallel
+from fabric.operations import put, run, sudo
+from fabric.contrib.project import rsync_project
+from fabric.context_managers import settings, prefix
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+sys.setrecursionlimit(30000)
+# pylint: disable=wrong-import-position
+from bookshelf.api_v2.logging_helpers import (log_green, log_red)
 
 
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
 def install_terraform():
     """ Installs Terraform locally """
 
@@ -50,24 +49,25 @@ def install_terraform():
 
 @task
 @timecall(immediate=True)
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
 def step_01_create_hosts():
     """ provisions new EC2 instances """
-    t = Template(open('templates/main.tf.j2').read())
+    cfg = Template(open('templates/main.tf.j2').read())
 
     # we need to read the json to get the CFG values
     # and we also need to set them, as they won't be set on OBOR configs
 
     with open('config/config.json') as json_data:
-        CFG = json.load(json_data)
- 
-    with open('main.tf', 'w') as f:
-        f.write(
-            t.render(
-                key_pair=CFG['aws']['key_pair'],
-                key_filename=CFG['aws']['key_filename'],
-                aws_dns_domain=CFG['aws']['aws_dns_domain'],
-                region=CFG['aws']['region'],
-                instance_type=CFG['aws']['instance_type']
+        obor = json.load(json_data)
+
+    with open('main.tf', 'w') as manifest:
+        manifest.write(
+            cfg.render(
+                key_pair=obor['aws']['key_pair'],
+                key_filename=obor['aws']['key_filename'],
+                aws_dns_domain=obor['aws']['aws_dns_domain'],
+                region=obor['aws']['region'],
+                instance_type=obor['aws']['instance_type']
             )
         )
 
@@ -76,216 +76,13 @@ def step_01_create_hosts():
     local("echo yes | ./terraform apply")
 
 
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_package(vm, _):
-    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant up' % vm)
-
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_up_vm_with_retry(vm):
-    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant up --no-provision' % vm)
-
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_provision_vm_with_retry(vm):
-    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant provision' % vm)
-
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_halt_vm_with_retry(vm):
-    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant halt' % vm)
-
-
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def vagrant_rsync_vm_with_retry(vm):
-    local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant rsync' % vm)
-
-
-@task
-def bake_obor_box():
-    """ bakes a vagrant box for OBOR """
-    log_green('running bake_obor_box')
-
-    local(
-        'VAGRANT_VAGRANTFILE=Vagrantfile.vagrant-obor-box '
-        'vagrant up --no-provision'
-    )
-
-    result = local('VAGRANT_VAGRANTFILE=Vagrantfile.vagrant-obor-box '
-                   'vagrant ssh-config', capture=True)
-
-    pattern = r'.*HostName\s(.*).*\n.*User\s(.*).*\n' \
-              '.*Port\s(.*).*\n.*\n.*\n.*\n.*IdentityFile\s(.*)'
-
-    regex = re.compile(pattern)
-    m = regex.search(result)
-
-    host, user, port, ssh_file = m.groups()
-
-    local(
-        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
-        '--rsh="ssh -F ssh.config -i {} -p {} " '
-        'vagrant-mesos-zk-01 {}@{}:/etc/nixos/'.format(ssh_file,
-                                                       port,
-                                                       user,
-                                                       host)
-    )
-
-    local(
-        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
-        '--rsh="ssh -F ssh.config -i {} -p {} " '
-        'common {}@{}:/etc/nixos/common'.format(ssh_file,
-                                                port,
-                                                user,
-                                                host)
-    )
-    local(
-        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
-        '--rsh="ssh -F ssh.config -i {} -p {} " '
-        'config {}@{}:/etc/nixos/config'.format(ssh_file,
-                                                port,
-                                                user,
-                                                host)
-    )
-
-    local(
-        'VAGRANT_VAGRANTFILE=Vagrantfile.vagrant-obor-box vagrant  provision'
-    )
-
-    local(
-        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
-        '--rsh="ssh -F ssh.config -i {} -p {} " '
-        'vagrant-mesos-slave {}@{}:/etc/nixos/'.format(ssh_file,
-                                                       port,
-                                                       user,
-                                                       host)
-    )
-
-    local(
-        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
-        '--rsh="ssh -F ssh.config  -i {} -p {} " '
-        'common {}@{}:/etc/nixos/common'.format(ssh_file,
-                                                port,
-                                                user,
-                                                host)
-    )
-
-    local(
-        'rsync --delete -chavzPq --rsync-path="sudo rsync" '
-        '--rsh="ssh -F ssh.config -i {} -p {} " '
-        'config {}@{}:/etc/nixos/config'.format(ssh_file,
-                                                port,
-                                                user,
-                                                host)
-    )
-
-    local(
-        'VAGRANT_VAGRANTFILE=Vagrantfile.vagrant-obor-box vagrant  provision'
-    )
-
-    local('rm -f package.box')
-
-    local('VAGRANT_VAGRANTFILE=Vagrantfile.vagrant-obor-box vagrant package')
-
-    # https://github.com/minio/mc
-    local('wget -c https://dl.minio.io/client/mc/release/linux-amd64/mc')
-    local('chmod +x mc')
-
-    # SET MC_CONFIG_STRING to your S3 compatible endpoint
-
-    # minio http://192.168.1.51 \
-    #    BKIKJAA5BMMU2RHO6IBB V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-
-    #    s3 https://s3.amazonaws.com BKIKJAA5BMMU2RHO6IBB \
-    #    V7f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v4
-
-    #    gcs  https://storage.googleapis.com BKIKJAA5BMMU2RHO6IBB \
-    #    V8f1CwQqAcwo80UEIJEjc5gVQUSSx5ohQ9GSrr12 S3v2
-    #
-    # SET MC_SERVICE to the name of the S3 endpoint
-    # (minio/s3/gcs) as the example above
-    #
-    # SET MC_PATH to the S3 bucket folder path
-
-    local('./mc config host add %s' % os.getenv('MC_CONFIG_STRING'))
-    local('./mc cp package.box %s/%s/vagrant-obor.box' % (
-        os.getenv('MC_SERVICE'),
-        os.getenv('MC_PATH'))
-    )
-
-    local('vagrant box add vagrant-obor-box package.box --force')
-    local('rm -f package.box')
-
-    log_green('bake_obor completed')
-
-
-@task
-def spin_up_obor():
-    log_green('running spin_up_obor')
-
-    for vm in [
-        'vagrant-mesos-zk-01',
-        'vagrant-mesos-zk-02',
-        'vagrant-mesos-zk-03',
-        'vagrant-mesos-slave'
-    ]:
-        vagrant_up_vm_with_retry(vm)
-        sleep(5)
-        vagrant_rsync_vm_with_retry(vm)
-
-    log_green('spin_up_obor completed')
-
-
-@task
-def provision_obor():
-    log_green('running provision_obor')
-
-    pool = Pool(processes=4)
-    results = []
-
-    for vm in [
-        'vagrant-mesos-zk-01',
-        'vagrant-mesos-zk-02',
-        'vagrant-mesos-zk-03',
-        'vagrant-mesos-slave'
-    ]:
-        results.append(pool.apipe(vagrant_provision_vm_with_retry, vm))
-
-    for stream in results:
-        stream.get()
-
-    log_green('provision_obor completed')
-
-
-@task
-def vagrant_reload():
-    log_green('running vagrant_reload')
-
-    # reboot one VM at a time to maintain ZK cluster consistency
-    for vm in [
-        'vagrant-mesos-zk-01',
-        'vagrant-mesos-zk-02',
-        'vagrant-mesos-zk-03',
-        # reboot 01 one more time, as it seems to unblock marathon-lb
-        'vagrant-mesos-zk-01',
-        'vagrant-mesos-slave'
-    ]:
-        vagrant_halt_vm_with_retry(vm)
-        vagrant_up_vm_with_retry(vm)
-
-
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def clean():
+    """ destroy all VMs """
     log_green('running clean')
     destroy_railtrack()
-    for vm in [
-        'vagrant-mesos-zk-01',
-        'vagrant-mesos-zk-02',
-        'vagrant-mesos-zk-03',
-        'vagrant-mesos-slave'
-    ]:
-        local('VAGRANT_VAGRANTFILE=Vagrantfile.%s vagrant destroy -f' % vm)
+    local("echo yes| ./terraform destroy")
 
 
 @task
@@ -309,58 +106,64 @@ def convert_os_to_nixos():
         Since hardly any cloud providers have nixos images, we use nixos-infect
         to recycle an existing OS into a nixos box.
     """
-    put('convert-os-to-nixos.sh', 'convert-os-to-nixos.sh', mode=0755)
-    run('convert-os-to-nixos.sh', shell=True)
+    sudo("test -e nixos-in-place || " +
+         "git clone https://github.com/jeaye/nixos-in-place.git")
+    with settings(warn_only=True):
+        sudo("cd nixos-in-place && bash -c 'echo yy | " +
+             "REPLY=y ./install -g /dev/xvda' && reboot")
 
 
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def update():
+    """ deploy or update OBOR on a host """
     log_green('running update on {}'.format(env.host_string))
     local('rm -f {}/result'.format(env.host_string))
     with settings(
-            warn_only=True,
-            shell='/run/current-system/sw/bin/bash -l -c'
+        warn_only=True,
+        shell='/run/current-system/sw/bin/bash -l -c'
     ):
         rsync_project(
             remote_dir='/etc/nixos/',
             local_dir=env.host_string + '/',
             delete=True,
             extra_opts='--rsync-path="sudo rsync"',
-            default_opts='-chavzPq'
+            default_opts='-chavzPq',
+            ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
+                     '-o StrictHostKeyChecking=no '
         )
         rsync_project(
             remote_dir='/etc/nixos/common',
             local_dir='common/',
             delete=True,
             extra_opts='--rsync-path="sudo rsync"',
-            default_opts='-chavzPq'
+            default_opts='-chavzPq',
+            ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
+                     '-o StrictHostKeyChecking=no '
         )
         rsync_project(
             remote_dir='/etc/nixos/config',
             local_dir='config/',
             delete=True,
             extra_opts='--rsync-path="sudo rsync"',
-            default_opts='-chavzPq'
+            default_opts='-chavzPq',
+            ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
+                     '-o StrictHostKeyChecking=no '
         )
 
     put('update.sh', 'update.sh', mode=0755)
 
     with settings(
-            warn_only=True,
-            shell='/run/current-system/sw/bin/bash -l -c'
+        warn_only=True,
+        shell='/run/current-system/sw/bin/bash -l -c'
     ):
         run('bash update.sh')
 
 
 @task
-def test_mesos_masters():
-    execute(run_testinfra_against_mesos_masters)
-
-
-@task
 @retry(stop_max_attempt_number=6, wait_fixed=90000)
-def run_testinfra_against_mesos_masters():
+def acceptance_tests_mesos_master():
+    """ run acceptance tests on mesos master """
     local(
         "testinfra --connection=ssh --ssh-config=ssh.config "
         "-v -n 9  --hosts='{}' "
@@ -371,22 +174,9 @@ def run_testinfra_against_mesos_masters():
 
 
 @task
-def vagrant_test_mesos_masters():
-    for vm in ['192.168.56.201',
-               '192.168.56.202',
-               '192.168.56.203']:
-        with settings(host_string=vm):
-            execute(test_mesos_masters)
-
-
-@task
-def test_mesos_slaves():
-    execute(run_testinfra_against_mesos_slaves)
-
-
-@task
 @retry(stop_max_attempt_number=6, wait_fixed=90000)
-def run_testinfra_against_mesos_slaves():
+def acceptance_tests_mesos_slave():
+    """ run acceptance tests on mesos slave """
     local(
         "testinfra --connection=ssh --ssh-config=ssh.config "
         "-v -n 9 --hosts='{}' "
@@ -396,38 +186,33 @@ def run_testinfra_against_mesos_slaves():
 
 
 @task
-def vagrant_test_mesos_slaves():
-    for vm in ['192.168.56.204']:
-        with settings(host_string=vm):
-            execute(test_mesos_slaves)
-
-
-@task
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
 def destroy_railtrack():
     """ destroys Railtrack VMs """
 
     local('cd Railtrack && '
           'pip install -r requirements.txt')
 
-    RAILTRACK_ENV = [
+    railtrack_env = [
         "eval `ssh-agent`",
         "ssh-add Railtrack/key-pairs/*.priv"
     ]
 
     # local() doesn't support most context managers
     # so let's bake a local environment file and consume as a prefix()
-    with open('shell_env', 'w') as f:
-        for line in RAILTRACK_ENV:
-            f.write(line + '\n')
+    with open('shell_env', 'w') as shell_env:
+        for line in railtrack_env:
+            shell_env.write(line + '\n')
     local('chmod +x shell_env')
 
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
-        with prefix(". ./shell_env"):
+        with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py clean")
 
 
 @task
+@retry(stop_max_attempt_number=3, wait_fixed=10000)
 def spin_up_railtrack():
     """ deploys Railtrack locally """
 
@@ -441,81 +226,159 @@ def spin_up_railtrack():
     local('cd Railtrack && '
           'pip install -r requirements.txt')
 
-    RAILTRACK_ENV = [
+    railtrack_env = [
         "eval `ssh-agent`",
         "ssh-add Railtrack/key-pairs/*.priv"
     ]
 
     # local() doesn't support most context managers
     # so let's bake a local environment file and consume as a prefix()
-    with open('shell_env', 'w') as f:
-        for line in RAILTRACK_ENV:
-            f.write(line + '\n')
+    with open('shell_env', 'w') as shell_env:
+        for line in railtrack_env:
+            shell_env.write(line + '\n')
     local('chmod +x shell_env')
 
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
-        with prefix(". ./shell_env"):
+        with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py step_01_create_hosts")
 
 
 @task
+@retry(stop_max_attempt_number=3, wait_fixed=90000)
 def provision_railtrack():
     """ deploys Railtrack locally """
 
     local('cd Railtrack && '
           'pip install -r requirements.txt')
 
-    RAILTRACK_ENV = [
+    railtrack_env = [
         "eval `ssh-agent`",
         "ssh-add Railtrack/key-pairs/*.priv"
     ]
 
     # local() doesn't support most context managers
     # so let's bake a local environment file and consume as a prefix()
-    with open('shell_env', 'w') as f:
-        for line in RAILTRACK_ENV:
-            f.write(line + '\n')
+    with open('shell_env', 'w') as shell_env:
+        for line in railtrack_env:
+            shell_env.write(line + '\n')
     local('chmod +x shell_env')
 
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
-        with prefix(". ./shell_env"):
+        with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py run_it acceptance_tests")
 
 
-@task
+@task  # NOQA
 def jenkins_build():
     """ runs a jenkins build """
 
-    try:
-        pool = Pool(processes=3)
-        results = []
-        # spin up and provision the Cluster
-        results.append(pool.apipe(
-            local, 'fab spin_up_obor provision_obor'))
-        # spin up Railtrack, which is required for OBOR
-        results.append(
-            pool.apipe(
-                local, 'fab spin_up_railtrack provision_railtrack'))
+    @retry(stop_max_attempt_number=3, wait_fixed=10000)
+    def _provision_obor():
+        log_green('running _provision_obor')
 
-        for stream in results:
-            stream.get()
+        count = 1
+        while True or count > 3:
+            nodes = [
+                'root@mesos-zk-01-public.aws.azulinho.com',
+                'root@mesos-zk-02-public.aws.azulinho.com',
+                'root@mesos-zk-03-public.aws.azulinho.com',
+                'root@mesos-slave-public.aws.azulinho.com'
+            ]
+
+            jobs = []
+            for node in nodes:
+                jobs.append(
+                    mp(
+                        target=local,
+                        args=("fab -H %s update" % node,)
+                    )
+                )
+            for job in jobs:
+                job.start()
+
+            exit_code = 0
+            for job in jobs:
+                job.join()
+                exit_code = exit_code + job.exitcode
+
+            if exit_code == 0:
+                break
+            count = count + 1
+
+        log_green('_provision_obor completed')
+
+    def _reload_obor():
+        log_green('running _reload_obor')
+
+        for target in [
+                'root@mesos-zk-01-public.aws.azulinho.com',
+                'root@mesos-zk-02-public.aws.azulinho.com',
+                'root@mesos-zk-03-public.aws.azulinho.com',
+                # fix issues with marathon-lb
+                'root@mesos-zk-01-public.aws.azulinho.com',
+                'root@mesos-slave-public.aws.azulinho.com'
+        ]:
+            with settings(warn_only=True):
+                local("ssh -o UserKnownHostsFile=/dev/null " + 
+                      "-o StrictHostKeyChecking=no {} reboot".format(target))
+            sleep(60)
+
+        log_green('_reload_obor completed')
+
+    def _test_obor():
+        log_green('running _test_obor')
+
+        for target in [
+                'root@mesos-zk-01-public.aws.azulinho.com',
+                'root@mesos-zk-02-public.aws.azulinho.com',
+                'root@mesos-zk-03-public.aws.azulinho.com',
+        ]:
+            local(
+                "fab -H {} acceptance_tests_mesos_master".format(target)
+            )
+
+        target = 'root@mesos-slave-public.aws.azulinho.com'
+        local("fab -H {} acceptance_tests_mesos_slave".format(target))
+
+        log_green('_test_obor completed')
+
+    def _flow1():
+        # spin up and provision the Cluster
+        step_01_create_hosts()
+        sleep(45)  # allow VMs to boot up
+        _provision_obor()
+
+    def _flow2():
+        # spin up Railtrack, which is required for OBOR
+        spin_up_railtrack()
+        sleep(45)  # allow VMs to boot up
+        provision_railtrack()
+
+    try:
+        p_flow1 = mp(target=_flow1)
+        p_flow2 = mp(target=_flow2)
+
+        p_flow1.start()
+        p_flow2.start()
+
+        p_flow1.join()
+        p_flow2.join()
 
         # reload after initial provision
-        execute(vagrant_reload)
+        _reload_obor()
 
-        sleep(180)
+        sleep(180)  # allow the start services
 
         # test all the things
-        execute(vagrant_test_mesos_masters)
-        execute(vagrant_test_mesos_slaves)
+        _test_obor()
 
         # and now destroy Railtrack and mesos VMs
-        execute(clean)
+        clean()
     except:  # noqa: E722 pylint: disable=bare-except
         log_red("jenkins_build() FAILED, aborting...")
-        execute(clean)
+        clean()
         sys.exit(1)
 
 
