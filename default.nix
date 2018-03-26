@@ -30,6 +30,7 @@ stdenv.mkDerivation {
   # create a virtualenv outside the mesos workspace
   # due to long paths that break shebangs
   export VENV=/tmp/$$
+  rm -rf venv
   virtualenv --no-setuptools --clear $VENV
   ln -s $VENV venv
   . venv/bin/activate
