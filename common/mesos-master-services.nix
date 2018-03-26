@@ -228,6 +228,7 @@ with lib;
           # strict-order
           no-poll
           no-resolv
+          no-negcache
         '';
       }; # close dnsmasq block
 
