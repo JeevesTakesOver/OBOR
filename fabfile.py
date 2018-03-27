@@ -26,7 +26,7 @@ from jinja2 import Template
 from retrying import retry
 import yaml
 from fabric.api import task, env, local, parallel
-from fabric.operations import put, run, sudo
+from fabric.operations import put, run, sudo, reboot
 from fabric.contrib.project import rsync_project
 from fabric.context_managers import settings, prefix
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -72,8 +72,8 @@ def step_01_create_hosts():
         )
 
     install_terraform()
-    local("./terraform init")
-    local("echo yes | ./terraform apply")
+    local("./terraform init > log/terraform.init.log 2>&1")
+    local("echo yes | ./terraform apply > log/terraform.apply.log 2>&1")
 
 
 @task
@@ -82,7 +82,7 @@ def clean():
     """ destroy all VMs """
     log_green('running clean')
     destroy_railtrack()
-    local("echo yes| ./terraform destroy")
+    local("echo yes| ./terraform destroy > log/terraform.destroy.log 2>&1")
 
 
 @task
@@ -130,7 +130,7 @@ def update():
             extra_opts='--rsync-path="sudo rsync"',
             default_opts='-chavzPq',
             ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
-                     '-o StrictHostKeyChecking=no '
+            '-o StrictHostKeyChecking=no '
         )
         rsync_project(
             remote_dir='/etc/nixos/common',
@@ -139,7 +139,7 @@ def update():
             extra_opts='--rsync-path="sudo rsync"',
             default_opts='-chavzPq',
             ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
-                     '-o StrictHostKeyChecking=no '
+            '-o StrictHostKeyChecking=no '
         )
         rsync_project(
             remote_dir='/etc/nixos/config',
@@ -148,7 +148,7 @@ def update():
             extra_opts='--rsync-path="sudo rsync"',
             default_opts='-chavzPq',
             ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
-                     '-o StrictHostKeyChecking=no '
+            '-o StrictHostKeyChecking=no '
         )
 
     put('update.sh', 'update.sh', mode=0755)
@@ -208,7 +208,8 @@ def destroy_railtrack():
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
             local("cd Railtrack && "
-                  "fab -f tasks/fabfile.py clean")
+                  "fab -f tasks/fabfile.py clean "
+                  "> ../log/railtrack.clean.log 2>&1")
 
 
 @task
@@ -241,7 +242,8 @@ def spin_up_railtrack():
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
             local("cd Railtrack && "
-                  "fab -f tasks/fabfile.py step_01_create_hosts")
+                  "fab -f tasks/fabfile.py step_01_create_hosts"
+                  " > ../log/railtrack.step01.log 2>&1")
 
 
 @task
@@ -267,7 +269,11 @@ def provision_railtrack():
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
             local("cd Railtrack && "
-                  "fab -f tasks/fabfile.py run_it acceptance_tests")
+                  "fab -f tasks/fabfile.py run_it"
+                  "> ../log/railtrack.run_it.log 2>&1")
+            local("cd Railtrack && "
+                  "fab -f tasks/fabfile.py acceptance_tests"
+                  "> ../log/railtrack.acceptance_tests.log 2>&1")
 
 
 @task  # NOQA
@@ -292,7 +298,8 @@ def jenkins_build():
                 jobs.append(
                     mp(
                         target=local,
-                        args=("fab -H %s update" % node,)
+                        args=("fab -H %s update " % node +
+                              "> log/%s.provision.log 2>&1" % node,)
                     )
                 )
             for job in jobs:
@@ -320,9 +327,12 @@ def jenkins_build():
                 'root@mesos-zk-01-public.aws.azulinho.com',
                 'root@mesos-slave-public.aws.azulinho.com'
         ]:
-            with settings(warn_only=True):
-                local("ssh -o UserKnownHostsFile=/dev/null " + 
-                      "-o StrictHostKeyChecking=no {} reboot".format(target))
+            with settings(
+                host_string=target,
+                warn_only=True,
+                shell='/run/current-system/sw/bin/bash -l -c'
+            ):
+                reboot()
             sleep(60)
 
         log_green('_reload_obor completed')
@@ -336,11 +346,13 @@ def jenkins_build():
                 'root@mesos-zk-03-public.aws.azulinho.com',
         ]:
             local(
-                "fab -H {} acceptance_tests_mesos_master".format(target)
+                "fab -H {} acceptance_tests_mesos_master".format(target) +
+                "> log/{}.test_obor.log 2>&1".format(target)
             )
 
         target = 'root@mesos-slave-public.aws.azulinho.com'
-        local("fab -H {} acceptance_tests_mesos_slave".format(target))
+        local("fab -H {} acceptance_tests_mesos_slave".format(target) +
+              "> log/{}.test_obor.log 2>&1".format(target))
 
         log_green('_test_obor completed')
 

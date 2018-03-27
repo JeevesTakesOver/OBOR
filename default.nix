@@ -31,12 +31,12 @@ stdenv.mkDerivation {
   # due to long paths that break shebangs
   export VENV=/tmp/$$
   rm -rf venv
-  virtualenv --no-setuptools --clear $VENV
+  virtualenv --no-setuptools --clear $VENV > log/venv.log 2>&1
   ln -s $VENV venv
   . venv/bin/activate
   export PATH=$VENV/bin:$PATH
-  pip install --quiet --upgrade -r requirements.txt
-  pip install --quiet --upgrade -r dev-requirements.txt
+  pip install --quiet --upgrade -r requirements.txt > log/pip.install.log 2>&1
+  pip install --quiet --upgrade -r dev-requirements.txt > log/pip.install.dev.log 2>&1
   export PS1="$PS1::nix-shell()"
   '';
 }
