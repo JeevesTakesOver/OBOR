@@ -26,7 +26,7 @@ from jinja2 import Template
 from retrying import retry
 import yaml
 from fabric.api import task, env, local, parallel
-from fabric.operations import put, run, sudo, reboot
+from fabric.operations import put, run, sudo
 from fabric.contrib.project import rsync_project
 from fabric.context_managers import settings, prefix
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -332,7 +332,11 @@ def jenkins_build():
                 warn_only=True,
                 shell='/run/current-system/sw/bin/bash -l -c'
             ):
-                reboot()
+                local(
+                    "ssh -o UserKnownHostsFile=/dev/null "
+                    "-o StrictHostKeyChecking=no {} "
+                    "nohup shutdown -r now &".format(target)
+                )
             sleep(60)
 
         log_green('_reload_obor completed')
