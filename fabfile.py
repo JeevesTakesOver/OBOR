@@ -81,8 +81,29 @@ def step_01_create_hosts():
 def clean():
     """ destroy all VMs """
     log_green('running clean')
-    destroy_railtrack()
-    local("echo yes| ./terraform destroy > log/terraform.destroy.log 2>&1")
+
+    jobs = []
+    jobs.append(
+        mp(target=destroy_railtrack)
+    )
+    jobs.append(
+        mp(
+            target=local,
+            args=("echo yes| ./terraform destroy "
+                  "> log/terraform.destroy.log 2>&1",)
+        )
+    )
+    for job in jobs:
+        job.start()
+
+    exit_code = 0
+    for job in jobs:
+        job.join()
+        exit_code = exit_code + job.exitcode
+
+    if exit_code != 0:
+        raise Exception('clean failed')
+    log_green('running clean completed')
 
 
 @task
