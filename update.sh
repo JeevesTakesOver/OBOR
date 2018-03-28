@@ -27,6 +27,9 @@ echo "update.sh: cleaning old files..."
     sudo rm -rf /tmp-nixos
     sudo rm -f /etc/nixos/result
 
+echo "update.sh: cleaning old packages..."
+    sudo nix-collect-garbage -d >/dev/null 
+
 echo "update.sh: making sure openssl is installed..."
     # https://github.com/NixOS/nixpkgs/issues/3382
     openssl version >/dev/null 2>/dev/null|| sudo nix-env -Q --quiet -i openssl >/dev/null
@@ -61,12 +64,10 @@ echo "update.sh: running nixos-rebuild build..."
     # https://github.com/NixOS/nix/issues/443
     retry 3 sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild build -Q -I nixpkgs=/nixpkgs/ 
 
-echo "update.sh: running nixos-rebuild switch..."
+echo "update.sh: running nixos-rebuild boot..."
     # https://github.com/NixOS/nix/issues/443
     retry 3 sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild boot -Q -I nixpkgs=/nixpkgs/
 
-echo "update.sh: cleaning old packages..."
-    sudo nix-collect-garbage -d >/dev/null 
 
 set +e
 echo "finished update.sh..."
