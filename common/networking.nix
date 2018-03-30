@@ -31,7 +31,7 @@
   # as we don't want dhcpcpd to attempt to allocate ip addresses for the
   # tinc vpn interfaces.
   # locking them them ensures this won't happen
-  networking.dhcpcd.allowInterfaces = [ "enp0s3" "enp5s0" "enp0s8"];
+  networking.dhcpcd.allowInterfaces = [ "enp0s3" "enp5s0" "enp0s8" "eth0"];
 
   # not entirelly sure we care about this block.
   services.udev.extraRules = ''

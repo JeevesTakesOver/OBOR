@@ -1,5 +1,24 @@
 #!/run/current-system/sw/bin/bash
 
+function retry {
+  local retry_max=$1
+  shift
+
+  local count=$retry_max
+  while [ $count -gt 0 ]; do
+    "$@" && break
+    count=$(($count - 1))
+    sleep 1
+  done
+
+  [ $count -eq 0 ] && {
+    echo "Retry failed [$retry_max]: $@" >&2
+    return 1
+  }
+  return 0
+}
+
+
 echo "running update.sh..."
 
 echo "update.sh: cleaning old files..."
@@ -7,6 +26,9 @@ echo "update.sh: cleaning old files..."
     sudo rm -rf /old-root
     sudo rm -rf /tmp-nixos
     sudo rm -f /etc/nixos/result
+
+echo "update.sh: cleaning old packages..."
+    sudo nix-collect-garbage -d >/dev/null 
 
 echo "update.sh: making sure openssl is installed..."
     # https://github.com/NixOS/nixpkgs/issues/3382
@@ -40,14 +62,12 @@ echo "update.sh: making sure jdks are installed..."
 set -e
 echo "update.sh: running nixos-rebuild build..."
     # https://github.com/NixOS/nix/issues/443
-    sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild build -Q -I nixpkgs=/nixpkgs/ 2>&1 | tail 
+    retry 3 sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild build -Q -I nixpkgs=/nixpkgs/ 
 
-echo "update.sh: running nixos-rebuild switch..."
+echo "update.sh: running nixos-rebuild boot..."
     # https://github.com/NixOS/nix/issues/443
-    sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild switch -Q -I nixpkgs=/nixpkgs/ 2>&1 | tail
+    retry 3 sudo CURL_CA_BUNDLE=/etc/ca-bundle.crt nixos-rebuild boot -Q -I nixpkgs=/nixpkgs/
 
-echo "update.sh: cleaning old packages..."
-    sudo nix-collect-garbage -d >/dev/null 2>&1| tail
 
 set +e
 echo "finished update.sh..."

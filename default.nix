@@ -30,12 +30,13 @@ stdenv.mkDerivation {
   # create a virtualenv outside the mesos workspace
   # due to long paths that break shebangs
   export VENV=/tmp/$$
-  virtualenv --no-setuptools --clear $VENV
+  rm -rf venv
+  virtualenv --no-setuptools --clear $VENV > log/`date '+%Y%m%d%H%M%S'`.venv.log 2>&1
   ln -s $VENV venv
   . venv/bin/activate
   export PATH=$VENV/bin:$PATH
-  pip install --quiet --upgrade -r requirements.txt
-  pip install --quiet --upgrade -r dev-requirements.txt
+  pip install --quiet --upgrade -r requirements.txt > log/`date '+%Y%m%d%H%M%S'`.pip.install.log 2>&1
+  pip install --quiet --upgrade -r dev-requirements.txt > log/`date '+%Y%m%d%H%M%S'`.pip.install.dev.log 2>&1
   export PS1="$PS1::nix-shell()"
   '';
 }

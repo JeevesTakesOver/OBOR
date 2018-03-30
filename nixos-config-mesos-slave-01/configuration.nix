@@ -18,51 +18,25 @@ in {
     ./common/imports.nix
     ./pkgs.nix
     /etc/nixos/common/mesos-slave-service.nix
+    /etc/nixos/common/obor-watchdog.nix
+    # we need to import this only if we're on AWS
+    <nixpkgs/nixos/modules/virtualisation/amazon-image.nix>
   ];
+
+  # we need to enable this only if we're on AWS
+  ec2.hvm = true;
 
   networking = {
     hostName = "${d.my.hostname}";
-
-    interfaces."${d.my.public_interface}" = {
-      ip4 = [ 
-        { address = "${d.my.public_ip_address}"; 
-        prefixLength = d.my.public_ip_netmask; } 
-      ];
-    };
-
-    # we don't actually need to set the default GW on vagrant boxes
-    # as this is done by the NAT interface
-    # defaultGateway = "${d.my.default_gateway}";
   };
-
 
   # and update /etc/hosts
   networking.extraHosts = ''
-    ${d.my.public_ip_address} ${d.my.hostname} ${d.my.public_fqdn}
+    ${d.my.hostname} ${d.my.public_fqdn}
     ${d.common.etc_hosts_entries}
   '';
 
-  boot.loader.grub.device = "/dev/sda";
   boot.initrd.availableKernelModules = [ "ata_piix" ];
-  boot.kernelModules = [ "kvm-intel" ];
-
-    # Creates a "vagrant" users with password-less sudo access
-  users = {
-    extraGroups = [ { name = "vagrant"; } { name = "vboxsf"; } ];
-    extraUsers  = [ {
-      description     = "Vagrant User";
-      name            = "vagrant";
-      group           = "vagrant";
-      extraGroups     = [ "users" "vboxsf" "wheel" ];
-      password        = "vagrant";
-      home            = "/home/vagrant";
-      createHome      = true;
-      useDefaultShell = true;
-      openssh.authorizedKeys.keys = [
-        "ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEA6NF8iallvQVp22WDkTkyrtvp9eWW6A8YVr+kz4TjGYe7gHzIw+niNltGEFHzD8+v1I2YJ6oXevct1YeS0o9HZyN1Q9qgCgzUFtdOKLv6IedplqoPkcmF0aYet2PkEDo3MlTBckFXPITAMzF8dJSIFo9D8HfdOV0IAdx4O7PtixWKn5y2hMNG0zQPyUecp4pzC6kivAIhyfHilFR61RGL+GPXQ2MWZWFYbAGjyiYJnAmCP3NOTd0jMZEnDkbUvxhMmBYSdETk1rRgm+R4LOzFUGaHqHDLKLX+FIPKcF96hrucXzcWyLbIbEgE98OHlnVYCzRdK8jlqm8tehUc9c9WhQ== vagrant insecure public key"
-      ];
-    } ];
-  };
 
   security.sudo.configFile =
     ''
@@ -74,16 +48,6 @@ in {
       root   ALL=(ALL) SETENV: ALL
       %wheel ALL=(ALL) NOPASSWD: ALL, SETENV: ALL
     '';
-
-  fileSystems."/" = { 
-    device = "/dev/sda1"; 
-    fsType = "ext4"; 
-    options = [
-      "rw"
-      "relatime"
-      "data=ordered"
-    ]; 
-  };
 
   swapDevices = [ { device = "/swapfile"; size = 2048; } ];
 
