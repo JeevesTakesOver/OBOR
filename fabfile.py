@@ -354,8 +354,6 @@ def jenkins_build():
                 'root@mesos-zk-01-public.aws.azulinho.com',
                 'root@mesos-zk-02-public.aws.azulinho.com',
                 'root@mesos-zk-03-public.aws.azulinho.com',
-                # fix issues with marathon-lb
-                'root@mesos-zk-01-public.aws.azulinho.com',
                 'root@mesos-slave-public.aws.azulinho.com'
         ]:
             with settings(
@@ -368,7 +366,6 @@ def jenkins_build():
                     "-o StrictHostKeyChecking=no {} "
                     "nohup shutdown -r now &".format(target)
                 )
-            sleep(60)
 
         log_green('_reload_obor completed')
 
