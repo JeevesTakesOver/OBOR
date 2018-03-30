@@ -114,7 +114,7 @@ def config_json(config_yaml):
     with open(config_yaml, 'r') as cfg_yaml:
         with open('config/config.json', 'w') as cfg_json:
             json.dump(
-                yaml.load(cfg_yaml.read()),
+                yaml.safe_load(cfg_yaml.read()),
                 cfg_json,
                 sort_keys=True,
                 indent=4
@@ -430,9 +430,9 @@ def jenkins_build():
         sys.exit(1)
 
 
-"""
-    ___main___
-"""
+###
+###   ___main___
+###
 
 env.connection_attempts = 10
 env.timeout = 30
