@@ -7,7 +7,7 @@ function retry {
   local count=$retry_max
   while [ $count -gt 0 ]; do
     "$@" && break
-    count=$(($count - 1))
+    let count=count-1
     sleep 1
   done
 
