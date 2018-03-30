@@ -309,6 +309,8 @@ def provision_railtrack():
 @task  # NOQA
 def jenkins_build():
     """ runs a jenkins build """
+    # clean previous build logs
+    local('rm -f log/*')
 
     @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def _provision_obor():
