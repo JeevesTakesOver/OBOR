@@ -72,8 +72,10 @@ def step_01_create_hosts():
         )
 
     install_terraform()
-    local("./terraform init > log/terraform.init.log 2>&1")
-    local("echo yes | ./terraform apply > log/terraform.apply.log 2>&1")
+    local("./terraform init > "
+          "log/`date '+%Y%m%d%H%M%S'`.terraform.init.log 2>&1")
+    local("echo yes | ./terraform apply > "
+          "log/`date '+%Y%m%d%H%M%S'`.terraform.apply.log 2>&1")
 
 
 @task
@@ -90,7 +92,7 @@ def clean():
         mp(
             target=local,
             args=("echo yes| ./terraform destroy "
-                  "> log/terraform.destroy.log 2>&1",)
+                  "> log/`date '+%Y%m%d%H%M%S'`.terraform.destroy.log 2>&1",)
         )
     )
     for job in jobs:
@@ -211,8 +213,10 @@ def acceptance_tests_mesos_slave():
 def destroy_railtrack():
     """ destroys Railtrack VMs """
 
-    local('cd Railtrack && '
-          'pip install -r requirements.txt')
+    local("cd Railtrack && "
+          "pip install -r requirements.txt >"
+          "../log/`date '+%Y%m%d%H%M%S'`."
+          "pip.install.requirements.txt.log 2>&1")
 
     railtrack_env = [
         "eval `ssh-agent`",
@@ -230,7 +234,7 @@ def destroy_railtrack():
         with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py clean "
-                  "> ../log/railtrack.clean.log 2>&1")
+                  "> ../log/`date '+%Y%m%d%H%M%S'`.railtrack.clean.log 2>&1")
 
 
 @task
@@ -245,8 +249,10 @@ def spin_up_railtrack():
     local('chmod 700 Railtrack')
     local('chmod 400 Railtrack/key-pairs/*.priv')
 
-    local('cd Railtrack && '
-          'pip install -r requirements.txt')
+    local("cd Railtrack && "
+          "pip install -r requirements.txt >"
+          "../log/`date '+%Y%m%d%H%M%S'`."
+          "pip.install.requirements.txt.log 2>&1")
 
     railtrack_env = [
         "eval `ssh-agent`",
@@ -264,7 +270,7 @@ def spin_up_railtrack():
         with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py step_01_create_hosts"
-                  " > ../log/railtrack.step01.log 2>&1")
+                  " > ../log/`date '+%Y%m%d%H%M%S'`.railtrack.step01.log 2>&1")
 
 
 @task
@@ -272,8 +278,10 @@ def spin_up_railtrack():
 def provision_railtrack():
     """ deploys Railtrack locally """
 
-    local('cd Railtrack && '
-          'pip install -r requirements.txt')
+    local("cd Railtrack && "
+          "pip install -r requirements.txt >"
+          "../log/`date '+%Y%m%d%H%M%S'`."
+          "pip.install.requirements.txt.log 2>&1")
 
     railtrack_env = [
         "eval `ssh-agent`",
@@ -291,10 +299,11 @@ def provision_railtrack():
         with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py run_it"
-                  "> ../log/railtrack.run_it.log 2>&1")
+                  "> ../log/`date '+%Y%m%d%H%M%S'`.railtrack.run_it.log 2>&1")
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py acceptance_tests"
-                  "> ../log/railtrack.acceptance_tests.log 2>&1")
+                  "> ../log/`date '+%Y%m%d%H%M%S'`."
+                  "railtrack.acceptance_tests.log 2>&1")
 
 
 @task  # NOQA
@@ -320,7 +329,8 @@ def jenkins_build():
                     mp(
                         target=local,
                         args=("fab -H %s update " % node +
-                              "> log/%s.provision.log 2>&1" % node,)
+                              "> log/`date '+%Y%m%d%H%M%S'`." +
+                              "%s.provision.log 2>&1" % node,)
                     )
                 )
             for job in jobs:
@@ -372,12 +382,14 @@ def jenkins_build():
         ]:
             local(
                 "fab -H {} acceptance_tests_mesos_master".format(target) +
-                "> log/{}.test_obor.log 2>&1".format(target)
+                "> log/`date '+%Y%m%d%H%M%S'`."
+                "{}.test_obor.log 2>&1".format(target)
             )
 
         target = 'root@mesos-slave-public.aws.azulinho.com'
         local("fab -H {} acceptance_tests_mesos_slave".format(target) +
-              "> log/{}.test_obor.log 2>&1".format(target))
+              "> log/`date '+%Y%m%d%H%M%S'`."
+              "{}.test_obor.log 2>&1".format(target))
 
         log_green('_test_obor completed')
 
