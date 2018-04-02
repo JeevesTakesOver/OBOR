@@ -2,17 +2,17 @@ import pytest
 
 @pytest.mark.mesos_master
 def test_mesos_master_is_running(Command):
-    cmd = Command('sudo systemctl is-active mesos-master')
+    cmd = Command('sudo systemctl is-active OBORmesos-master')
     if cmd.rc != 0:
         raise AssertionError()
 
-    cmd = Command('sudo systemctl status mesos-master')
+    cmd = Command('sudo systemctl status OBORmesos-master')
     if cmd.rc != 0:
         raise AssertionError()
 
 @pytest.mark.mesos_master
 def test_mesos_master_is_enabled(Command):
-    cmd = Command('sudo systemctl is-enabled mesos-master')
+    cmd = Command('sudo systemctl is-enabled OBORmesos-master')
     if cmd.rc != 0:
         raise AssertionError()
 

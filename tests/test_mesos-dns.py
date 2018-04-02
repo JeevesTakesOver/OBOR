@@ -2,17 +2,17 @@ import pytest
 
 @pytest.mark.mesos_dns
 def test_mesos_dns_is_running(Command):
-    cmd = Command('sudo systemctl is-active mesos-dns')
+    cmd = Command('sudo systemctl is-active OBORmesos-dns')
     if cmd.rc != 0:
         raise AssertionError()
 
-    cmd = Command('sudo systemctl status mesos-dns')
+    cmd = Command('sudo systemctl status OBORmesos-dns')
     if cmd.rc != 0:
         raise AssertionError()
 
 @pytest.mark.mesos_dns
 def test_mesos_dns_is_enabled(Command):
-    cmd = Command('sudo systemctl is-enabled mesos-dns')
+    cmd = Command('sudo systemctl is-enabled OBORmesos-dns')
     if cmd.rc != 0:
         raise AssertionError()
 

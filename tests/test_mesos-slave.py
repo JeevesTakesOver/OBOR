@@ -2,17 +2,17 @@ import pytest
 
 @pytest.mark.mesos_slave
 def test_mesos_slave_is_running(Command):
-    cmd = Command('sudo systemctl is-active mesos-slave')
+    cmd = Command('sudo systemctl is-active OBORmesos-slave')
     if cmd.rc != 0:
         raise AssertionError()
 
-    cmd = Command('sudo systemctl status mesos-slave')
+    cmd = Command('sudo systemctl status OBORmesos-slave')
     if cmd.rc != 0:
         raise AssertionError()
 
 @pytest.mark.mesos_slave
 def test_mesos_slave_is_enabled(Command):
-    cmd = Command('sudo systemctl is-enabled mesos-slave')
+    cmd = Command('sudo systemctl is-enabled OBORmesos-slave')
     if cmd.rc != 0:
         raise AssertionError()
 

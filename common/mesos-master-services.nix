@@ -125,7 +125,7 @@ with lib;
     services = {
 
 
-      zookeeper = {
+      OBORzookeeper = {
         enable = true;
         id = cfg.zookeeper_id;
         servers = ''
@@ -150,7 +150,7 @@ with lib;
       }; # close zookeeper
 
 
-      mesos.master = {
+      OBORmesos.master = {
         enable = true;
         quorum = 2;
         zk = "${cfg.zk_string}";
@@ -162,7 +162,7 @@ with lib;
       }; # close mesos-master
 
 
-      marathon = {
+      OBORmarathon = {
         enable = true;
         zookeeperHosts = [
           "${cfg.zk_node01}:2181" 
@@ -185,7 +185,7 @@ with lib;
       }; # close marathon
 
 
-      marathon-lb = {
+      OBORmarathon-lb = {
         enable = true;
         extraCmdLineOptions = [
           "sse" 
@@ -233,7 +233,7 @@ with lib;
       }; # close dnsmasq block
 
 
-      mesos-dns = {
+      OBORmesos-dns = {
         enable = true;
         config_block = ''
           {
@@ -255,7 +255,7 @@ with lib;
         listenAddress = "${cfg.tinc_ip_address}";
       }; # close logstash block
 
-      tinc = {
+      OBORtinc = {
         networks = {
           core-vpn = {
             name = "${cfg.tinc_hostname}";
@@ -323,13 +323,13 @@ with lib;
             }
 
             while true; do
-              check_tinc_vpn || (systemctl restart tinc.core-vpn; logger -t obor-watchdog 'restarting tinc.core-vpn')
+              check_tinc_vpn || (systemctl restart OBORtinc.core-vpn; logger -t obor-watchdog 'restarting OBORtinc.core-vpn')
               check_dockerd || (systemctl restart docker; logger -t obor-watchdog 'restarting docker')
               check_dnsmasq || (systemctl restart dnsmasq; logger -t obor-watchdog 'restarting dnsmasq')
-              check_mesos_dns || (systemctl restart mesos-dns'; logger -t obor-watchdog 'restarting mesos-dns')
-              check_zookeeper || (systemctl restart zookeeper; logger -t obor-watchdog 'restarting zookeeper')
-              check_marathon || (systemctl restart marathon; logger -t obor-watchdog 'restarting marathon')
-              check_marathon_lb || (systemctl restart marathon-lb' ; logger -t obor-watchdog 'restarting marathon-lb')
+              check_mesos_dns || (systemctl restart OBORmesos-dns; logger -t obor-watchdog 'restarting OBORmesos-dns')
+              check_zookeeper || (systemctl restart OBORzookeeper; logger -t obor-watchdog 'restarting OBORzookeeper')
+              check_marathon || (systemctl restart OBORmarathon; logger -t obor-watchdog 'restarting OBORmarathon')
+              check_marathon_lb || (systemctl restart OBORmarathon-lb ; logger -t obor-watchdog 'restarting OBORmarathon-lb')
 
               sleep 60
             done

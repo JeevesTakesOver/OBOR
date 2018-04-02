@@ -16,6 +16,14 @@ in
     ./services.nix
     ./tinc.nix
     ./virtualisation.nix
+
+    ./services/OBORmesos-master.nix
+    ./services/OBORmesos-slave.nix
+    ./services/OBORtinc.nix
+    ./services/OBORzookeeper.nix
+    ./services/OBORmesos-dns.nix
+    ./services/OBORmarathon.nix
+    ./services/OBORmarathon-lb.nix
   ];
 
   system.stateVersion = "17.03";
