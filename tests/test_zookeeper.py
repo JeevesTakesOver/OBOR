@@ -2,17 +2,17 @@ import pytest
 
 @pytest.mark.mesos_dns
 def test_zookeeper_is_running(Command):
-    cmd = Command('sudo systemctl is-active zookeeper')
+    cmd = Command('sudo systemctl is-active OBORzookeeper')
     if cmd.rc != 0:
         raise AssertionError()
 
-    cmd = Command('sudo systemctl status zookeeper')
+    cmd = Command('sudo systemctl status OBORzookeeper')
     if cmd.rc != 0:
         raise AssertionError()
 
 @pytest.mark.mesos_dns
 def test_zookeeper_is_enabled(Command):
-    cmd = Command('sudo systemctl is-enabled zookeeper')
+    cmd = Command('sudo systemctl is-enabled OBORzookeeper')
     if cmd.rc != 0:
         raise AssertionError()
 

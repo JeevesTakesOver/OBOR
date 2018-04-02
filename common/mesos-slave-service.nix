@@ -148,7 +148,7 @@ with lib;
 
     services = {
 
-      mesos.slave = {
+      OBORmesos.slave = {
         enable = true;
         master = "${cfg.zk_string}";
         ip = "${cfg.tinc_ip_address}";
@@ -183,7 +183,7 @@ with lib;
       }; # close logstash
 
 
-      tinc = {
+      OBORtinc = {
         networks = {
           core-vpn = {
             name = "${cfg.tinc_hostname}";

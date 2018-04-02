@@ -2,17 +2,17 @@ import pytest
 
 @pytest.mark.tincd
 def test_tincd_is_running(Command):
-    cmd = Command('sudo systemctl is-active tinc.core-vpn')
+    cmd = Command('sudo systemctl is-active OBORtinc.core-vpn')
     if cmd.rc != 0:
         raise AssertionError()
 
-    cmd = Command('sudo systemctl status tinc.core-vpn')
+    cmd = Command('sudo systemctl status OBORtinc.core-vpn')
     if cmd.rc != 0:
         raise AssertionError()
 
 @pytest.mark.tincd
 def test_tincd_is_enabled(Command):
-    cmd = Command('sudo systemctl is-enabled tinc.core-vpn')
+    cmd = Command('sudo systemctl is-enabled OBORtinc.core-vpn')
     if cmd.rc != 0:
         raise AssertionError()
 

@@ -18,11 +18,11 @@ in {
   # make sure we use avahi services on the tinc.core-vpn interface
   # services.avahi.interfaces = [ "tinc.core-vpn" ];
 
-  services.tinc.networks.core-vpn.debugLevel = 2;
-  services.tinc.networks.core-vpn.interfaceType = "tap";
-  services.tinc.networks.core-vpn.chroot=false; # disable as we need to run tinc-up
-  services.tinc.networks.core-vpn.package=pkgs.tinc;
-  services.tinc.networks.core-vpn.extraConfig = ''
+  services.OBORtinc.networks.core-vpn.debugLevel = 2;
+  services.OBORtinc.networks.core-vpn.interfaceType = "tap";
+  services.OBORtinc.networks.core-vpn.chroot=false; # disable as we need to run tinc-up
+  services.OBORtinc.networks.core-vpn.package=pkgs.tinc;
+  services.OBORtinc.networks.core-vpn.extraConfig = ''
       AddressFamily = ipv4
       LocalDiscovery = yes
       Mode=switch
@@ -33,7 +33,7 @@ in {
       ProcessPriority = high
     '';
 
-  services.tinc.networks.core-vpn.hosts.core_network_01 = ''
+  services.OBORtinc.networks.core-vpn.hosts.core_network_01 = ''
     Name=core_network_01
     Address=${d.common.tinc_core_node01_fqdn}
     Port=655
@@ -43,7 +43,7 @@ in {
     ${d.common.tinc_core_node01_public_key}
   '';
 
-  services.tinc.networks.core-vpn.hosts.core_network_02 = ''
+  services.OBORtinc.networks.core-vpn.hosts.core_network_02 = ''
     Name=core_network_02
     Address=${d.common.tinc_core_node02_fqdn}
     Port=655
@@ -53,7 +53,7 @@ in {
     ${d.common.tinc_core_node02_public_key}
   '';
 
-  services.tinc.networks.core-vpn.hosts.core_network_03 = ''
+  services.OBORtinc.networks.core-vpn.hosts.core_network_03 = ''
     Name=core_network_03
     Address=${d.common.tinc_core_node03_fqdn}
     Port=655

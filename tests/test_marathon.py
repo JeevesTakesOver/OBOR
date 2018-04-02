@@ -2,17 +2,17 @@ import pytest
 
 @pytest.mark.marathon
 def test_marathon_is_running(Command):
-    cmd = Command('sudo systemctl is-active marathon')
+    cmd = Command('sudo systemctl is-active OBORmarathon')
     if cmd.rc != 0:
         raise AssertionError()
 
-    cmd = Command('sudo systemctl status marathon')
+    cmd = Command('sudo systemctl status OBORmarathon')
     if cmd.rc != 0:
         raise AssertionError()
 
 @pytest.mark.marathon
 def test_marathon_is_enabled(Command):
-    cmd = Command('sudo systemctl is-enabled marathon')
+    cmd = Command('sudo systemctl is-enabled OBORmarathon')
     if cmd.rc != 0:
         raise AssertionError()
 
