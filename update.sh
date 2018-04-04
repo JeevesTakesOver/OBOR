@@ -30,8 +30,8 @@ echo "update.sh: cleaning old files..."
 echo "update.sh: cleaning old packages..."
     sudo nix-collect-garbage -d >/dev/null 
 
-echo "nix-channel update.... on 17.09"
-    nix-channel --add https://nixos.org/channels/nixos-17.09 nixos
+echo "nix-channel update.... on 17.03"
+    nix-channel --add https://nixos.org/channels/nixos-17.03 nixos
     nix-channel --update
 
 echo "update.sh: making sure wget is installed..."
