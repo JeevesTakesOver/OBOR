@@ -40,8 +40,11 @@ echo "update.sh: making sure wget is installed..."
 echo "update.sh: making sure jdks are installed..."
     cd /tmp
 
-    sudo wget  --no-cookies  --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie"  http://download.oracle.com/otn-pub/java/jdk/8u141-b15/336fa29ff2bb4ef291e347e091f7f4a7/jdk-8u141-linux-x64.tar.gz  || echo
-    sudo nix-store -Q --quiet  --add-fixed sha256 jdk-8u141-linux-x64.tar.gz >/dev/null
+    sudo wget -c -qq --no-cookies  --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie"  http://download.oracle.com/otn-pub/java/jdk/8u141-b15/336fa29ff2bb4ef291e347e091f7f4a7/jdk-8u141-linux-x64.tar.gz  || echo
+    sudo nix-store --add-fixed sha256 jdk-8u141-linux-x64.tar.gz
+
+    sudo wget -c -qq  --no-cookies  --no-check-certificate --header "Cookie: oraclelicense=accept-securebackup-cookie"  http://download.oracle.com/otn-pub/java/jdk/8u161-b12/2f38c3b165be4555a1fa6e98c45e0808/jdk-8u161-linux-x64.tar.gz  || echo
+    sudo nix-store --add-fixed sha256 jdk-8u161-linux-x64.tar.gz
 
 set -e
 echo "update.sh: running nixos-rebuild build..."
