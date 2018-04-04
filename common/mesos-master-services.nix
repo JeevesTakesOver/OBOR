@@ -198,7 +198,7 @@ with lib;
 
       consul = {
         enable = true;
-        webUi = true;
+        webUi = false;
         forceIpv4 = true;
         interface = {
           advertise = "${cfg.tinc_interface}";
