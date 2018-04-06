@@ -244,7 +244,7 @@ def spin_up_railtrack():
 
     with settings(warn_only=True):
         local('git clone https://github.com/JeevesTakesOver/Railtrack.git')
-        local('cd Railtrack && git checkout v1.0.0')
+        local('cd Railtrack && git checkout v1.0.1')
 
     # make sure we are able to consume these key pairs
     local('chmod 700 Railtrack')
