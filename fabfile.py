@@ -138,49 +138,57 @@ def convert_os_to_nixos():
 
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
-def update():
+def update(rsync='yes', nix_gc='yes', nix_release='17.03', switch='no'):
     """ deploy or update OBOR on a host """
     log_green('running update on {}'.format(env.host_string))
     local('rm -f {}/result'.format(env.host_string))
-    with settings(
-        warn_only=True,
-        shell='/run/current-system/sw/bin/bash -l -c'
-    ):
-        rsync_project(
-            remote_dir='/etc/nixos/',
-            local_dir=env.host_string + '/',
-            delete=True,
-            extra_opts='--rsync-path="sudo rsync"',
-            default_opts='-chavzPq',
-            ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
-            '-o StrictHostKeyChecking=no '
-        )
-        rsync_project(
-            remote_dir='/etc/nixos/common',
-            local_dir='common/',
-            delete=True,
-            extra_opts='--rsync-path="sudo rsync"',
-            default_opts='-chavzPq',
-            ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
-            '-o StrictHostKeyChecking=no '
-        )
-        rsync_project(
-            remote_dir='/etc/nixos/config',
-            local_dir='config/',
-            delete=True,
-            extra_opts='--rsync-path="sudo rsync"',
-            default_opts='-chavzPq',
-            ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
-            '-o StrictHostKeyChecking=no '
-        )
+
+    yes_answers = ['yes', 'y', 'YES', 'Y', 'True', 'true']
+
+    if rsync in yes_answers:
+        with settings(
+            warn_only=True,
+            shell='/run/current-system/sw/bin/bash -l -c'
+        ):
+            rsync_project(
+                remote_dir='/etc/nixos/',
+                local_dir=env.host_string + '/',
+                delete=True,
+                extra_opts='--rsync-path="sudo rsync"',
+                default_opts='-chavzPq',
+                ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
+                '-o StrictHostKeyChecking=no '
+            )
+            rsync_project(
+                remote_dir='/etc/nixos/common',
+                local_dir='common/',
+                delete=True,
+                extra_opts='--rsync-path="sudo rsync"',
+                default_opts='-chavzPq',
+                ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
+                '-o StrictHostKeyChecking=no '
+            )
+            rsync_project(
+                remote_dir='/etc/nixos/config',
+                local_dir='config/',
+                delete=True,
+                extra_opts='--rsync-path="sudo rsync"',
+                default_opts='-chavzPq',
+                ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
+                '-o StrictHostKeyChecking=no '
+            )
 
     with settings(
         warn_only=True,
         shell='/run/current-system/sw/bin/bash -l -c'
     ):
         sudo('rm -f /etc/nixos/result')
-        sudo('nix-collect-garbage -d >/dev/null')
-        sudo('nix-channel --add https://nixos.org/channels/nixos-17.03 nixos')
+        if nix_gc in yes_answers:
+            sudo('nix-collect-garbage -d >/dev/null')
+        sudo(
+            'nix-channel --add '
+            'https://nixos.org/channels/nixos-{} nixos'.format(nix_release)
+        )
         sudo('nix-channel --update')
         sudo('which wget >/dev/null 2>&1|| '
              'nix-env -Q --quiet -i wget >/dev/null')
@@ -208,7 +216,18 @@ def update():
             sudo('nixos-rebuild build -Q')
             sudo('nixos-rebuild boot -Q')
 
+    @retry(stop_max_attempt_number=3, wait_fixed=60000)
+    def _nixos_switch():
+        """ wrapper for nixos-rebuild """
+        with settings(
+            shell='/run/current-system/sw/bin/bash -l -c'
+        ):
+            sudo('nixos-rebuild switch -Q')
+
     _nixos_rebuild()
+
+    if switch in yes_answers:
+        _nixos_switch()
 
 
 @task
