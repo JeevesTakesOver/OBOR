@@ -26,7 +26,7 @@ from jinja2 import Template
 from retrying import retry
 import yaml
 from fabric.api import task, env, local, parallel
-from fabric.operations import put, run, sudo
+from fabric.operations import sudo
 from fabric.contrib.project import rsync_project
 from fabric.context_managers import settings, prefix
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -174,13 +174,41 @@ def update():
             '-o StrictHostKeyChecking=no '
         )
 
-    put('update.sh', 'update.sh', mode=0755)
-
     with settings(
         warn_only=True,
         shell='/run/current-system/sw/bin/bash -l -c'
     ):
-        run('bash update.sh')
+        sudo('rm -f /etc/nixos/result')
+        sudo('nix-collect-garbage -d >/dev/null')
+        sudo('nix-channel --add https://nixos.org/channels/nixos-17.03 nixos')
+        sudo('nix-channel --update')
+        sudo('which wget >/dev/null 2>&1|| '
+             'nix-env -Q --quiet -i wget >/dev/null')
+
+        sudo('wget -c -qq --no-cookies  --no-check-certificate '
+             '--header "Cookie: oraclelicense=accept-securebackup-cookie"  '
+             'http://download.oracle.com/otn-pub/java/jdk/'
+             '8u141-b15/336fa29ff2bb4ef291e347e091f7f4a7/'
+             'jdk-8u141-linux-x64.tar.gz')
+        sudo('nix-store --add-fixed sha256 jdk-8u141-linux-x64.tar.gz')
+
+        sudo('wget -c -qq --no-cookies  --no-check-certificate '
+             '--header "Cookie: oraclelicense=accept-securebackup-cookie"  '
+             'http://download.oracle.com/otn-pub/java/jdk/'
+             '/8u161-b12/2f38c3b165be4555a1fa6e98c45e0808/'
+             'jdk-8u161-linux-x64.tar.gz')
+        sudo('nix-store --add-fixed sha256 jdk-8u161-linux-x64.tar.gz')
+
+    @retry(stop_max_attempt_number=3, wait_fixed=60000)
+    def _nixos_rebuild():
+        """ wrapper for nixos-rebuild """
+        with settings(
+            shell='/run/current-system/sw/bin/bash -l -c'
+        ):
+            sudo('nixos-rebuild build -Q')
+            sudo('nixos-rebuild boot -Q')
+
+    _nixos_rebuild()
 
 
 @task
@@ -244,7 +272,8 @@ def spin_up_railtrack():
 
     with settings(warn_only=True):
         local('git clone https://github.com/JeevesTakesOver/Railtrack.git')
-        local('cd Railtrack && git checkout v1.0.1')
+
+    local('cd Railtrack && git fetch --all --tags && git checkout v1.0.1')
 
     # make sure we are able to consume these key pairs
     local('chmod 700 Railtrack')
@@ -431,9 +460,9 @@ def jenkins_build():
         sys.exit(1)
 
 
-###
-###   ___main___
-###
+#
+#   ___main___
+#
 
 env.connection_attempts = 10
 env.timeout = 30
