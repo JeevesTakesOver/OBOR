@@ -28,13 +28,6 @@ Will generate a config/config.json file based out a YAML config.
 
 
 ```
-fab -H <ipaddress> convert-os-to-nixos 
-```
-
-will attempt to convert an ubuntu OS (from any cloud provider) into a NixOS OS.
-This helps the issue of the lack of cloud providers currently offering a NixOS image.
-
-```
 fab -H <hostname> update
 ```
 

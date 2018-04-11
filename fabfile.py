@@ -25,7 +25,7 @@ from profilehooks import timecall
 from jinja2 import Template
 from retrying import retry
 import yaml
-from fabric.api import task, env, local, parallel
+from fabric.api import task, env, local
 from fabric.operations import sudo
 from fabric.contrib.project import rsync_project
 from fabric.context_managers import settings, prefix
@@ -119,21 +119,6 @@ def config_json(config_yaml):
                 sort_keys=True,
                 indent=4
             )
-
-
-@task
-@parallel
-def convert_os_to_nixos():
-    """
-        Converts most Cloud instances to nixos automatically.
-        Since hardly any cloud providers have nixos images, we use nixos-infect
-        to recycle an existing OS into a nixos box.
-    """
-    sudo("test -e nixos-in-place || " +
-         "git clone https://github.com/jeaye/nixos-in-place.git")
-    with settings(warn_only=True):
-        sudo("cd nixos-in-place && bash -c 'echo yy | " +
-             "REPLY=y ./install -g /dev/xvda' && reboot")
 
 
 @task
