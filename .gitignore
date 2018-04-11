@@ -21,3 +21,4 @@ tags
 .terraform/
 .pytest_cache
 main.tf
+get-pip.py
