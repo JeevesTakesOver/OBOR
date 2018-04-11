@@ -123,10 +123,22 @@ def config_json(config_yaml):
 
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
-def update(rsync='yes', nix_gc='yes', nix_release='17.03', switch='no'):
+def update(
+        host_dir=None,
+        config_dir='config/',
+        rsync='yes',
+        nix_gc='yes',
+        nix_release='17.03',
+        switch='no'
+):  # pylint:  disable=too-many-arguments
     """ deploy or update OBOR on a host """
+
     log_green('running update on {}'.format(env.host_string))
-    local('rm -f {}/result'.format(env.host_string))
+
+    if not host_dir:
+        host_dir = env.host_string
+
+    local('rm -f {}/result'.format(host_dir))
 
     yes_answers = ['yes', 'y', 'YES', 'Y', 'True', 'true']
 
@@ -137,7 +149,7 @@ def update(rsync='yes', nix_gc='yes', nix_release='17.03', switch='no'):
         ):
             rsync_project(
                 remote_dir='/etc/nixos/',
-                local_dir=env.host_string + '/',
+                local_dir=host_dir + '/',
                 delete=True,
                 extra_opts='--rsync-path="sudo rsync"',
                 default_opts='-chavzPq',
@@ -153,9 +165,10 @@ def update(rsync='yes', nix_gc='yes', nix_release='17.03', switch='no'):
                 ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
                 '-o StrictHostKeyChecking=no '
             )
+# this needs to be paramtes
             rsync_project(
-                remote_dir='/etc/nixos/config',
-                local_dir='config/',
+                remote_dir='/etc/nixos/config/',
+                local_dir=config_dir,
                 delete=True,
                 extra_opts='--rsync-path="sudo rsync"',
                 default_opts='-chavzPq',
