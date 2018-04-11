@@ -37,13 +37,13 @@ from bookshelf.api_v2.logging_helpers import (log_green, log_red)
 
 @timecall(immediate=True)
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
-def install_terraform():
+def install_terraform(version='0.11.2'):
     """ Installs Terraform locally """
 
-    local('wget -q -c https://releases.hashicorp.com/terraform/0.11.2/'
-          'terraform_0.11.2_linux_amd64.zip')
+    local('wget -q -c https://releases.hashicorp.com/terraform/{}/'
+          'terraform_{}_linux_amd64.zip'.format(version, version))
     local('rm -f terraform')
-    local('unzip -qq terraform_0.11.2_linux_amd64.zip')
+    local('unzip -qq terraform_{}_linux_amd64.zip'.format(version))
     local('chmod +x terraform')
 
 
