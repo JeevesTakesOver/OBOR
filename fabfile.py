@@ -207,7 +207,6 @@ def update(rsync='yes', nix_gc='yes', nix_release='17.03', switch='no'):
              'jdk-8u161-linux-x64.tar.gz')
         sudo('nix-store --add-fixed sha256 jdk-8u161-linux-x64.tar.gz')
 
-    @retry(stop_max_attempt_number=3, wait_fixed=60000)
     def _nixos_rebuild():
         """ wrapper for nixos-rebuild """
         with settings(
@@ -216,7 +215,6 @@ def update(rsync='yes', nix_gc='yes', nix_release='17.03', switch='no'):
             sudo('nixos-rebuild build -Q')
             sudo('nixos-rebuild boot -Q')
 
-    @retry(stop_max_attempt_number=3, wait_fixed=60000)
     def _nixos_switch():
         """ wrapper for nixos-rebuild """
         with settings(
