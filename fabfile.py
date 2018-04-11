@@ -50,9 +50,9 @@ def install_terraform(version='0.11.2'):
 @task
 @timecall(immediate=True)
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
-def step_01_create_hosts():
+def step_01_create_hosts(tf_j2_template='templates/main.tf.j2'):
     """ provisions new EC2 instances """
-    cfg = Template(open('templates/main.tf.j2').read())
+    cfg = Template(open(tf_j2_template).read())
 
     # we need to read the json to get the CFG values
     # and we also need to set them, as they won't be set on OBOR configs
