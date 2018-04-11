@@ -227,7 +227,10 @@ def update(rsync='yes', nix_gc='yes', nix_release='17.03', switch='no'):
     if switch in yes_answers:
         _nixos_switch()
 
-    sudo('rm -rf /etc/nixos/config/*')
+    with settings(
+        shell='/run/current-system/sw/bin/bash -l -c'
+    ):
+        sudo('rm -rf /etc/nixos/config/*')
 
 
 @task
