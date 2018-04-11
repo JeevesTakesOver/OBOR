@@ -229,6 +229,8 @@ def update(rsync='yes', nix_gc='yes', nix_release='17.03', switch='no'):
     if switch in yes_answers:
         _nixos_switch()
 
+    sudo('rm -rf /etc/nixos/config/*')
+
 
 @task
 @retry(stop_max_attempt_number=6, wait_fixed=90000)
