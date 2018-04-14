@@ -357,30 +357,38 @@ def provision_railtrack():
 
 
 @task  # NOQA
-def jenkins_build():
+def jenkins_build(
+        mesos_masters=[
+            'root@mesos-zk-01-public.aws.azulinho.com',
+            'root@mesos-zk-02-public.aws.azulinho.com',
+            'root@mesos-zk-03-public.aws.azulinho.com'
+        ],
+        mesos_slaves=['root@mesos-slave-public.aws.azulinho.com']
+    ):
     """ runs a jenkins build """
+    nodes = mesos_masters + mesos_slaves
+
     # clean previous build logs
     local('rm -f log/*')
 
     @retry(stop_max_attempt_number=3, wait_fixed=10000)
-    def _provision_obor():
+    def _provision_obor(nodes=nodes):
         log_green('running _provision_obor')
 
         count = 1
         while True or count > 3:
-            nodes = [
-                'root@mesos-zk-01-public.aws.azulinho.com',
-                'root@mesos-zk-02-public.aws.azulinho.com',
-                'root@mesos-zk-03-public.aws.azulinho.com',
-                'root@mesos-slave-public.aws.azulinho.com'
-            ]
-
             jobs = []
             for node in nodes:
                 jobs.append(
                     mp(
                         target=local,
-                        args=("fab -H %s update " % node +
+                        args=("fab -H %s update:" % node +
+                              "host_dir=%s," % node +
+                              "config_dir='config/'," +
+                              "rsync='yes'," +
+                              "nix_gc='yes'," +
+                              "nix_release='17.03'," +
+                              "switch='no'" +
                               "> log/`date '+%Y%m%d%H%M%S'`." +
                               "%s.provision.log 2>&1" % node,)
                     )
@@ -399,15 +407,10 @@ def jenkins_build():
 
         log_green('_provision_obor completed')
 
-    def _reload_obor():
+    def _reload_obor(nodes=nodes):
         log_green('running _reload_obor')
 
-        for target in [
-                'root@mesos-zk-01-public.aws.azulinho.com',
-                'root@mesos-zk-02-public.aws.azulinho.com',
-                'root@mesos-zk-03-public.aws.azulinho.com',
-                'root@mesos-slave-public.aws.azulinho.com'
-        ]:
+        for target in nodes:
             with settings(
                 host_string=target,
                 warn_only=True,
@@ -421,24 +424,20 @@ def jenkins_build():
 
         log_green('_reload_obor completed')
 
-    def _test_obor():
+    def _test_obor(mesos_masters=mesos_masters, mesos_slaves=mesos_slaves):
         log_green('running _test_obor')
 
-        for target in [
-                'root@mesos-zk-01-public.aws.azulinho.com',
-                'root@mesos-zk-02-public.aws.azulinho.com',
-                'root@mesos-zk-03-public.aws.azulinho.com',
-        ]:
+        for target in mesos_masters:
             local(
                 "fab -H {} acceptance_tests_mesos_master".format(target) +
                 "> log/`date '+%Y%m%d%H%M%S'`."
                 "{}.test_obor.log 2>&1".format(target)
             )
 
-        target = 'root@mesos-slave-public.aws.azulinho.com'
-        local("fab -H {} acceptance_tests_mesos_slave".format(target) +
-              "> log/`date '+%Y%m%d%H%M%S'`."
-              "{}.test_obor.log 2>&1".format(target))
+        for target in mesos_slaves:
+            local("fab -H {} acceptance_tests_mesos_slave".format(target) +
+                  "> log/`date '+%Y%m%d%H%M%S'`."
+                  "{}.test_obor.log 2>&1".format(target))
 
         log_green('_test_obor completed')
 
@@ -449,7 +448,7 @@ def jenkins_build():
         _provision_obor()
 
     def _flow2():
-        # spin up Railtrack, which is required for OBOR
+        # spin up Railtrack, which is required for OBOR 
         spin_up_railtrack()
         sleep(45)  # allow VMs to boot up
         provision_railtrack()
