@@ -128,7 +128,7 @@ def update(
         config_dir='config/',
         rsync='yes',
         nix_gc='yes',
-        nix_release='17.09',
+        nix_release='18.03',
         switch='no',
 ):  # pylint:  disable=too-many-arguments
     """ deploy or update OBOR on a host """
@@ -387,7 +387,7 @@ def jenkins_build(
                               "config_dir='config/'," +
                               "rsync='yes'," +
                               "nix_gc='yes'," +
-                              "nix_release='17.09'," +
+                              "nix_release='18.03'," +
                               "switch='no'" +
                               "> log/`date '+%Y%m%d%H%M%S'`." +
                               "%s.provision.log 2>&1" % node,)
