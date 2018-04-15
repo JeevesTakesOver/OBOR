@@ -5,7 +5,6 @@ with lib;
 let
 
   cfg = config.services.OBORmarathon;
-  OBORmarathon = pkgs.callPackage ../packages/OBORmarathon/default.nix {};
 
 in {
 
@@ -87,7 +86,7 @@ in {
       after = [ "network.target" "OBORzookeeper.service" "OBORmesos-master.service" "OBORmesos-slave.service" ];
 
       serviceConfig = {
-        ExecStart = "${OBORmarathon}/bin/marathon --master ${cfg.master} --zk zk://${concatStringsSep "," cfg.zookeeperHosts}/marathon --http_port ${toString cfg.httpPort} ${concatStringsSep " " cfg.extraCmdLineOptions}";
+        ExecStart = "${pkgs.marathon}/bin/marathon --master ${cfg.master} --zk zk://${concatStringsSep "," cfg.zookeeperHosts}/marathon --http_port ${toString cfg.httpPort} ${concatStringsSep " " cfg.extraCmdLineOptions}";
         User = cfg.user;
         Restart = "always";
         RestartSec = "5";
