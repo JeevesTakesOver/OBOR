@@ -5,13 +5,6 @@ with lib;
 let
   cfg = config.services.OBORmesos.slave;
 
-  OBORmesos =  pkgs.callPackage ../packages/OBORmesos/default.nix {
-    sasl = pkgs.cyrus_sasl;
-    inherit (pkgs.pythonPackages) python boto setuptools wrapPython;
-    pythonProtobuf = pkgs.pythonPackages.protobuf2_6;
-    perf = pkgs.linuxPackages.perf;
-  };
-
   mkAttributes =
     attrs: concatStringsSep ";" (mapAttrsToList
                                    (k: v: "${k}:${v}")
@@ -209,7 +202,7 @@ in {
         Restart = "always";
         RestartSec = 5;
         ExecStart = ''
-          ${OBORmesos}/bin/mesos-slave \
+          ${pkgs.mesos}/bin/mesos-slave \
             --containerizers=${containerizersArg} \
             --image_providers=${imageProvidersArg} \
             --image_provisioner_backend=${cfg.imageProvisionerBackend} \

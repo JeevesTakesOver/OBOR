@@ -4,13 +4,6 @@ with lib;
 
 let
   cfg = config.services.OBORmesos.master;
-  OBORmesos =  pkgs.callPackage ../packages/OBORmesos/default.nix {
-    sasl = pkgs.cyrus_sasl;
-    inherit (pkgs.pythonPackages) python boto setuptools wrapPython;
-    pythonProtobuf = pkgs.pythonPackages.protobuf2_6;
-    perf = pkgs.linuxPackages.perf;
-  };
-
 in {
 
   options.services.OBORmesos = {
@@ -107,7 +100,7 @@ in {
       after = [ "network.target" ];
       serviceConfig = {
         ExecStart = ''
-          ${OBORmesos}/bin/mesos-master \
+          ${pkgs.mesos}/bin/mesos-master \
             --ip=${cfg.ip} \
             --port=${toString cfg.port} \
             ${optionalString (cfg.advertiseIp != null) "--advertise_ip=${cfg.advertiseIp}"} \
