@@ -4,7 +4,6 @@ with lib;
 
 let
   cfg = config.services.OBORzookeeper;
-  OBORzookeeper = pkgs.callPackage ../packages/OBORzookeeper {};
   
   zookeeperConfig = ''
     dataDir=${cfg.dataDir}
@@ -121,7 +120,7 @@ in {
         RestartSec = 5;
         ExecStart = ''
           ${pkgs.jre}/bin/java \
-            -cp "${OBORzookeeper}/lib/*:${OBORzookeeper}/${OBORzookeeper.name}.jar:${configDir}" \
+            -cp "${pkgs.zookeeper}/lib/*:${pkgs.zookeeper}/${pkgs.zookeeper.name}.jar:${configDir}" \
             ${toString cfg.extraCmdLineOptions} \
             -Dzookeeper.datadir.autocreate=false \
             ${optionalString cfg.preferIPv4 "-Djava.net.preferIPv4Stack=true"} \
