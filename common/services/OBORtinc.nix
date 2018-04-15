@@ -5,7 +5,6 @@ with lib;
 let
 
   cfg = config.services.OBORtinc;
-  OBORtinc_pre = pkgs.callPackage ../packages/OBORtinc/pre.nix {};
 
 in
 
@@ -89,7 +88,7 @@ in
 
           package = mkOption {
             type = types.package;
-            default = OBORtinc_pre;
+            default = pkgs.tinc_pre;
             defaultText = "pkgs.tinc_pre";
             description = ''
               The package to use for the tinc daemon's binary.
