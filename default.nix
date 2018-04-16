@@ -8,7 +8,6 @@ stdenv.mkDerivation {
     #
     python27Full
     python27Packages.virtualenv
-    python27Packages.pip
     # the following packages are related to the dependencies of your python
     # project.
     # In this particular example the python modules listed in the
@@ -37,7 +36,7 @@ stdenv.mkDerivation {
   . venv/bin/activate
   export PATH=$VENV/bin:$PATH
   rm -f get-pip.py
-  wget -c https://bootstrap.pypa.io/get-pip.py
+  wget -c -q https://bootstrap.pypa.io/get-pip.py
   venv/bin/python get-pip.py
   venv/bin/pip install --upgrade -r requirements.txt > log/`date '+%Y%m%d%H%M%S'`.pip.install.log 2>&1
   venv/bin/pip install --upgrade -r dev-requirements.txt > log/`date '+%Y%m%d%H%M%S'`.pip.install.dev.log 2>&1
