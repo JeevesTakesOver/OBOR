@@ -243,13 +243,24 @@ with lib;
           {
             "zk": "${cfg.zk_string}",
             "masters": ["${cfg.zk_node01}:5050","${cfg.zk_node02}:5050", "${cfg.zk_node03}:5050"],
-            "refreshSeconds": 60,
-            "ttl": 60,
+            "refreshSeconds": 5,
+            "ttl": 5,
             "domain": "mesos",
             "port": 9153,
             "resolvers": ["${cfg.dns_resolver1}","${cfg.dns_resolver2}"],
             "timeout": 5, 
-            "listener": "${cfg.tinc_ip_address}"
+            "listener": "${cfg.tinc_ip_address}",
+            "httpon": true,
+            "dnson": true,
+            "httpport": 8123,
+            "externalon": true,
+            "SOAMname": "ns1.mesos",
+            "SOARname": "root.ns1.mesos",
+            "SOARefresh": 60,
+            "SOARetry":   600,
+            "SOAExpire":  86400,
+            "SOAMinttl": 60,
+            "IPSources": ["mesos", "host"]
           }
         '';
       }; # close mesos-dns block
