@@ -88,7 +88,7 @@
     ngrep
     openssh
     openssl_1_1_0
-    oraclejdk8
+    openjdk
     powerline-fonts
     python27Full
     python27Packages.ipython
