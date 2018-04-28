@@ -45,7 +45,7 @@ in
 	  "SOARetry":   600,
 	  "SOAExpire":  86400,
 	  "SOAMinttl": 60,
-	  "IPSources": ["netinfo", "mesos", "host"]
+	  "IPSources": ["mesos", "host"]
 	}
         '';
         type = types.lines;
