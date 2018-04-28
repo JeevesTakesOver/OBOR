@@ -8,7 +8,7 @@ let
   OBORmesos-dns = pkgs.callPackage ../packages/OBORmesos-dns/default.nix {};
 
   configFile = pkgs.writeText "mesos-dns.conf" ''
-	${ cfg.config_block }
+  ${ cfg.config_block }
   '';
 
 in
@@ -25,28 +25,28 @@ in
 
       config_block = mkOption {
         default = ''
-	{
-	  "zk": "zk://127.0.0.1:2181/mesos",
-	  "masters": ["127.0.0.1:5050"],
-	  "refreshSeconds": 60,
-	  "ttl": 60,
-	  "domain": "mesos",
-	  "port": 53,
-	  "resolvers": ["8.8.8.8", "8.8.4.4"],
-	  "timeout": 5, 
-	  "httpon": true,
-	  "dnson": true,
-	  "httpport": 8123,
-	  "externalon": true,
-	  "listener": "0.0.0.0",
-	  "SOAMname": "ns1.mesos",
-	  "SOARname": "root.ns1.mesos",
-	  "SOARefresh": 60,
-	  "SOARetry":   600,
-	  "SOAExpire":  86400,
-	  "SOAMinttl": 60,
-	  "IPSources": ["mesos", "host"]
-	}
+  {
+    "zk": "zk://127.0.0.1:2181/mesos",
+    "masters": ["127.0.0.1:5050"],
+    "refreshSeconds": 60,
+    "ttl": 60,
+    "domain": "mesos",
+    "port": 53,
+    "resolvers": ["8.8.8.8", "8.8.4.4"],
+    "timeout": 5, 
+    "httpon": true,
+    "dnson": true,
+    "httpport": 8123,
+    "externalon": true,
+    "listener": "0.0.0.0",
+    "SOAMname": "ns1.mesos",
+    "SOARname": "root.ns1.mesos",
+    "SOARefresh": 60,
+    "SOARetry":   600,
+    "SOAExpire":  86400,
+    "SOAMinttl": 60,
+    "IPSources": ["mesos", "host"]
+  }
         '';
         type = types.lines;
         description = "config.json block";
