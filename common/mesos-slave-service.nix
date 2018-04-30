@@ -310,6 +310,7 @@ with lib;
         ];
 
       resolvconfOptions = [
+        "search ${cfg.tinc_domain}"
         "attempts:1" 
         "timeout:1" 
       ];

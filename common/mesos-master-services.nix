@@ -409,6 +409,7 @@ with lib;
         "resolv.conf" = {
           mode = "0644";
           text = ''
+            search ${cfg.tinc_domain}
             nameserver 127.0.0.1 
             options attempts:1
             options timeout:1
