@@ -270,6 +270,35 @@ with lib;
           '';
         }; #close tinc/core-vpn/dhclient.conf block
 
+        # desperate attempt to stop resolvconf from updating /etc/resolv.conf
+        "resolvconf.conf" = {
+          mode = "0644";
+          text = ''
+            resolv_conf=/etc/resolv.conf.disabled
+          '';
+        };
+
+        # now we can set our own /etc/resolv.conf
+        # DNSmasq listens on mesos-zk-01,02,3 and probagates DNS accross the
+        # different services.
+        # we query the TINC based DNS servers first.
+        # these may not be available at boot time
+        # or during the initial provisioning of the host
+        # so to avoid DNS errors, we add the Google DNS servers too.
+        # requests will try every DNS server in the list
+        "resolv.conf" = {
+          mode = "0644";
+          text = ''
+            search ${cfg.tinc_domain}
+            nameserver ${cfg.dns_resolver1}
+            nameserver ${cfg.dns_resolver2} 
+            nameserver 8.8.8.8
+            options attempts:1
+            options timeout:1
+            options rotate
+          '';
+        };
+
       }; # close etc block
     }; # close environment block
 
@@ -294,28 +323,6 @@ with lib;
     time = {
       timeZone = "${cfg.timezone}"; # make sure all logging agrees on a timezone
     }; # close time block
-
-    networking = {
-      # DNSmasq listens on mesos-zk-01,02,3 and probagates DNS accross the
-      # different services.
-      # we query the TINC based DNS servers first.
-      # these may not be available at boot time
-      # or during the initial provisioning of the host
-      # so to avoid DNS errors, we add the Google DNS servers too.
-      # requests will try every DNS server in the list
-      nameservers = [ 
-        "${cfg.dns_resolver1}" 
-        "${cfg.dns_resolver2}" 
-        "8.8.8.8"
-        ];
-
-      resolvconfOptions = [
-        "search ${cfg.tinc_domain}"
-        "attempts:1" 
-        "timeout:1" 
-      ];
-    }; # close networking block
-
 
     # our mesos frameworks should be configured to use this user
     users.extraUsers."${cfg.mesosUser}" = {
