@@ -296,6 +296,23 @@ with lib;
             #!/run/current-system/sw/bin/bash
             export PATH=$PATH:/run/current-system/sw/bin/:/run/wrappers/bin/
 
+            function retry {
+              local retry_max=$1
+              shift
+
+              local count=$retry_max
+              while [ $count -gt 0 ]; do
+                "$@" && break
+                count=$(($count - 1))
+                sleep 1
+              done
+
+              [ $count -eq 0 ] && {
+                return 1
+              }
+              return 0
+            }
+
             function tinc_ip_address() {
               ifconfig tinc.core-vpn | grep -E  'inet [0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.[0-9]{1,3}.*netmask' | awk '{ print $2 }' | head -1 | tr -d "\n"
             }
