@@ -241,8 +241,8 @@ with lib;
             }
 
             while true; do
-              check_tinc_vpn || (systemctl restart tinc.core-vpn;  logger -t obor-watchdog 'restarting tinc.core-vpn')
-              check_dockerd || (systemctl restart docker;  logger -t obor-watchdog 'restarting docker')
+              retry 5 check_tinc_vpn || (systemctl restart tinc.core-vpn;  logger -t obor-watchdog 'restarting tinc.core-vpn')
+              retry 5 check_dockerd || (systemctl restart docker;  logger -t obor-watchdog 'restarting docker')
 
               sleep 60
             done
