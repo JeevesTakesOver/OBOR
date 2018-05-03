@@ -370,7 +370,7 @@ def jenkins_build(
                               "host_dir=%s," % node +
                               "config_dir='config/'," +
                               "rsync='yes'," +
-                              "nix_gc='yes'," +
+                              "nix_gc='no'," +
                               "nix_release='18.03'," +
                               "switch='no'" +
                               "> log/`date '+%Y%m%d%H%M%S'`." +
