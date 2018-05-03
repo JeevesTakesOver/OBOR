@@ -110,6 +110,12 @@ with lib;
         type = with types; str;
         description = "Timezone for all our hosts";
       };
+
+      consul_other_nodes = mkOption {
+        default = [];
+        type = with types; array;
+        description = "list of other consul nodes";
+      };
     };
   }; # close options
 
@@ -208,6 +214,12 @@ with lib;
           listenAddr = "${cfg.tinc_ip_address}:9000";
           consulAddr = "${cfg.tinc_ip_address}:8500";
         };
+        extraConfig = {
+          server = true;
+          bootstrap_expect = 3;
+          retry_join = "${cfg.consul_other_nodes}";
+        };
+
       }; # close consul
 
 

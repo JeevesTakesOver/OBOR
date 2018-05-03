@@ -73,6 +73,7 @@ in {
       zookeeper_id = d.my.zookeeper_id;
       dns_resolver1 = "${d.common.mesos_dns_resolver1}";
       dns_resolver2 = "${d.common.mesos_dns_resolver2}";
+      consul_other_nodes = "${d.my.consul_other_nodes}";
     };
     dbus.enable    = true;
   };
