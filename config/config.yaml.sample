@@ -94,6 +94,8 @@ common: &common
   # as part of the OBOR deployment (to be changed)
   elasticsearch_url: 'http://10.254.0.19:9200' # elasticsearch endpoint
 
+  # list of all consul nodes
+  consul_nodes: ['10.254.0.11:8301', '10.254.0.12:8301', '10.254.0.13:8301']
 
   #---------------------------------------------------------------------------
   # Railtrack nodes settings below:
@@ -174,6 +176,7 @@ mesos_masters:
     tinc_hostname: 'mesos_zk_01' # Railtrack tinc hostname to use
     public_interface: 'enp0s8'
     zookeeper_id: 0 # zookeeper id
+    consul_other_nodes: ['10.254.0.12:8301', '10.254.0.13:8301']
 
     # TINC public key (these should be commited to 'menagerie')
     tinc_public_key: |
@@ -226,6 +229,7 @@ mesos_masters:
     tinc_hostname: 'mesos_zk_02'
     public_interface: 'enp0s8'
     zookeeper_id: 1 
+    consul_other_nodes: ['10.254.0.11:8301', '10.254.0.13:8301']
 
     tinc_public_key: |
       -----BEGIN RSA PUBLIC KEY-----
@@ -276,6 +280,7 @@ mesos_masters:
     tinc_hostname: 'mesos_zk_03'
     public_interface: 'enp0s8'
     zookeeper_id: 2 
+    consul_other_nodes: ['10.254.0.11:8301', '10.254.0.12:8301']
 
     tinc_public_key: |
       -----BEGIN RSA PUBLIC KEY-----

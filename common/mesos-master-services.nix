@@ -110,6 +110,12 @@ with lib;
         type = with types; str;
         description = "Timezone for all our hosts";
       };
+
+      consul_other_nodes = mkOption {
+        default = [];
+        type = with types; listOf str;
+        description = "list of other consul nodes";
+      };
     };
   }; # close options
 
@@ -208,6 +214,12 @@ with lib;
           listenAddr = "${cfg.tinc_ip_address}:9000";
           consulAddr = "${cfg.tinc_ip_address}:8500";
         };
+        extraConfig = {
+          server = true;
+          bootstrap_expect = 3;
+          retry_join = cfg.consul_other_nodes;
+        };
+
       }; # close consul
 
 
@@ -354,6 +366,12 @@ with lib;
               return $?
             }
 
+            function check_consul() {
+              netstat -nltp | grep '.*:8300 .*/consul' > /dev/null 2>&1
+              return $?
+            }
+
+
             while true; do
               retry 5 check_tinc_vpn || (systemctl restart OBORtinc.core-vpn; logger -t obor-watchdog 'restarting OBORtinc.core-vpn')
               retry 5 check_dockerd || (systemctl restart docker; logger -t obor-watchdog 'restarting docker')
@@ -362,6 +380,7 @@ with lib;
               retry 5 check_zookeeper || (systemctl restart OBORzookeeper; logger -t obor-watchdog 'restarting OBORzookeeper')
               retry 5 check_marathon || (systemctl restart OBORmarathon; logger -t obor-watchdog 'restarting OBORmarathon')
               retry 5 check_marathon_lb || (systemctl restart OBORmarathon-lb ; logger -t obor-watchdog 'restarting OBORmarathon-lb')
+              retry 5 check_consul || (systemctl restart consul ; logger -t obor-watchdog 'restarting consul')
 
               sleep 60
             done

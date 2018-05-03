@@ -75,6 +75,7 @@ in {
       dns_resolver1 = "${d.common.dns_nameserver_01}";
       dns_resolver2 = "${d.common.dns_nameserver_02}";
       dns_resolver3 = "${d.common.dns_nameserver_03}"; 
+      consul_nodes = d.common.consul_nodes; 
     # we have a race condition on our vagrant box when we enable the
     # virtualbox services. Our Vagrant VM uses 192.168.56.204 for its
     # vagrant private ip address (which is the host host-only vboxnet0).

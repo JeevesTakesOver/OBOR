@@ -135,7 +135,13 @@ with lib;
         description = "Enable VirtualBox Host services?";
       };
 
+      consul_nodes = mkOption {
+        default = [];
+        type = with types; listOf str;
+        description = "list of consul nodes";
+      };
     };
+
   }; # close options
 
 
@@ -174,6 +180,10 @@ with lib;
         alerts = {
           listenAddr = "${cfg.tinc_ip_address}:9000";
           consulAddr = "${cfg.tinc_ip_address}:8500";
+        };
+        extraConfig = {
+          server = false;
+          retry_join = cfg.consul_nodes;
         };
       }; # close consul
 
@@ -240,9 +250,15 @@ with lib;
               return $?
             }
 
+            function check_consul() {
+              netstat -nltp | grep '.*:8301 .*/consul' > /dev/null 2>&1
+              return $?
+            }
+
             while true; do
               retry 5 check_tinc_vpn || (systemctl restart tinc.core-vpn;  logger -t obor-watchdog 'restarting tinc.core-vpn')
               retry 5 check_dockerd || (systemctl restart docker;  logger -t obor-watchdog 'restarting docker')
+              retry 5 check_consul || (systemctl restart consul ; logger -t obor-watchdog 'restarting consul')
 
               sleep 60
             done

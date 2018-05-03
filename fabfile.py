@@ -235,7 +235,7 @@ def acceptance_tests_mesos_slave():
     local(
         "testinfra --connection=ssh --ssh-config=ssh.config "
         "-v -n 9 --hosts='{}' "
-        "-m 'mesos_slave or tincd or docker or dns_resolution' "
+        "-m 'mesos_slave or tincd or docker or dns_resolution or consul' "
         "tests".format(env.host_string)
     )
 
