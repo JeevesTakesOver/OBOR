@@ -278,6 +278,8 @@ with lib;
         '';
       }; # close mesos-dns block
 
+      # enable mesos-consul with default options
+      OBORmesos-consul.enable = true; 
 
       logstash = {
         listenAddress = "${cfg.tinc_ip_address}";
