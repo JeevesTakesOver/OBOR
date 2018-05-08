@@ -374,6 +374,11 @@ with lib;
               return $?
             }
 
+            function check_mesos_consul() {
+              docker ps | grep mesos-consul | grep Up> /dev/null 2>&1
+              return $?
+            }
+
 
             while true; do
               retry 5 check_tinc_vpn || (systemctl restart OBORtinc.core-vpn; logger -t obor-watchdog 'restarting OBORtinc.core-vpn')
@@ -384,6 +389,7 @@ with lib;
               retry 5 check_marathon || (systemctl restart OBORmarathon; logger -t obor-watchdog 'restarting OBORmarathon')
               retry 5 check_marathon_lb || (systemctl restart OBORmarathon-lb ; logger -t obor-watchdog 'restarting OBORmarathon-lb')
               retry 5 check_consul || (systemctl restart consul ; logger -t obor-watchdog 'restarting consul')
+              retry 5 check_mesos_consul || (systemctl restart OBORmesos-consul ; logger -t obor-watchdog 'restarting OBORmesos-consul')
 
               sleep 60
             done
