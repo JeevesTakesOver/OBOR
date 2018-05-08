@@ -231,7 +231,8 @@ with lib;
         extraConfig = ''
           # .mesos is served by the mesos-dns listening on the tinc interface
           server=/mesos/${cfg.tinc_ip_address}#9153
-          server=/kubernetes.io/${cfg.tinc_ip_address}#7153
+          server=/kubernetes/${cfg.tinc_ip_address}#7153
+          server=/consul/${cfg.tinc_ip_address}#8600
           server=/${cfg.tinc_domain}/${cfg.dns_resolver1}
           server=/${cfg.tinc_domain}/${cfg.dns_resolver2}
           listen-address=0.0.0.0
