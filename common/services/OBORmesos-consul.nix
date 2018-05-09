@@ -38,7 +38,7 @@ in {
       after = [ "network.target" "OBORzookeeper.service" "OBORmesos-master.service" "OBORmesos-slave.service" "OBORmarathon.service" "docker.service" ];
 
       serviceConfig = {
-        ExecStart = "${pkgs.docker}/bin/docker run ciscocloud/mesos-consul:v0.4.0 --zk=${ cfg.zkConnectionString } ";
+        ExecStart = "${pkgs.docker}/bin/docker run --net=host ciscocloud/mesos-consul:v0.4.0 --mesos-ip-order=mesos,host --zk=${ cfg.zkConnectionString } ";
         Restart = "always";
         RestartSec = "5";
       };
