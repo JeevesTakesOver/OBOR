@@ -135,10 +135,10 @@ with lib;
         description = "Enable VirtualBox Host services?";
       };
 
-      consul_nodes = mkOption {
-        default = [];
-        type = with types; listOf str;
-        description = "list of consul nodes";
+      consul_other_node = mkOption {
+        default = "";
+        type = with types; str;
+        description = "other consul node";
       };
     };
 
@@ -176,7 +176,7 @@ with lib;
         "-advertise=${cfg.tinc_interface} " + 
         "-bind=${cfg.tinc_interface} " + 
         "-client=${cfg.tinc_interface} " +
-        "-retry-join=${cfg.consul_nodes}";
+        "-retry-join=${cfg.consul_other_node}";
       }; # close consul
 
       # enable traefik with default params

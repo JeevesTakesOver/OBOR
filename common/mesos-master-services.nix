@@ -111,10 +111,10 @@ with lib;
         description = "Timezone for all our hosts";
       };
 
-      consul_other_nodes = mkOption {
-        default = [];
-        type = with types; listOf str;
-        description = "list of other consul nodes";
+      consul_other_node = mkOption {
+        default = "";
+        type = with types; str;
+        description = "a second consul node";
       };
     };
   }; # close options
@@ -209,7 +209,7 @@ with lib;
         "-advertise=${cfg.tinc_interface} " + 
         "-bind=${cfg.tinc_interface} " + 
         "-client=${cfg.tinc_interface} " +
-        "-retry-join=${cfg.consul_extra_nodes} " + 
+        "-retry-join=${cfg.consul_other_node} " + 
         "--botstrap-expect=3";
       }; # close consul
 
