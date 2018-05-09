@@ -35,7 +35,7 @@ in {
     systemd.services.OBORmesos-consul = {
       description = "OBORmesos-consul Service";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "OBORzookeeper.service" "OBORmesos-master.service" "OBORmesos-slave.service" "OBORmarathon.service" "docker.service" ];
+      after = [ "network.target" "OBORconsul" "OBORzookeeper.service" "OBORmesos-master.service" "OBORmarathon.service" "docker.service" ];
 
       serviceConfig = {
         ExecStart = "${pkgs.docker}/bin/docker run --net=host ciscocloud/mesos-consul:v0.4.0 --mesos-ip-order=mesos,host --zk=${ cfg.zkConnectionString } ";

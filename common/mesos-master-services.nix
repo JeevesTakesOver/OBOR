@@ -202,28 +202,16 @@ with lib;
       }; # close marathon-lb block
 
 
-      consul = {
+      OBORconsul = {
         enable = true;
-        webUi = false;
-        forceIpv4 = true;
-        interface = {
-          advertise = "${cfg.tinc_interface}";
-          bind = "${cfg.tinc_interface}";
-          client = "${cfg.tinc_ip_address}";
-        };
-        alerts = {
-          listenAddr = "${cfg.tinc_ip_address}:9000";
-          consulAddr = "${cfg.tinc_ip_address}:8500";
-        };
-        extraConfig = {
-          server = true;
-          bootstrap_expect = 3;
-          retry_join = cfg.consul_other_nodes;
-        };
-
+        consulAgentFlags = " " + 
+        "-server " +
+        "-advertise=${cfg.tinc_interface} " + 
+        "-bind=${cfg.tinc_interface} " + 
+        "-client=${cfg.tinc_interface} " +
+        "-retry-join=${cfg.consul_extra_nodes} " + 
+        "--botstrap-expect=3";
       }; # close consul
-
-
 
       dnsmasq = {
         enable = true;
@@ -389,7 +377,7 @@ with lib;
               retry 5 check_zookeeper || (systemctl restart OBORzookeeper; logger -t obor-watchdog 'restarting OBORzookeeper')
               retry 5 check_marathon || (systemctl restart OBORmarathon; logger -t obor-watchdog 'restarting OBORmarathon')
               retry 5 check_marathon_lb || (systemctl restart OBORmarathon-lb ; logger -t obor-watchdog 'restarting OBORmarathon-lb')
-              retry 5 check_consul || (systemctl restart consul ; logger -t obor-watchdog 'restarting consul')
+              retry 5 check_consul || (systemctl restart OBORconsul ; logger -t obor-watchdog 'restarting OBORconsul')
               retry 5 check_mesos_consul || (systemctl restart OBORmesos-consul ; logger -t obor-watchdog 'restarting OBORmesos-consul')
 
               sleep 60

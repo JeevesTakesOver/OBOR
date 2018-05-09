@@ -169,25 +169,15 @@ with lib;
         ];
       }; # close mesos-slave
 
-      consul = {
-        enable = true;
-        webUi = false;
-        forceIpv4 = true;
-        interface = {
-          advertise = "${cfg.tinc_interface}";
-          bind = "${cfg.tinc_interface}";
-        };
-        alerts = {
-          listenAddr = "${cfg.tinc_ip_address}:9000";
-          consulAddr = "${cfg.tinc_ip_address}:8500";
-          client = "${cfg.tinc_ip_address}";
-        };
-        extraConfig = {
-          server = false;
-          retry_join = cfg.consul_nodes;
-        };
-      }; # close consul
 
+      OBORconsul = {
+        enable = true;
+        consulAgentFlags = " " +
+        "-advertise=${cfg.tinc_interface} " + 
+        "-bind=${cfg.tinc_interface} " + 
+        "-client=${cfg.tinc_interface} " +
+        "-retry-join=${cfg.consul_nodes}";
+      }; # close consul
 
       logstash = {
         listenAddress = "$cfg.tinc_ip_address}";
@@ -259,7 +249,7 @@ with lib;
             while true; do
               retry 5 check_tinc_vpn || (systemctl restart tinc.core-vpn;  logger -t obor-watchdog 'restarting tinc.core-vpn')
               retry 5 check_dockerd || (systemctl restart docker;  logger -t obor-watchdog 'restarting docker')
-              retry 5 check_consul || (systemctl restart consul ; logger -t obor-watchdog 'restarting consul')
+              retry 5 check_consul || (systemctl restart OBORconsul ; logger -t obor-watchdog 'restarting OBORconsul')
 
               sleep 60
             done

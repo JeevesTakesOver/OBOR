@@ -25,6 +25,7 @@ in
     ./services/OBORmarathon.nix
     ./services/OBORmarathon-lb.nix
     ./services/OBORmesos-consul.nix
+    ./services/OBORconsul.nix
   ];
 
   system.stateVersion = "17.03";

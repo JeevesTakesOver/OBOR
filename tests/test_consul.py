@@ -2,17 +2,17 @@ import pytest
 
 @pytest.mark.consul
 def test_consul_is_running(Command):
-    cmd = Command('sudo systemctl is-active consul')
+    cmd = Command('sudo systemctl is-active OBORconsul')
     if cmd.rc != 0:
         raise AssertionError()
 
-    cmd = Command('sudo systemctl status consul')
+    cmd = Command('sudo systemctl status OBORconsul')
     if cmd.rc != 0:
         raise AssertionError()
 
 @pytest.mark.consul
 def test_consul_is_enabled(Command):
-    cmd = Command('sudo systemctl is-enabled consul')
+    cmd = Command('sudo systemctl is-enabled OBORconsul')
     if cmd.rc != 0:
         raise AssertionError()
 
