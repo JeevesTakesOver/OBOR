@@ -349,7 +349,8 @@ def jenkins_build(
             'root@mesos-zk-02-public.aws.azulinho.com',
             'root@mesos-zk-03-public.aws.azulinho.com'
         ],
-        mesos_slaves=['root@mesos-slave-public.aws.azulinho.com']
+        mesos_slaves=['root@mesos-slave-public.aws.azulinho.com'],
+        cleanup=True
     ):
     """ runs a jenkins build """
     nodes = mesos_masters + mesos_slaves
@@ -458,10 +459,12 @@ def jenkins_build(
         _test_obor()
 
         # and now destroy Railtrack and mesos VMs
-        clean()
+        if cleanup in [True, 'yes', 'y', 'Y', 'YES']:
+            clean()
     except:  # noqa: E722 pylint: disable=bare-except
         log_red("jenkins_build() FAILED, aborting...")
-        clean()
+        if cleanup in [True, 'yes', 'y', 'Y', 'YES']:
+            clean()
         sys.exit(1)
 
 
