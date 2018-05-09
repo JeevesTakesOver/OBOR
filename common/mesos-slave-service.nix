@@ -179,6 +179,9 @@ with lib;
         "-retry-join=${cfg.consul_nodes}";
       }; # close consul
 
+      # enable traefik with default params
+      OBORtraefik.enable = true;
+
       logstash = {
         listenAddress = "$cfg.tinc_ip_address}";
       }; # close logstash
@@ -246,10 +249,16 @@ with lib;
               return $?
             }
 
+            function check_traefik() {
+              netstat -nltp | grep '.*:8081 .*/traefik' > /dev/null 2>&1
+              return $?
+            }
+
             while true; do
               retry 5 check_tinc_vpn || (systemctl restart tinc.core-vpn;  logger -t obor-watchdog 'restarting tinc.core-vpn')
               retry 5 check_dockerd || (systemctl restart docker;  logger -t obor-watchdog 'restarting docker')
               retry 5 check_consul || (systemctl restart OBORconsul ; logger -t obor-watchdog 'restarting OBORconsul')
+              retry 5 check_traefik || (systemctl restart OBORtraefik ; logger -t obor-watchdog 'restarting OBORtraefik')
 
               sleep 60
             done
