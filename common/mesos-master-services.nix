@@ -209,6 +209,7 @@ with lib;
         interface = {
           advertise = "${cfg.tinc_interface}";
           bind = "${cfg.tinc_interface}";
+          client = "${cfg.tinc_ip_address}";
         };
         alerts = {
           listenAddr = "${cfg.tinc_ip_address}:9000";

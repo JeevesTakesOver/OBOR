@@ -180,6 +180,7 @@ with lib;
         alerts = {
           listenAddr = "${cfg.tinc_ip_address}:9000";
           consulAddr = "${cfg.tinc_ip_address}:8500";
+          client = "${cfg.tinc_ip_address}";
         };
         extraConfig = {
           server = false;
