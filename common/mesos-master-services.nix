@@ -229,12 +229,12 @@ with lib;
         resolveLocalQueries = true;
         servers = [ "8.8.8.8" "8.8.4.4" ];
         extraConfig = ''
-          # .mesos is served by the mesos-dns listening on the tinc interface
-          server=/mesos/${cfg.tinc_ip_address}#9153
-          server=/kubernetes/${cfg.tinc_ip_address}#7153
-          server=/consul/${cfg.tinc_ip_address}#8600
           server=/${cfg.tinc_domain}/${cfg.dns_resolver1}
           server=/${cfg.tinc_domain}/${cfg.dns_resolver2}
+          # .mesos is served by the mesos-dns listening on the tinc interface
+          server=/mesos/${cfg.tinc_ip_address}#9153
+          server=/consul/127.0.0.1#8600
+          server=/kubernetes/${cfg.tinc_ip_address}#7153
           listen-address=0.0.0.0
           bind-interfaces
           # strict-order slows down queries to tinc-core-vpn by 10ms
