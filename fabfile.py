@@ -358,7 +358,6 @@ def jenkins_build(
     # clean previous build logs
     local('rm -f log/*')
 
-    @retry(stop_max_attempt_number=3, wait_fixed=10000)
     def _provision_obor(nodes=nodes):
         log_green('running _provision_obor')
 
