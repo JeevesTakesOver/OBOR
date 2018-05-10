@@ -251,7 +251,7 @@ with lib;
             }
 
             function check_traefik() {
-              netstat -nltp | grep '.*:8081 .*/traefik' > /dev/null 2>&1
+              netstat -nltp | grep '.*:80 .*/traefik' > /dev/null 2>&1
               return $?
             }
 
