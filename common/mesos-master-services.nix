@@ -222,7 +222,7 @@ with lib;
           server=/${cfg.tinc_domain}/${cfg.dns_resolver2}
           # .mesos is served by the mesos-dns listening on the tinc interface
           server=/mesos/${cfg.tinc_ip_address}#9153
-          server=/consul/127.0.0.1#8600
+          server=/consul/${cfg.tinc_ip_address}#8600
           server=/kubernetes/${cfg.tinc_ip_address}#7153
           listen-address=0.0.0.0
           bind-interfaces
