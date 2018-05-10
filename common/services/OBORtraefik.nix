@@ -37,7 +37,7 @@ in {
       after = [ "network.target" "consul.service" ];
 
       serviceConfig = {
-        ExecStart = "${pkgs.docker}/bin/docker run -p 8080:8080 -p 8081:80 traefik:1.6-alpine ${ cfg.extraCmdLineOptions } ";
+        ExecStart = "${pkgs.docker}/bin/docker run --rm -p 80:80 traefik:1.6-alpine ${ cfg.extraCmdLineOptions } ";
         Restart = "always";
         RestartSec = "5";
       };
