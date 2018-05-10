@@ -206,11 +206,11 @@ with lib;
         enable = true;
         consulAgentFlags = " " + 
         "-server " +
-        "-advertise=${cfg.tinc_interface} " + 
-        "-bind=${cfg.tinc_interface} " + 
-        "-client=${cfg.tinc_interface} " +
+        "-advertise=${cfg.tinc_ip_address} " + 
+        "-bind=${cfg.tinc_ip_address} " + 
+        "-client=${cfg.tinc_ip_address} " +
         "-retry-join=${cfg.consul_other_node} " + 
-        "--botstrap-expect=3";
+        "--bootstrap-expect=3";
       }; # close consul
 
       dnsmasq = {
