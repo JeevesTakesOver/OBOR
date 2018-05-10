@@ -181,6 +181,7 @@ with lib;
 
       # enable traefik with default params
       OBORtraefik.enable = true;
+      OBORtraefik.extraCmdLineOptions = "--consulcatalog.endpoint=${cfg.tinc_ip_address}:8500";
 
       logstash = {
         listenAddress = "$cfg.tinc_ip_address}";
