@@ -30,7 +30,7 @@ in {
 
     # and update /etc/hosts
     extraHosts = ''
-      ${d.my.hostname} ${d.my.public_fqdn}
+      127.0.0.1 ${d.my.hostname} ${d.my.public_fqdn}
       ${d.common.etc_hosts_entries}
     '';
   };
