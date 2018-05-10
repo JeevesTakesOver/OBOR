@@ -3,7 +3,7 @@ testinfra
 pytest-xdist
 pyaml
 httpie
-fabric
+Fabric==1.10.2
 retrying
 pybookshelf
 docker-compose
