@@ -329,7 +329,6 @@ with lib;
             nameserver 8.8.8.8
             options attempts:1
             options timeout:1
-            options rotate
           '';
         };
 
