@@ -37,7 +37,7 @@ in {
       after = [ "network.target" "docker.service" ];
 
       serviceConfig = {
-        ExecStart = "${pkgs.docker}/bin/docker run --net=host -v /var/lib/consul:/consul/data consul:1.0.7 agent ${ cfg.consulAgentFlags } ";
+        ExecStart = "${pkgs.docker}/bin/docker run --rm --net=host -v /var/lib/consul:/consul/data consul:1.0.7 agent ${ cfg.consulAgentFlags } ";
         Restart = "always";
         RestartSec = "5";
       };
