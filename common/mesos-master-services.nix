@@ -231,6 +231,7 @@ with lib;
           no-poll
           no-resolv
           no-negcache
+          no-hosts
           # force our clients to always ask us
           max-ttl=1
           # and make sure our cache is never older than 30 seconds
