@@ -180,7 +180,7 @@ with lib;
 
       # enable traefik with default params
       OBORtraefik.enable = true;
-      OBORtraefik.extraCmdLineOptions = "--consulcatalog.endpoint=${cfg.tinc_ip_address}:8500";
+      OBORtraefik.extraCmdLineOptions = "--consulcatalog.endpoint=${cfg.tinc_ip_address}:8500 --accesslog --logLevel=INFO --consulcatalog.domain=service.consul";
 
       logstash = {
         listenAddress = "$cfg.tinc_ip_address}";
@@ -250,7 +250,7 @@ with lib;
             }
 
             function check_traefik() {
-              netstat -nltp | grep '.*:80 .*/traefik' > /dev/null 2>&1
+              netstat -nltp | grep '.*:80 .*/docker-proxy' > /dev/null 2>&1
               return $?
             }
 
