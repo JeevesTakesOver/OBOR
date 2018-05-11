@@ -112,7 +112,6 @@ with lib;
       };
 
       consul_other_node = mkOption {
-        default = "";
         type = with types; str;
         description = "a second consul node";
       };

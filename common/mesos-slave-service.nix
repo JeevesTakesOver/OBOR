@@ -136,7 +136,6 @@ with lib;
       };
 
       consul_other_node = mkOption {
-        default = "";
         type = with types; str;
         description = "other consul node";
       };
