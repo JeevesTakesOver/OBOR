@@ -334,7 +334,7 @@ with lib;
 
             function check_marathon() {
               ip=`tinc_ip_address`
-              netstat -nltp | grep "$ip:8080" > /dev/null 2>&1
+              curl -L -v http://$ip:8080 | grep "HTTP/1.1 200 OK" > /dev/null 2>&1
               return $?
             }
 
