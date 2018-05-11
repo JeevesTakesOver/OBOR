@@ -235,7 +235,7 @@ with lib;
             }
 
             function check_tinc_vpn() {
-              tinc_ip_address >/dev/null 2>&1
+              ping -c 1 `tinc_ip_address` >/dev/null 2>&1
               return $?
             }
 
