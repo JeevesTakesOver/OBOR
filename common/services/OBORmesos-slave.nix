@@ -228,7 +228,7 @@ in {
         export PATH
         mkdir -m 0700 -p ${cfg.workDir}
         chown ${cfg.mesosUser} ${cfg.workDir}
-        rm -f /var/lib/mesos/slave/meta/slaves/latest
+        rm -f /var/lib/mesos/meta/slaves/latest
       '';
     };
   };
