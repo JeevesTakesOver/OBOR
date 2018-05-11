@@ -368,6 +368,11 @@ with lib;
               return $?
             }
 
+            function check_mesos() {
+              ip=`tinc_ip_address`
+              curl -s -L http://$ip:5050/state > /dev/null 2>&1
+              return $?
+            }
 
             while true; do
               retry 5 check_tinc_vpn || (systemctl restart OBORtinc.core-vpn; logger -t obor-watchdog 'restarting OBORtinc.core-vpn')
@@ -379,6 +384,7 @@ with lib;
               retry 5 check_marathon_lb || (systemctl restart OBORmarathon-lb ; logger -t obor-watchdog 'restarting OBORmarathon-lb')
               retry 5 check_consul || (systemctl restart OBORconsul ; logger -t obor-watchdog 'restarting OBORconsul')
               retry 5 check_mesos_consul || (systemctl restart OBORmesos-consul ; logger -t obor-watchdog 'restarting OBORmesos-consul')
+              retry 5 check_mesos || (systemctl restart OBORmesos-master ; logger -t obor-watchdog 'restarting OBORmesos-master')
 
               sleep 60
             done
