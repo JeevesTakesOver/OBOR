@@ -188,10 +188,6 @@ with lib;
         "-retry-join=${cfg.consul_other_node}";
       }; # close consul
 
-      # enable traefik with default params
-      OBORtraefik.enable = true;
-      OBORtraefik.extraCmdLineOptions = "--consulcatalog.endpoint=${cfg.tinc_ip_address}:8500 --accesslog --logLevel=INFO --consulcatalog.domain=service.consul";
-
       logstash = {
         listenAddress = "$cfg.tinc_ip_address}";
       }; # close logstash
