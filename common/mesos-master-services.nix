@@ -328,7 +328,7 @@ with lib;
 
             function check_zookeeper() {
               ip=`tinc_ip_address`
-              timeout 1 echo stats | nc $ip 2181 | grep Mode | awk '{ print $NF }' | egrep -E 'follower|leader' > /dev/null 2>&1
+              timeout 1 echo ruok | nc $ip 2181 | grep imok > /dev/null 2>&1
               return $?
             }
 
