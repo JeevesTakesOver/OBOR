@@ -120,6 +120,7 @@ in {
         RestartSec = 5;
         ExecStart = ''
           ${pkgs.jre}/bin/java \
+            -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:MaxGCPauseMillis=200 \
             -cp "${pkgs.zookeeper}/lib/*:${pkgs.zookeeper}/${pkgs.zookeeper.name}.jar:${configDir}" \
             ${toString cfg.extraCmdLineOptions} \
             -Dzookeeper.datadir.autocreate=false \
