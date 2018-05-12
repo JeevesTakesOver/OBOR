@@ -153,6 +153,16 @@ with lib;
 
     services = {
 
+      OBORmarathon-lb = {
+        enable = true;
+        extraCmdLineOptions = [
+          "sse" 
+          "--group external"
+          "--marathon http://${config.networking.hostName}.${cfg.tinc_domain}:8080" 
+          "--haproxy-map" 
+        ];
+      }; # close marathon-lb block
+
       OBORmesos.slave = {
         enable = true;
         master = "${cfg.zk_string}";
@@ -254,7 +264,13 @@ with lib;
               return $?
             }
 
+            function check_marathon_lb() {
+              netstat -nltp | grep '.*:443 .*/haproxy' > /dev/null 2>&1
+              return $?
+            }
+
             while true; do
+              retry 5 check_marathon_lb || (systemctl restart OBORmarathon-lb ; logger -t obor-watchdog 'restarting OBORmarathon-lb')
               retry 5 check_tinc_vpn || (systemctl restart tinc.core-vpn;  logger -t obor-watchdog 'restarting tinc.core-vpn')
               retry 5 check_dockerd || (systemctl restart docker;  logger -t obor-watchdog 'restarting docker')
               retry 5 check_consul || (systemctl restart OBORconsul ; logger -t obor-watchdog 'restarting OBORconsul')
