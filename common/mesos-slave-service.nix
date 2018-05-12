@@ -153,7 +153,7 @@ with lib;
         extraCmdLineOptions = [
           "sse" 
           "--group external"
-          "--marathon http://${config.networking.hostName}.${cfg.tinc_domain}:8080" 
+          "--marathon http://leader.mesos:8080" 
           "--haproxy-map" 
         ];
       }; # close marathon-lb block
