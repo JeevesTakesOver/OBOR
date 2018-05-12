@@ -110,11 +110,6 @@ with lib;
         type = with types; str;
         description = "Timezone for all our hosts";
       };
-
-      consul_other_node = mkOption {
-        type = with types; str;
-        description = "a second consul node";
-      };
     };
   }; # close options
 
@@ -189,17 +184,6 @@ with lib;
         ];
       }; # close marathon
 
-      OBORconsul = {
-        enable = true;
-        consulAgentFlags = " " + 
-        "-server " +
-        "-advertise=${cfg.tinc_ip_address} " + 
-        "-bind=${cfg.tinc_ip_address} " + 
-        "-client=${cfg.tinc_ip_address} " +
-        "-retry-join=${cfg.consul_other_node} " + 
-        "--bootstrap-expect=3";
-      }; # close consul
-
       dnsmasq = {
         enable = true;
         resolveLocalQueries = true;
@@ -209,7 +193,6 @@ with lib;
           server=/${cfg.tinc_domain}/${cfg.dns_resolver2}
           # .mesos is served by the mesos-dns listening on the tinc interface
           server=/mesos/${cfg.tinc_ip_address}#9153
-          server=/consul/${cfg.tinc_ip_address}#8600
           server=/kubernetes/${cfg.tinc_ip_address}#7153
           listen-address=0.0.0.0
           bind-interfaces
@@ -254,9 +237,6 @@ with lib;
           }
         '';
       }; # close mesos-dns block
-
-      # enable mesos-consul with default options
-      OBORmesos-consul.enable = true; 
 
       logstash = {
         listenAddress = "${cfg.tinc_ip_address}";
@@ -341,16 +321,6 @@ with lib;
               return $?
             }
 
-            function check_consul() {
-              netstat -nltp | grep '.*:8300 .*/consul' > /dev/null 2>&1
-              return $?
-            }
-
-            function check_mesos_consul() {
-              docker ps | grep mesos-consul | grep Up> /dev/null 2>&1
-              return $?
-            }
-
             function check_mesos() {
               ip=`tinc_ip_address`
               curl -s -L http://$ip:5050/state > /dev/null 2>&1
@@ -364,8 +334,6 @@ with lib;
               retry 5 check_mesos_dns || (systemctl restart OBORmesos-dns; logger -t obor-watchdog 'restarting OBORmesos-dns')
               retry 60 check_zookeeper || (systemctl restart OBORzookeeper; logger -t obor-watchdog 'restarting OBORzookeeper')
               retry 15 check_marathon || (systemctl restart OBORmarathon; logger -t obor-watchdog 'restarting OBORmarathon')
-              retry 5 check_consul || (systemctl restart OBORconsul ; logger -t obor-watchdog 'restarting OBORconsul')
-              retry 5 check_mesos_consul || (systemctl restart OBORmesos-consul ; logger -t obor-watchdog 'restarting OBORmesos-consul')
               retry 5 check_mesos || (systemctl restart OBORmesos-master ; logger -t obor-watchdog 'restarting OBORmesos-master')
 
               sleep 60
