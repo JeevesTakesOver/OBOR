@@ -222,7 +222,7 @@ def acceptance_tests_mesos_master():
     local(
         "testinfra --connection=ssh --ssh-config=ssh.config "
         "-v -n 9  --hosts='{}' "
-        "-m 'dnsmasq or docker or marathon_lb or marathon or mesos-dns or "
+        "-m 'dnsmasq or docker or marathon or mesos-dns or "
         "mesos_master or tincd or zookeeper or dns_resolution or consul or "
         "mesos_consul' "
         "tests".format(env.host_string)
@@ -237,7 +237,7 @@ def acceptance_tests_mesos_slave():
         "testinfra --connection=ssh --ssh-config=ssh.config "
         "-v -n 9 --hosts='{}' "
         "-m 'mesos_slave or tincd or docker or dns_resolution or consul or "
-        "traefik ' "
+        "traefik or marathon_lb' "
         "tests".format(env.host_string)
     )
 

@@ -189,18 +189,6 @@ with lib;
         ];
       }; # close marathon
 
-
-      OBORmarathon-lb = {
-        enable = true;
-        extraCmdLineOptions = [
-          "sse" 
-          "--group external"
-          "--marathon http://${config.networking.hostName}.${cfg.tinc_domain}:8080" 
-          "--haproxy-map" 
-        ];
-      }; # close marathon-lb block
-
-
       OBORconsul = {
         enable = true;
         consulAgentFlags = " " + 
@@ -338,11 +326,6 @@ with lib;
               return $?
             }
 
-            function check_marathon_lb() {
-              netstat -nltp | grep '.*:443 .*/haproxy' > /dev/null 2>&1
-              return $?
-            }
-
             function check_dockerd() {
               timeout 20 docker ps >/dev/null 2>&1
               return $?
@@ -381,7 +364,6 @@ with lib;
               retry 5 check_mesos_dns || (systemctl restart OBORmesos-dns; logger -t obor-watchdog 'restarting OBORmesos-dns')
               retry 60 check_zookeeper || (systemctl restart OBORzookeeper; logger -t obor-watchdog 'restarting OBORzookeeper')
               retry 15 check_marathon || (systemctl restart OBORmarathon; logger -t obor-watchdog 'restarting OBORmarathon')
-              retry 5 check_marathon_lb || (systemctl restart OBORmarathon-lb ; logger -t obor-watchdog 'restarting OBORmarathon-lb')
               retry 5 check_consul || (systemctl restart OBORconsul ; logger -t obor-watchdog 'restarting OBORconsul')
               retry 5 check_mesos_consul || (systemctl restart OBORmesos-consul ; logger -t obor-watchdog 'restarting OBORmesos-consul')
               retry 5 check_mesos || (systemctl restart OBORmesos-master ; logger -t obor-watchdog 'restarting OBORmesos-master')
