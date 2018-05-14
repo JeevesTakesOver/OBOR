@@ -100,7 +100,7 @@ in {
       after = [ "network.target" ];
       serviceConfig = {
         ExecStart = ''
-          ${pkgs.mesos}/bin/mesos-master \
+          ${pkgs.docker}/bin/docker run --rm --net=host mesosphere/mesos-master:1.5.0 \
             --ip=${cfg.ip} \
             --port=${toString cfg.port} \
             ${optionalString (cfg.advertiseIp != null) "--advertise_ip=${cfg.advertiseIp}"} \
