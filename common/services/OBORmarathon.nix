@@ -39,7 +39,7 @@ in {
 
     user = mkOption {
       type = types.str;
-      default = "marathon";
+      default = "root";
       example = "root";
       description = ''
 	The user that the Marathon framework will be launched as. If the user doesn't exist it will be created.
@@ -83,7 +83,7 @@ in {
       description = "Marathon Service";
       environment = cfg.environment;
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "OBORzookeeper.service" "OBORmesos-master.service" "OBORmesos-slave.service" ];
+      after = [ "network.target" "docker.service" "OBORzookeeper.service"];
 
       serviceConfig = {
         ExecStart = "${pkgs.docker}/bin/docker run --rm --net=host mesosphere/marathon:v1.6.352 --master ${cfg.master} --zk zk://${concatStringsSep "," cfg.zookeeperHosts}/marathon --http_port ${toString cfg.httpPort} ${concatStringsSep " " cfg.extraCmdLineOptions}";

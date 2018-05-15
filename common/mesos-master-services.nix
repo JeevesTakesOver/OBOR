@@ -176,7 +176,6 @@ with lib;
           "--http_address" "${cfg.tinc_ip_address}" 
           "--hostname" "${config.networking.hostName}.${cfg.tinc_domain}" 
           "--enable_features" "vips,task_killing"
-          "--task_lost_expunge_gc" "180000" 
           "--task_lost_expunge_initial_delay" "120000" 
           "--task_lost_expunge_interval" "300000"
           "--failover_timeout" "300"
@@ -333,8 +332,8 @@ with lib;
               retry 5 check_dnsmasq || (systemctl restart dnsmasq; logger -t obor-watchdog 'restarting dnsmasq')
               retry 5 check_mesos_dns || (systemctl restart OBORmesos-dns; logger -t obor-watchdog 'restarting OBORmesos-dns')
               retry 120 check_zookeeper || (systemctl restart OBORzookeeper; logger -t obor-watchdog 'restarting OBORzookeeper')
-              retry 30 check_marathon || (systemctl restart OBORmarathon; logger -t obor-watchdog 'restarting OBORmarathon')
-              retry 5 check_mesos || (systemctl restart OBORmesos-master ; logger -t obor-watchdog 'restarting OBORmesos-master')
+              retry 60 check_marathon || (systemctl restart OBORmarathon; logger -t obor-watchdog 'restarting OBORmarathon')
+              retry 60 check_mesos || (systemctl restart OBORmesos-master ; logger -t obor-watchdog 'restarting OBORmesos-master')
 
               sleep 60
             done
