@@ -48,7 +48,7 @@ in {
 
       serviceConfig = {
         ExecStart = "${pkgs.docker}/bin/docker run --rm -e PORTS=${ toString cfg.port } --name=marathon-lb --net=host --privileged -v /dev/log:/dev/log mesosphere/marathon-lb:v1.12.1 ${ concatStringsSep " " cfg.extraCmdLineOptions } ";
-        ExecStop = "${pkgs.docker}/bin/docker stop marathon-lb";
+        ExecStop = "${pkgs.docker}/bin/docker kill marathon-lb";
         Restart = "always";
         RestartSec = "5";
       };
