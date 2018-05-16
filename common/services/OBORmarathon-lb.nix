@@ -47,7 +47,8 @@ in {
       after = [ "network.target" "OBORzookeeper.service" "OBORmesos-master.service" "OBORmesos-slave.service" "OBORmarathon.service" "docker.service" ];
 
       serviceConfig = {
-        ExecStart = "${pkgs.docker}/bin/docker run --rm -e PORTS=${ toString cfg.port } --net=host --privileged -v /dev/log:/dev/log mesosphere/marathon-lb:v1.4.3 ${ concatStringsSep " " cfg.extraCmdLineOptions } ";
+        ExecStart = "${pkgs.docker}/bin/docker run --rm -e PORTS=${ toString cfg.port } --name=marathon-lb --net=host --privileged -v /dev/log:/dev/log mesosphere/marathon-lb:v1.4.3 ${ concatStringsSep " " cfg.extraCmdLineOptions } ";
+        ExecStop = "${pkgs.docker}/bin/docker stop marathon-lb";
         Restart = "always";
         RestartSec = "5";
       };
