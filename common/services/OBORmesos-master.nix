@@ -100,7 +100,10 @@ in {
       after = [ "network.target" ];
       serviceConfig = {
         ExecStart = ''
-          ${pkgs.docker}/bin/docker run --rm --net=host --name=mesos-master mesosphere/mesos-master:1.5.0 \
+          ${pkgs.docker}/bin/docker run --rm --net=host --name=mesos-master \
+          -v /var/lib/mesos/master:/var/lib/mesos \
+          -v /var/log/mesos/master:/var/log/mesos \
+          mesosphere/mesos-master:1.5.0 \
             --ip=${cfg.ip} \
             --port=${toString cfg.port} \
             ${optionalString (cfg.advertiseIp != null) "--advertise_ip=${cfg.advertiseIp}"} \
@@ -112,7 +115,7 @@ in {
             --logging_level=${cfg.logLevel} \
             ${toString cfg.extraCmdLineOptions}
         '';
-        ExecStart = "${pkgs.docker}/bin/docker stop mesos-master";
+        ExecStop = "${pkgs.docker}/bin/docker stop mesos-master";
         Restart = "always";
         RestartSec = 5;
         PermissionsStartOnly = true;
