@@ -1,1 +1,0 @@
-nixos-config-mesos-slave-01
