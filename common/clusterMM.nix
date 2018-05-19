@@ -1,13 +1,25 @@
-{ services, pkgs, programs, environment, networking, virtualisation, config, 
+# clusterMM.nix
+{ services, pkgs, programs, environment, networking, virtualisation, config,
   lib, time, ... }:
 
-let 
+let
   cfg = config.services.clusterMM;
 in
 
 with lib;
-  
+
 {
+  imports = [
+  ./services/OBORmesos-master.nix
+  ./services/OBORmesos-slave.nix
+  ./services/OBORtinc.nix
+  ./services/OBORzookeeper.nix
+  ./services/OBORmesos-dns.nix
+  ./services/OBORmarathon.nix
+  ./services/OBORmarathon-lb.nix
+  ./obor-watchdog.nix
+  ];
+
   options = {
     services.clusterMM = {
       enable = mkOption {
@@ -38,12 +50,6 @@ with lib;
         default = "";
         type = with types; str;
         description = "The Tinc hostname (using '_')";
-      };
-
-      tinc_compression = mkOption {
-        default = "";
-        type = with types; str;
-        description = "The Tinc networks compression to use";
       };
 
       tinc_public_key = mkOption {
@@ -100,16 +106,80 @@ with lib;
       };
 
       dockerStorageDriver = mkOption {
-        default = "overlay2"; 
+        default = "overlay2";
         type = with types; str;
         description = "Docker storage driver to use ('overlay2')";
       };
 
       timezone = mkOption {
-        default = "GMT"; 
+        default = "GMT";
         type = with types; str;
         description = "Timezone for all our hosts";
       };
+
+      tinc_core_node01_fqdn = mkOption {
+        description = "public IP address for Railtrack Core node 01";
+        type = types.str;
+      };
+
+      tinc_core_node01_ip_address = mkOption {
+        description = "tinc IP address for Railtrack Core node 01";
+        type = types.str;
+      };
+
+      tinc_core_node01_public_key = mkOption {
+        description = "tinc public key for Railtrack Core node 01";
+        type = types.str;
+      };
+
+
+      tinc_core_node02_fqdn = mkOption {
+        description = "public IP address for Railtrack Core node 02";
+        type = types.str;
+      };
+
+      tinc_core_node02_ip_address = mkOption {
+        description = "tinc IP address for Railtrack Core node 02";
+        type = types.str;
+      };
+
+      tinc_core_node02_public_key = mkOption {
+        description = "tinc public key for Railtrack Core node 02";
+        type = types.str;
+      };
+
+      tinc_core_node03_fqdn = mkOption {
+        description = "public IP address for Railtrack Core node 03";
+        type = types.str;
+      };
+
+      tinc_core_node03_ip_address = mkOption {
+        description = "tinc IP address for Railtrack Core node 03";
+        type = types.str;
+      };
+
+      tinc_core_node03_public_key = mkOption {
+        description = "tinc public key for Railtrack Core node 03";
+        type = types.str;
+      };
+
+      tinc_compression = mkOption {
+        description = "Tinc Compression";
+        default = "6";
+        type = types.str;
+      };
+
+      tinc_network = mkOption {
+        description = "Tinc network name";
+        type = types.str;
+      };
+
+      tinc_network_netmask = mkOption {
+        description = "Tinc network netmastk";
+        type = types.str;
+      };
+
+
     };
   }; # close options
 
@@ -165,18 +235,18 @@ with lib;
       OBORmarathon = {
         enable = true;
         zookeeperHosts = [
-          "${cfg.zk_node01}:2181" 
-          "${cfg.zk_node02}:2181" 
-          "${cfg.zk_node03}:2181" 
+          "${cfg.zk_node01}:2181"
+          "${cfg.zk_node02}:2181"
+          "${cfg.zk_node03}:2181"
         ];
         # see:
         # https://github.com/mesosphere/marathon/issues/4232#issuecomment-243443555
         # https://github.com/mesosphere/marathon/issues/4310
-        extraCmdLineOptions = [ 
-          "--http_address" "${cfg.tinc_ip_address}" 
-          "--hostname" "${config.networking.hostName}.${cfg.tinc_domain}" 
+        extraCmdLineOptions = [
+          "--http_address" "${cfg.tinc_ip_address}"
+          "--hostname" "${config.networking.hostName}.${cfg.tinc_domain}"
           "--enable_features" "vips,task_killing"
-          "--task_lost_expunge_initial_delay" "120000" 
+          "--task_lost_expunge_initial_delay" "120000"
           "--task_lost_expunge_interval" "300000"
           "--failover_timeout" "300"
           "--mesos_user" "mesos"
@@ -220,7 +290,7 @@ with lib;
             "domain": "mesos",
             "port": 9153,
             "resolvers": ["${cfg.dns_resolver1}","${cfg.dns_resolver2}"],
-            "timeout": 5, 
+            "timeout": 5,
             "listener": "${cfg.tinc_ip_address}",
             "httpon": true,
             "dnson": true,
@@ -243,8 +313,28 @@ with lib;
 
       OBORtinc = {
         networks = {
-          core-vpn = {
+          "${cfg.tinc_network}" = {
             name = "${cfg.tinc_hostname}";
+            tinc_network_netmask = "${cfg.tinc_network_netmask}";
+            tinc_interface = "${cfg.tinc_interface}";
+            tinc_ip_address = "${cfg.tinc_ip_address}";
+            tinc_private_key = "${cfg.tinc_private_key}";
+            tinc_public_key = "${cfg.tinc_public_key}";
+	          debugLevel = 2;
+	          interfaceType = "tap";
+	          chroot=false; # disable as we need to run tinc-up
+	          package=pkgs.tinc;
+	          extraConfig = ''
+		          AddressFamily = ipv4
+		          LocalDiscovery = yes
+		          Mode=switch
+		          ConnectTo = core_network_01
+		          ConnectTo = core_network_02
+		          ConnectTo = core_network_03
+		          Cipher=aes-256-cbc
+		          ProcessPriority = high
+	          '';
+
             hosts = {
               "${cfg.tinc_hostname}" = ''
                 Name=${cfg.tinc_hostname}
@@ -254,10 +344,44 @@ with lib;
                 ${cfg.tinc_public_key}
 
               '';
+
+		          core_network_01 = ''
+		            Name=core_network_01
+		            Address=${cfg.tinc_core_node01_fqdn}
+		            Port=655
+		            Compression=${cfg.tinc_compression}
+		            Subnet=${cfg.tinc_core_node01_ip_address}/32
+
+		            ${cfg.tinc_core_node01_public_key}
+
+		          '';
+
+		          core_network_02 = ''
+		            Name=core_network_02
+		            Address=${cfg.tinc_core_node02_fqdn}
+		            Port=655
+		            Compression=${cfg.tinc_compression}
+		            Subnet=${cfg.tinc_core_node02_ip_address}/32
+
+		            ${cfg.tinc_core_node02_public_key}
+
+		          '';
+
+		          core_network_03 = ''
+		            Name=core_network_03
+		            Address=${cfg.tinc_core_node03_fqdn}
+		            Port=655
+		            Compression=${cfg.tinc_compression}
+		            Subnet=${cfg.tinc_core_node03_ip_address}/32
+
+		            ${cfg.tinc_core_node03_public_key}
+
+		          '';
             }; # close hosts block
           }; # close core-vpn block
         }; # close networks block
       }; # close tinc block
+
 
 
       # enable the obor-watchdog
@@ -342,73 +466,6 @@ with lib;
 
     }; # close services block
 
-    environment = {
-      etc = {
-        "tinc/core-vpn/rsa_key.priv" = { 
-          mode = "0600";
-          text = ''
-            ${ cfg.tinc_private_key }
-          '';
-        }; # close tinc/core-vpn/rsa_key.priv block
-
-        "tinc/core-vpn/rsa_key.pub" = {
-          mode = "0644";
-          text = ''
-            ${cfg.tinc_public_key}
-          '';
-        }; # close tinc/core-vpn/rsa_key.pub block
-
-        # attempt to use gethostname() so that this block could be moved
-        # to the common section.
-        "tinc/core-vpn/dhclient.conf" = {
-          mode = "0644";
-          text = ''
-            option rfc3442-classless-static-routes code 121 = array of unsigned integer 8;
-
-            # https://bugs.launchpad.net/ubuntu/+source/isc-dhcp/+bug/1006937
-            send host-name "${config.networking.hostName}";
-            send dhcp-requested-address ${cfg.tinc_ip_address};
-
-            request subnet-mask, broadcast-address, time-offset, routers,
-                domain-name, domain-search, host-name,
-                netbios-name-servers, netbios-scope, interface-mtu,
-                rfc3442-classless-static-routes, ntp-servers;
-
-            timeout 300;
-          '';
-        }; #close tinc/core-vpn/dhclient.conf block
-
-        # desperate attempt to stop resolvconf from updating /etc/resolv.conf
-        "resolvconf.conf" = {
-          mode = "0644";
-          text = ''
-            resolv_conf=/etc/resolv.conf.disabled
-          '';
-        };
-
-        # now we can set our own /etc/resolv.conf
-        # DNSmasq listens on mesos-zk-01,02,3 and probagates DNS accross the
-        # different services.
-        # we query our own dnsmasq instance first, which should query the 
-        # upstream core01,02 TINC dns servers.
-        # these may not be available at boot time
-        # or during the initial provisioning of the host
-        # so to avoid DNS errors, we add the Google DNS servers too.
-        # requests will try every DNS server in the list
-        "resolv.conf" = {
-          mode = "0644";
-          text = ''
-            search ${cfg.tinc_domain}
-            nameserver 127.0.0.1 
-            options attempts:1
-            options timeout:1
-            options rotate
-          '';
-        };
-
-      }; # close etc block
-    }; # close environment block
-
 
     virtualisation = {
       docker = {
@@ -424,22 +481,52 @@ with lib;
     networking = {
       # DNSmasq listens on mesos-zk-01,02,3 and probagates DNS accross the
       # different services.
-      # we query our own dnsmasq instance first, which should query the 
+      # we query our own dnsmasq instance first, which should query the
       # upstream core01,02 TINC dns servers.
       # these may not be available at boot time
       # or during the initial provisioning of the host
       # so to avoid DNS errors, we add the Google DNS servers too.
       # requests will try every DNS server in the list
-      nameservers = [ 
-        "127.0.0.1" 
+      nameservers = [
+        "127.0.0.1"
         "8.8.8.8"
-        "8.8.4.4" 
+        "8.8.4.4"
         ];
 
       resolvconfOptions = [
-        "attempts:1" 
+        "attempts:1"
       ];
     };
+
+    # desperate attempt to stop resolvconf from updating /etc/resolv.conf
+    environment.etc."resolvconf.conf" = {
+      mode = "0644";
+      text = ''
+        resolv_conf=/etc/resolv.conf.disabled
+      '';
+    };
+
+    # now we can set our own /etc/resolv.conf
+    # DNSmasq listens on mesos-zk-01,02,3 and probagates DNS accross the
+    # different services.
+    # we query our own dnsmasq instance first, which should query the
+    # upstream core01,02 TINC dns servers.
+    # these may not be available at boot time
+    # or during the initial provisioning of the host
+    # so to avoid DNS errors, we add the Google DNS servers too.
+    # requests will try every DNS server in the list
+    environment.etc."resolv.conf" = {
+      mode = "0644";
+      text = ''
+        search ${cfg.tinc_domain}
+        nameserver 127.0.0.1
+        options attempts:1
+        options timeout:1
+        options rotate
+      '';
+    };
+
+
 
   }; # close module block
 }

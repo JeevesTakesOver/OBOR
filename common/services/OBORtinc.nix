@@ -105,6 +105,43 @@ in
               Note that tinc can't run scripts anymore (such as tinc-down or host-up), unless it is setup to be runnable inside chroot environment.
             '';
           };
+
+          tinc_network_netmask = mkOption {
+            type = types.str;
+            description = "TINC Subnet mask";
+          };
+
+          tinc_broadcast_address = mkOption {
+            type = types.str;
+            description = "TINC Broadcast adress";
+          };
+
+          tinc_network = mkOption {
+            type = types.str;
+            description = "TINC network name";
+          };
+
+          tinc_interface = mkOption {
+            type = types.str;
+            description = "TINC network interface name";
+          };
+
+          tinc_ip_address = mkOption {
+            type = types.str;
+            description = "TINC ip address";
+          };
+
+          tinc_private_key = mkOption {
+            type = types.str;
+            description = "TINC private key";
+          };
+
+          tinc_public_key = mkOption {
+            type = types.str;
+            description = "TINC public key";
+          };
+
+
         };
       };
     };
@@ -115,6 +152,9 @@ in
   ###### implementation
 
   config = mkIf (cfg.networks != { }) {
+
+
+
 
     environment.etc = fold (a: b: a // b) { }
       (flip mapAttrsToList cfg.networks (network: data:
@@ -134,8 +174,103 @@ in
               ${data.extraConfig}
             '';
           };
+
+    "tinc/${network}/tinc-up" = {
+	mode = "0755";
+        text = ''
+	      #!/bin/sh
+	      PATH=/run/current-system/sw/bin:/run/current-system/sw/sbin:$PATH
+
+	      # see: https://www.tinc-vpn.org/pipermail/tinc/2017-January/004729.html
+	      macfile=/etc/tinc/${network}/address
+	      if [ -f $macfile ]; then
+		    ip link set ${data.tinc_interface} address `cat $macfile`
+	      else
+		    cat /sys/class/net/${data.tinc_interface}/address >$macfile
+	      fi
+
+	      # https://bugs.launchpad.net/ubuntu/+source/isc-dhcp/+bug/1006937
+	      dhclient -4 -nw -v ${data.tinc_interface} -cf /etc/tinc/${network}/dhclient.conf -r
+	      dhclient -4 -nw -v ${data.tinc_interface} -cf /etc/tinc/${network}/dhclient.conf
+
+	      nohup /etc/tinc/${network}/fix-route >/dev/null 2>&1 &
+	'';
+     };
+
+
+    "tinc/${network}/tinc-down" = {
+     	mode = "0755";
+    	text = ''
+	      #!/bin/sh
+	      PATH=/run/current-system/sw/bin:/run/current-system/sw/sbin:$PATH
+
+	      dhclient -4 -nw -v ${data.tinc_interface} -cf /etc/tinc/${network}/dhclient.conf -r
+        '';
+    };
+
+    "tinc/${network}/fix-route" = {
+         mode = "0755";
+         text = ''
+	      #!/usr/bin/env bash
+
+	      sleep 15
+	      netstat -rnv | grep ${network} | grep 0.0.0.0 >/dev/null 2>&1
+
+	      if [ $? = 0 ]; then
+		route del -net ${network} netmask ${data.tinc_network_netmask} gateway 0.0.0.0
+		route add -net ${network} netmask ${data.tinc_network_netmask} gateway `ifconfig ${data.tinc_interface}| grep inet | awk '{ print $2 }' `
+	      fi
+      '';
+    };
+
+
+
+
+
+
+
+
+        "tinc/${network}/rsa_key.priv" = {
+          mode = "0600";
+          text = ''
+            ${ data.tinc_private_key }
+          '';
+        }; # close tinc/core-vpn/rsa_key.priv block
+
+        "tinc/${network}/rsa_key.pub" = {
+          mode = "0644";
+          text = ''
+            ${data.tinc_public_key}
+          '';
+        }; # close tinc/core-vpn/rsa_key.pub block
+
+        # attempt to use gethostname() so that this block could be moved
+        # to the common section.
+        "tinc/${network}/dhclient.conf" = {
+          mode = "0644";
+          text = ''
+            option rfc3442-classless-static-routes code 121 = array of unsigned integer 8;
+
+            # https://bugs.launchpad.net/ubuntu/+source/isc-dhcp/+bug/1006937
+            send host-name "${config.networking.hostName}";
+            send dhcp-requested-address ${data.tinc_ip_address};
+
+            request subnet-mask, broadcast-address, time-offset, routers,
+                domain-name, domain-search, host-name,
+                netbios-name-servers, netbios-scope, interface-mtu,
+                rfc3442-classless-static-routes, ntp-servers;
+
+            timeout 300;
+          '';
+        }; #close tinc/core-vpn/dhclient.conf block
+
         }
       ));
+
+
+
+
+
 
       networking.interfaces = flip mapAttrs' cfg.networks (network: data: nameValuePair
       ("tinc.${network}")
@@ -195,10 +330,11 @@ in
       })
     );
 
-    environment.systemPackages = [ 
-      pkgs.avahi
+    environment.systemPackages = [
+      pkgs.tinc
       pkgs.dhcp
     ];
-  };
 
+
+    };
 }

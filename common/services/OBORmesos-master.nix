@@ -88,12 +88,12 @@ in {
       };
 
     };
-
-
   };
 
 
   config = mkIf cfg.enable {
+
+
     systemd.services.OBORmesos-master = {
       description = "Mesos Master";
       wantedBy = [ "multi-user.target" ];
@@ -125,6 +125,4 @@ in {
       '';
     };
   };
-
 }
-
