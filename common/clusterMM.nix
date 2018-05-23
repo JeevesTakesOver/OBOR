@@ -550,7 +550,6 @@ with lib;
         nameserver 127.0.0.1
         options attempts:1
         options timeout:1
-        options rotate
       '';
     };
 
