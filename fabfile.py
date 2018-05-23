@@ -66,27 +66,13 @@ def clean():
 
 
 @task
-def config_json(config_yaml):
-    """ generates the config.json for nixos """
-    with open(config_yaml, 'r') as cfg_yaml:
-        with open('config/config.json', 'w') as cfg_json:
-            json.dump(
-                yaml.safe_load(cfg_yaml.read()),
-                cfg_json,
-                sort_keys=True,
-                indent=4
-            )
-
-
-@task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def update(
         host_dir=None,
-        config_dir='config/',
         rsync='yes',
         nix_gc='yes',
         nix_release='18.03',
-        switch='no',
+        switch='no'
 ):  # pylint:  disable=too-many-arguments
     """ deploy or update OBOR on a host """
 
@@ -116,16 +102,6 @@ def update(
             rsync_project(
                 remote_dir='/etc/nixos/common',
                 local_dir='common/',
-                delete=True,
-                extra_opts='--rsync-path="sudo rsync"',
-                default_opts='-chavzPq',
-                ssh_opts=' -o UserKnownHostsFile=/dev/null ' +
-                '-o StrictHostKeyChecking=no '
-            )
-# this needs to be paramtes
-            rsync_project(
-                remote_dir='/etc/nixos/config/',
-                local_dir=config_dir,
                 delete=True,
                 extra_opts='--rsync-path="sudo rsync"',
                 default_opts='-chavzPq',
@@ -166,10 +142,6 @@ def update(
     if switch in yes_answers:
         _nixos_switch()
 
-    with settings(
-        shell='/run/current-system/sw/bin/bash -l -c'
-    ):
-        sudo('rm -rf /etc/nixos/config/*')
 
 
 @task
@@ -320,13 +292,13 @@ def jenkins_build(
         count = 1
         while True or count > 3:
             jobs = []
-            for node in nodes:
+            for node, hostdir in nodes:
                 jobs.append(
                     mp(
                         target=local,
-                        args=("fab -H %s update:" % node +
-                              "host_dir=%s," % node +
-                              "config_dir='config/'," +
+                        args=("fab -i nixos-vagrant-configs/vagrant.priv " +
+                              "-H %s update:" % node +
+                              "host_dir=%s," % hostdir +
                               "rsync='yes'," +
                               "nix_gc='no'," +
                               "nix_release='18.03'," +
