@@ -280,11 +280,13 @@ def provision_railtrack():
 @task  # NOQA
 def jenkins_build(
         mesos_masters=[
-            'root@mesos-zk-01-public.aws.azulinho.com',
-            'root@mesos-zk-02-public.aws.azulinho.com',
-            'root@mesos-zk-03-public.aws.azulinho.com'
+            ('vagrant@192.168.56.201', 'nixos-vagrant-configs/mesos-zk-01'),
+            ('vagrant@192.168.56.202', 'nixos-vagrant-configs/mesos-zk-02'),
+            ('vagrant@192.168.56.203', 'nixos-vagrant-configs/mesos-zk-03'),
         ],
-        mesos_slaves=['root@mesos-slave-public.aws.azulinho.com'],
+        mesos_slaves=[
+            ('vagrant@192.168.56.204', 'nixos-vagrant-configs/slave')
+        ],
         cleanup=True
     ):
     """ runs a jenkins build """
@@ -328,35 +330,20 @@ def jenkins_build(
 
         log_green('_provision_obor completed')
 
-    def _reload_obor(nodes=nodes):
-        log_green('running _reload_obor')
-
-        for target in nodes:
-            with settings(
-                host_string=target,
-                warn_only=True,
-                shell='/run/current-system/sw/bin/bash -l -c'
-            ):
-                local(
-                    "ssh -o UserKnownHostsFile=/dev/null "
-                    "-o StrictHostKeyChecking=no {} "
-                    "nohup shutdown -r now &".format(target)
-                )
-
-        log_green('_reload_obor completed')
-
     def _test_obor(mesos_masters=mesos_masters, mesos_slaves=mesos_slaves):
         log_green('running _test_obor')
 
-        for target in mesos_masters:
+        for target, _ in mesos_masters:
             local(
-                "fab -H {} acceptance_tests_mesos_master".format(target) +
+                "fab -i nixos-vagrant-configs/vagrant.priv" +
+                "-H {} acceptance_tests_mesos_master ".format(target) +
                 "> log/`date '+%Y%m%d%H%M%S'`."
                 "{}.test_obor.log 2>&1".format(target)
             )
 
-        for target in mesos_slaves:
-            local("fab -H {} acceptance_tests_mesos_slave".format(target) +
+        for target, _ in mesos_slaves:
+            local("fab -i nixos-vagrant-configs/vagrant.priv " +
+                  "-H {} acceptance_tests_mesos_slave ".format(target) +
                   "> log/`date '+%Y%m%d%H%M%S'`."
                   "{}.test_obor.log 2>&1".format(target))
 
@@ -369,7 +356,7 @@ def jenkins_build(
         _provision_obor()
 
     def _flow2():
-        # spin up Railtrack, which is required for OBOR 
+        # spin up Railtrack, which is required for OBOR
         spin_up_railtrack()
         sleep(45)  # allow VMs to boot up
         provision_railtrack()
