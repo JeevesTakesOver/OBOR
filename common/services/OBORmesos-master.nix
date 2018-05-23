@@ -97,7 +97,7 @@ in {
     systemd.services.OBORmesos-master = {
       description = "Mesos Master";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" ];
+      after = [ "network.target" "zookeeper.service" "docker.service"];
       serviceConfig = {
         ExecStart = ''
           ${pkgs.docker}/bin/docker run --rm --net=host --name=mesos-master \
