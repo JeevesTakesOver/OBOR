@@ -35,49 +35,6 @@ sys.setrecursionlimit(30000)
 from bookshelf.api_v2.logging_helpers import (log_green, log_red)
 
 
-@timecall(immediate=True)
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def install_terraform(version='0.11.2'):
-    """ Installs Terraform locally """
-
-    local('wget -q -c https://releases.hashicorp.com/terraform/{}/'
-          'terraform_{}_linux_amd64.zip'.format(version, version))
-    local('rm -f terraform')
-    local('unzip -qq terraform_{}_linux_amd64.zip'.format(version))
-    local('chmod +x terraform')
-
-
-@task
-@timecall(immediate=True)
-@retry(stop_max_attempt_number=3, wait_fixed=10000)
-def step_01_create_hosts(tf_j2_template='templates/main.tf.j2'):
-    """ provisions new EC2 instances """
-    cfg = Template(open(tf_j2_template).read())
-
-    # we need to read the json to get the CFG values
-    # and we also need to set them, as they won't be set on OBOR configs
-
-    with open('config/config.json') as json_data:
-        obor = json.load(json_data)
-
-    with open('main.tf', 'w') as manifest:
-        manifest.write(
-            cfg.render(
-                key_pair=obor['aws']['key_pair'],
-                key_filename=obor['aws']['key_filename'],
-                aws_dns_domain=obor['aws']['aws_dns_domain'],
-                region=obor['aws']['region'],
-                instance_type=obor['aws']['instance_type']
-            )
-        )
-
-    install_terraform()
-    local("./terraform init > "
-          "log/`date '+%Y%m%d%H%M%S'`.terraform.init.log 2>&1")
-    local("echo yes | ./terraform apply > "
-          "log/`date '+%Y%m%d%H%M%S'`.terraform.apply.log 2>&1")
-
-
 @task
 @retry(stop_max_attempt_number=3, wait_fixed=10000)
 def clean():
@@ -91,8 +48,8 @@ def clean():
     jobs.append(
         mp(
             target=local,
-            args=("echo yes| ./terraform destroy "
-                  "> log/`date '+%Y%m%d%H%M%S'`.terraform.destroy.log 2>&1",)
+            args=("vagrant destroy -f "
+                  "> log/`date '+%Y%m%d%H%M%S'`.vagrant.destroy.log 2>&1",)
         )
     )
     for job in jobs:
@@ -428,7 +385,7 @@ def jenkins_build(
 
     def _flow1():
         # spin up and provision the Cluster
-        step_01_create_hosts()
+        local('vagrant up')
         sleep(45)  # allow VMs to boot up
         _provision_obor()
 
@@ -449,7 +406,7 @@ def jenkins_build(
         p_flow2.join()
 
         # reload after initial provision
-        _reload_obor()
+        local('vagrant reload')
 
         sleep(180)  # allow the start services
 
