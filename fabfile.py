@@ -175,16 +175,12 @@ def acceptance_tests_mesos_slave():
 def destroy_railtrack():
     """ destroys Railtrack VMs """
 
-    local("cd Railtrack && "
-          "pip install -r requirements.txt >"
-          "../log/`date '+%Y%m%d%H%M%S'`."
-          "pip.install.requirements.txt.log 2>&1")
-
     railtrack_env = [
         "eval `ssh-agent`",
-        "ssh-add Railtrack/key-pairs/*.priv"
+        "ssh-add $PWD/Railtrack/key-pairs/*.priv",
+        "virtualenv $PWD/Railtrack/venv",
+        "export PATH=$PWD/Railtrack/venv/bin:$PATH"
     ]
-
     # local() doesn't support most context managers
     # so let's bake a local environment file and consume as a prefix()
     with open('shell_env', 'w') as shell_env:
@@ -194,6 +190,11 @@ def destroy_railtrack():
 
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
+            local("cd Railtrack && "
+                  "pip install -r requirements.txt >"
+                  "../log/`date '+%Y%m%d%H%M%S'`."
+                  "pip.install.requirements.txt.log 2>&1")
+
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py clean "
                   "> ../log/`date '+%Y%m%d%H%M%S'`.railtrack.clean.log 2>&1")
@@ -209,26 +210,29 @@ def spin_up_railtrack():
 
     local('cd Railtrack && git fetch --all --tags && git checkout v1.0.2')
 
-    # make sure we are able to consume these key pairs
-    local('chmod 700 Railtrack')
-    local('chmod 400 Railtrack/key-pairs/*.priv')
-
-    local("cd Railtrack && "
-          "pip install -r requirements.txt >"
-          "../log/`date '+%Y%m%d%H%M%S'`."
-          "pip.install.requirements.txt.log 2>&1")
-
     railtrack_env = [
+        "virtualenv $PWD/Railtrack/venv",
         "eval `ssh-agent`",
-        "ssh-add Railtrack/key-pairs/*.priv"
+        "ssh-add $PWD/Railtrack/key-pairs/*.priv",
+        "export PATH=$PWD/Railtrack/venv/bin:$PATH",
     ]
-
     # local() doesn't support most context managers
     # so let's bake a local environment file and consume as a prefix()
     with open('shell_env', 'w') as shell_env:
         for line in railtrack_env:
             shell_env.write(line + '\n')
     local('chmod +x shell_env')
+
+    # make sure we are able to consume these key pairs
+    local('chmod 700 Railtrack')
+    local('chmod 400 Railtrack/key-pairs/*.priv')
+
+    with settings(shell='/run/current-system/sw/bin/bash -l -c'):
+        with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
+            local("cd Railtrack && "
+                  "pip install -r requirements.txt >"
+                  "../log/`date '+%Y%m%d%H%M%S'`."
+                  "pip.install.requirements.txt.log 2>&1")
 
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
@@ -242,16 +246,12 @@ def spin_up_railtrack():
 def provision_railtrack():
     """ deploys Railtrack locally """
 
-    local("cd Railtrack && "
-          "pip install -r requirements.txt >"
-          "../log/`date '+%Y%m%d%H%M%S'`."
-          "pip.install.requirements.txt.log 2>&1")
-
     railtrack_env = [
+        "virtualenv $PWD/Railtrack/venv",
         "eval `ssh-agent`",
-        "ssh-add Railtrack/key-pairs/*.priv"
+        "ssh-add $PWD/Railtrack/key-pairs/*.priv",
+        "export PATH=$PWD/Railtrack/venv/bin:$PATH",
     ]
-
     # local() doesn't support most context managers
     # so let's bake a local environment file and consume as a prefix()
     with open('shell_env', 'w') as shell_env:
@@ -261,9 +261,16 @@ def provision_railtrack():
 
     with settings(shell='/run/current-system/sw/bin/bash -l -c'):
         with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
+
+            local("cd Railtrack && "
+                  "pip install -r requirements.txt >"
+                  "../log/`date '+%Y%m%d%H%M%S'`."
+                  "pip.install.requirements.txt.log 2>&1")
+
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py run_it"
                   "> ../log/`date '+%Y%m%d%H%M%S'`.railtrack.run_it.log 2>&1")
+
             local("cd Railtrack && "
                   "fab -f tasks/fabfile.py acceptance_tests"
                   "> ../log/`date '+%Y%m%d%H%M%S'`."
