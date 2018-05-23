@@ -20,10 +20,16 @@ Vagrant.configure(2) do |config|
   box = ENV['VAGRANT_BOX'] || "nixos/nixos-18.03-x86_64"
 
   machines = [
-    { 'name' => 'nixos-config-mesos-zk-master-01',
+    { 'name' => 'mesos-zk-01',
       'ip' =>  '192.168.56.201' 
     },
-    { 'name' => 'nixos-config-mesos-slave-01',
+    { 'name' => 'mesos-zk-02',
+      'ip' =>  '192.168.56.202' 
+    },
+    { 'name' => 'mesos-zk-03',
+      'ip' =>  '192.168.56.203' 
+    },
+    { 'name' => 'slave',
       'ip' =>  '192.168.56.204' 
     }
   ]
@@ -41,7 +47,7 @@ Vagrant.configure(2) do |config|
       machine.ssh.insert_key = false
 
       machine.vm.provider "virtualbox" do |vb|
-        vb.memory = "2048"
+        vb.memory = "4096"
         # https://github.com/hashicorp/otto/issues/423#issuecomment-186076403
         vb.linked_clone = true if Vagrant::VERSION =~ /^1.9/ 
         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
@@ -56,6 +62,13 @@ Vagrant.configure(2) do |config|
           "--hostiocache", "off"
         ]
       end
+
+      machine.vm.provision "shell",
+        inline: "ifconfig enp0s8 #{item['ip']}"
+      machine.vm.provision "shell", privileged: false,
+        inline: "mkdir .ssh; chmod 700 .ssh; curl https://raw.githubusercontent.com/hashicorp/vagrant/master/keys/vagrant.pub > .ssh/authorized_keys"
+      machine.vm.provision "shell",
+        inline: "fallocate -l 2G /swapfile; mkswap /swapfile; chmod 0600 /swapfile; swapon /swapfile"
     end
   end
 end
