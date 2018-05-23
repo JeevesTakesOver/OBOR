@@ -480,6 +480,33 @@ with lib;
     }; # close time block
 
     networking = {
+
+      # TODO: bring this into options.
+
+      enableIPv6 = false;
+
+      firewall.enable = true;
+      firewall.allowPing = true;
+
+      # traffic on the tin.core-vpn interface is not restricted by iptables
+      firewall.trustedInterfaces = [ "tinc.core-vpn" "docker0" ];
+
+      # allow internet/external access to ssh and tincd port.
+      # ssh is required for provisioning, however it could be locked down to a 
+      # allow access only to a particular group of of addresses in the sshd_config 
+      # file
+      firewall.allowedTCPPorts = [ 22 655 ];
+      firewall.allowedUDPPorts = [ 655 ];
+
+      # specify the list of primary network cards across the different boxes.
+      # we need dhcpcd allocation locked down to the primary interfaces
+      # as we don't want dhcpcpd to attempt to allocate ip addresses for the
+      # tinc vpn interfaces.
+      # locking them them ensures this won't happen
+      dhcpcd.allowInterfaces = [ "enp0s3" "enp5s0" "enp0s8" "eth0"];
+
+
+
       # DNSmasq listens on mesos-zk-01,02,3 and probagates DNS accross the
       # different services.
       # we query our own dnsmasq instance first, which should query the

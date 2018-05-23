@@ -211,6 +211,34 @@ with lib;
     # use a nested array for defining your services, as vim indent will make it
     # a lot easier to navigate as you collapse/expand blocks.
 
+
+    # TODO: bring this into options.
+
+    networking.enableIPv6 = false;
+    networking.wireless.enable = false; #disable when using networkmanager
+
+    networking.firewall.enable = true;
+    networking.firewall.allowPing = true;
+
+    # traffic on the tin.core-vpn interface is not restricted by iptables
+    networking.firewall.trustedInterfaces = [ "tinc.core-vpn" "docker0" ];
+
+    # allow internet/external access to ssh and tincd port.
+    # ssh is required for provisioning, however it could be locked down to a 
+    # allow access only to a particular group of of addresses in the sshd_config 
+    # file
+    networking.firewall.allowedTCPPorts = [ 22 655 ];
+    networking.firewall.allowedUDPPorts = [ 655 ];
+
+    # specify the list of primary network cards across the different boxes.
+    # we need dhcpcd allocation locked down to the primary interfaces
+    # as we don't want dhcpcpd to attempt to allocate ip addresses for the
+    # tinc vpn interfaces.
+    # locking them them ensures this won't happen
+    networking.dhcpcd.allowInterfaces = [ "enp0s3" "enp5s0" "enp0s8" "eth0"];
+
+
+
     services = {
 
       OBORmarathon-lb = {
