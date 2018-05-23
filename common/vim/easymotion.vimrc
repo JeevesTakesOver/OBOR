@@ -1,2 +1,0 @@
-Plug 'easymotion/vim-easymotion'
-
