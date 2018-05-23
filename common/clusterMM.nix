@@ -320,20 +320,20 @@ with lib;
             tinc_ip_address = "${cfg.tinc_ip_address}";
             tinc_private_key = "${cfg.tinc_private_key}";
             tinc_public_key = "${cfg.tinc_public_key}";
-	          debugLevel = 2;
-	          interfaceType = "tap";
-	          chroot=false; # disable as we need to run tinc-up
-	          package=pkgs.tinc;
-	          extraConfig = ''
-		          AddressFamily = ipv4
-		          LocalDiscovery = yes
-		          Mode=switch
-		          ConnectTo = core_network_01
-		          ConnectTo = core_network_02
-		          ConnectTo = core_network_03
-		          Cipher=aes-256-cbc
-		          ProcessPriority = high
-	          '';
+            debugLevel = 2;
+            interfaceType = "tap";
+            chroot=false; # disable as we need to run tinc-up
+            package=pkgs.tinc;
+            extraConfig = ''
+              AddressFamily = ipv4
+              LocalDiscovery = yes
+              Mode=switch
+              ConnectTo = core_network_01
+              ConnectTo = core_network_02
+              ConnectTo = core_network_03
+              Cipher=aes-256-cbc
+              ProcessPriority = high
+            '';
 
             hosts = {
               "${cfg.tinc_hostname}" = ''
@@ -345,38 +345,38 @@ with lib;
 
               '';
 
-		          core_network_01 = ''
-		            Name=core_network_01
-		            Address=${cfg.tinc_core_node01_fqdn}
-		            Port=655
-		            Compression=${cfg.tinc_compression}
-		            Subnet=${cfg.tinc_core_node01_ip_address}/32
+              core_network_01 = ''
+                Name=core_network_01
+                Address=${cfg.tinc_core_node01_fqdn}
+                Port=655
+                Compression=${cfg.tinc_compression}
+                Subnet=${cfg.tinc_core_node01_ip_address}/32
 
-		            ${cfg.tinc_core_node01_public_key}
+                ${cfg.tinc_core_node01_public_key}
 
-		          '';
+              '';
 
-		          core_network_02 = ''
-		            Name=core_network_02
-		            Address=${cfg.tinc_core_node02_fqdn}
-		            Port=655
-		            Compression=${cfg.tinc_compression}
-		            Subnet=${cfg.tinc_core_node02_ip_address}/32
+              core_network_02 = ''
+                Name=core_network_02
+                Address=${cfg.tinc_core_node02_fqdn}
+                Port=655
+                Compression=${cfg.tinc_compression}
+                Subnet=${cfg.tinc_core_node02_ip_address}/32
 
-		            ${cfg.tinc_core_node02_public_key}
+                ${cfg.tinc_core_node02_public_key}
 
-		          '';
+              '';
 
-		          core_network_03 = ''
-		            Name=core_network_03
-		            Address=${cfg.tinc_core_node03_fqdn}
-		            Port=655
-		            Compression=${cfg.tinc_compression}
-		            Subnet=${cfg.tinc_core_node03_ip_address}/32
+              core_network_03 = ''
+                Name=core_network_03
+                Address=${cfg.tinc_core_node03_fqdn}
+                Port=655
+                Compression=${cfg.tinc_compression}
+                Subnet=${cfg.tinc_core_node03_ip_address}/32
 
-		            ${cfg.tinc_core_node03_public_key}
+                ${cfg.tinc_core_node03_public_key}
 
-		          '';
+              '';
             }; # close hosts block
           }; # close core-vpn block
         }; # close networks block
