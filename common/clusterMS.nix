@@ -380,6 +380,7 @@ with lib;
 
     virtualisation = {
       docker = {
+        enable = true;
         storageDriver = "${cfg.dockerStorageDriver}";
         extraOptions = "--ip ${cfg.tinc_ip_address }";
       }; # close docker

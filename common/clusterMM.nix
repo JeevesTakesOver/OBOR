@@ -469,6 +469,7 @@ with lib;
 
     virtualisation = {
       docker = {
+        enable = true;
         storageDriver = "${cfg.dockerStorageDriver}";
       }; # close docker
     }; # close virtualisation
