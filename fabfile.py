@@ -388,7 +388,7 @@ def jenkins_build(
         # reload after initial provision
         local('vagrant reload')
 
-        sleep(180)  # allow the start services
+        sleep(240)  # allow the start services
 
         # test all the things
         _test_obor()
