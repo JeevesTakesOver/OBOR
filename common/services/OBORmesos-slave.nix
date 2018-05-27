@@ -160,7 +160,7 @@ in {
           The logging level used. Possible values:
             'INFO', 'WARNING', 'ERROR'
         '';
-        default = "INFO";
+        default = "WARNING";
         type = types.str;
       };
 
