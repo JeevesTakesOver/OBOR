@@ -44,9 +44,11 @@ in {
     systemd.services.OBORmarathon-lb = {
       description = "OBORmarathon-lb Service";
       wantedBy = [ "multi-user.target" ];
-      after = [ "network.target" "OBORzookeeper.service" "OBORmesos-master.service" "OBORmesos-slave.service" "OBORmarathon.service" "docker.service" ];
+      after = [ "network.target" "OBORmesos-slave.service" "docker.service" ];
 
       serviceConfig = {
+        TimeoutStartSec = "0";
+        ExecStartPre = "${pkgs.docker}/bin/docker pull mesosphere/marathon-lb:v1.12.1";
         ExecStart = "${pkgs.docker}/bin/docker run --rm -e PORTS=${ toString cfg.port } --name=marathon-lb --net=host --privileged -v /dev/log:/dev/log mesosphere/marathon-lb:v1.12.1 ${ concatStringsSep " " cfg.extraCmdLineOptions } ";
         ExecStop = "${pkgs.docker}/bin/docker kill marathon-lb";
         Restart = "always";
