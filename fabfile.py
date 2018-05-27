@@ -333,19 +333,33 @@ def jenkins_build(
     def _test_obor(mesos_masters=mesos_masters, mesos_slaves=mesos_slaves):
         log_green('running _test_obor')
 
-        for target, _ in mesos_masters:
-            local(
-                "fab -i nixos-vagrant-configs/vagrant.priv" +
-                "-H {} acceptance_tests_mesos_master ".format(target) +
-                "> log/`date '+%Y%m%d%H%M%S'`."
-                "{}.test_obor.log 2>&1".format(target)
-            )
+        obor_env = [
+            "eval `ssh-agent`",
+            "ssh-add $PWD/nixos-vagrant-configs/*.priv",
+        ]
+        # local() doesn't support most context managers
+        # so let's bake a local environment file and consume as a prefix()
+        with open('shell_env', 'w') as shell_env:
+            for line in obor_env:
+                shell_env.write(line + '\n')
+        local('chmod +x shell_env')
 
-        for target, _ in mesos_slaves:
-            local("fab -i nixos-vagrant-configs/vagrant.priv " +
-                  "-H {} acceptance_tests_mesos_slave ".format(target) +
-                  "> log/`date '+%Y%m%d%H%M%S'`."
-                  "{}.test_obor.log 2>&1".format(target))
+        with settings(shell='/run/current-system/sw/bin/bash -l -c'):
+            with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
+
+                for target, _ in mesos_masters:
+                    local(
+                        "fab -i nixos-vagrant-configs/vagrant.priv " +
+                        "-H {} acceptance_tests_mesos_master ".format(target) +
+                        "> log/`date '+%Y%m%d%H%M%S'`."
+                        "{}.test_obor.log 2>&1".format(target)
+                    )
+
+                for target, _ in mesos_slaves:
+                    local("fab -i nixos-vagrant-configs/vagrant.priv " +
+                          "-H {} acceptance_tests_mesos_slave ".format(target) +
+                          "> log/`date '+%Y%m%d%H%M%S'`."
+                          "{}.test_obor.log 2>&1".format(target))
 
         log_green('_test_obor completed')
 
