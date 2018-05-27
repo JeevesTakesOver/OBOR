@@ -225,6 +225,7 @@ with lib;
         quorum = 2;
         zk = "${cfg.zk_string}";
         ip = "${cfg.tinc_ip_address}";
+        advertiseIp = "${cfg.tinc_ip_address}";
         extraCmdLineOptions = [
           "--hostname=${config.networking.hostName}.${cfg.tinc_domain}"
           "--log_dir=/var/log/mesos-master"
