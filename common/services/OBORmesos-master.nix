@@ -98,7 +98,9 @@ in {
       description = "Mesos Master";
       wantedBy = [ "multi-user.target" ];
       after = [ "network.target" "zookeeper.service" "docker.service"];
+      requires = [ "docker.service" ];
       serviceConfig = {
+        TimeoutStartSec = "0";
         ExecStart = ''
           ${pkgs.docker}/bin/docker run --rm --net=host --name=mesos-master \
           -v /var/lib/mesos/master:/var/lib/mesos \
@@ -121,6 +123,9 @@ in {
         PermissionsStartOnly = true;
       };
       preStart = ''
+        ${pkgs.docker}/bin/docker stop mesos-master || true
+        ${pkgs.docker}/bin/docker rm mesos-master || true
+        ${pkgs.docker}/bin/docker pull mesosphere/mesos-master:1.5.0
         mkdir -m 0700 -p ${cfg.workDir}
       '';
     };
