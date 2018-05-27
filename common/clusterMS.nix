@@ -246,7 +246,7 @@ with lib;
         extraCmdLineOptions = [
           "sse" 
           "--group external"
-          "--marathon http://leader.mesos:8080" 
+          "--marathon http://${cfg.zk_node01}:8080 http://${cfg.zk_node02}:8080 http://${cfg.zk_node03}:8080"
           "--haproxy-map" 
         ];
       }; # close marathon-lb block
