@@ -20,12 +20,6 @@ This gives me a mixed on-premises and multi-cloud Mesos Cluster on top of a dist
 The fabfile in this repository is used to deploy and generate the required config.
 
 Running :
-``` 
-fab config_json:config_yaml=<config/config.yaml.sample>
-```
-
-Will generate a config/config.json file based out a YAML config.
-
 
 ```
 fab -H <hostname> update
