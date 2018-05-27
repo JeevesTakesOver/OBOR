@@ -410,7 +410,7 @@ with lib;
       docker = {
         enable = true;
         storageDriver = "${cfg.dockerStorageDriver}";
-        extraOptions = "--ip ${cfg.tinc_ip_address }";
+        extraOptions = "--ip ${cfg.tinc_ip_address } --max-concurrent-downloads 1";
       }; # close docker
     }; # close virtualisation
 
