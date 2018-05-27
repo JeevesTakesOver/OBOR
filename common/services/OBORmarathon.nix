@@ -83,9 +83,12 @@ in {
       description = "Marathon Service";
       environment = cfg.environment;
       wantedBy = [ "multi-user.target" ];
+      requires = [ "docker.service" ];
       after = [ "network.target" "docker.service" "OBORzookeeper.service"];
 
       serviceConfig = {
+        TimeoutStartSec = "0";
+        ExecStartPre = "${pkgs.docker}/bin/docker pull mesosphere/marathon:v1.6.352";
         ExecStart = "${pkgs.docker}/bin/docker run --rm --name=marathon --net=host mesosphere/marathon:v1.6.352 --master ${cfg.master} --zk zk://${concatStringsSep "," cfg.zookeeperHosts}/marathon --http_port ${toString cfg.httpPort} ${concatStringsSep " " cfg.extraCmdLineOptions}";
         ExecStop = "${pkgs.docker}/bin/docker stop marathon";
         User = cfg.user;
