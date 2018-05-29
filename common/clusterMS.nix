@@ -196,6 +196,11 @@ with lib;
         type = types.str;
       };
 
+      syslog_endpoint = mkOption {
+        description = "Syslog aggregator box";
+        type = types.str;
+        default = "@@syslog.marathon.mesos:514";
+      };
 
     };
 
@@ -403,6 +408,31 @@ with lib;
             done
         '';
       };
+
+
+      rsyslogd.enable = true;
+      rsyslogd.defaultConfig = "";
+      rsyslogd.extraConfig = ''
+        $ModLoad imjournal # provides access to the systemd journal
+        $imjournalRatelimitInterval 1
+        $imjournalRatelimitBurst 20000
+        $imjournalPersistStateInterval 100
+        $imjournalStateFile /var/spool/rsyslog/imjournal.state
+        # setting escaping off to make it possible to remove the control characters
+        $EscapeControlCharactersOnReceive off
+
+        # removing the optimization from use (it slows things down)
+        $OptimizeForUniprocessor on
+
+        # Using queue for 20000 messages. After that the messages are dropped instantly
+        $MainMsgQueueSize 20000
+        $MainMsgQueueDiscardMark 20000
+        $MainMsgQueueTimeoutEnqueue 0
+
+        *.* ${cfg.syslog_endpoint}
+      '';
+
+
 
     }; # close services block
 
