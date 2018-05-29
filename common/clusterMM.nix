@@ -441,12 +441,12 @@ with lib;
             }
 
             function check_dnsmasq() {
-              timeout 5 nslookup www.google.com > /dev/null 2>&1
+              timeout 5 host www.google.com > /dev/null 2>&1
               return $?
             }
 
             function check_mesos_dns() {
-              timeout 5 nslookup leader.mesos > /dev/null 2>&1
+              timeout 5 host leader.mesos > /dev/null 2>&1
               return $?
             }
 
