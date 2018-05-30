@@ -234,6 +234,9 @@ with lib;
         extraCmdLineOptions = [
           "--hostname=${config.networking.hostName}.${cfg.tinc_domain}"
           "--log_dir=/var/log/mesos-master"
+          "--max_completed_frameworks=10"
+          "--max_completed_tasks_per_framework=50"
+          "--max_unreachable_tasks_per_framework=50"
         ];
       }; # close mesos-master
 
@@ -251,11 +254,14 @@ with lib;
         extraCmdLineOptions = [
           "--http_address" "${cfg.tinc_ip_address}"
           "--hostname" "${config.networking.hostName}.${cfg.tinc_domain}"
-          "--enable_features" "vips,task_killing"
+          "--enable_features" "task_killing"
           "--task_lost_expunge_initial_delay" "120000"
           "--task_lost_expunge_interval" "300000"
-          "--failover_timeout" "300"
+          "--failover_timeout" "180"
           "--mesos_user" "mesos"
+          "--zk_max_versions" "5"
+          "--zk_session_timeout" "30000"
+          "--mesos_heartbeat_interval" "30000"
         ];
       }; # close marathon
 
