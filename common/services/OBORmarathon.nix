@@ -88,8 +88,8 @@ in {
 
       serviceConfig = {
         TimeoutStartSec = "0";
-        ExecStartPre = "${pkgs.docker}/bin/docker pull mesosphere/marathon:v1.6.352";
-        ExecStart = "${pkgs.docker}/bin/docker run --rm --name=marathon --net=host mesosphere/marathon:v1.6.352 --master ${cfg.master} --zk zk://${concatStringsSep "," cfg.zookeeperHosts}/marathon --http_port ${toString cfg.httpPort} ${concatStringsSep " " cfg.extraCmdLineOptions}";
+        ExecStartPre = "${pkgs.docker}/bin/docker pull mesosphere/marathon:v1.5.1";
+        ExecStart = "${pkgs.docker}/bin/docker run --rm --name=marathon --net=host mesosphere/marathon:v1.5.1 --master ${cfg.master} --zk zk://${concatStringsSep "," cfg.zookeeperHosts}/marathon --http_port ${toString cfg.httpPort} ${concatStringsSep " " cfg.extraCmdLineOptions}";
         ExecStop = "${pkgs.docker}/bin/docker stop marathon";
         User = cfg.user;
         Restart = "always";
