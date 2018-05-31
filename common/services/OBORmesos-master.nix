@@ -125,7 +125,7 @@ in {
       preStart = ''
         ${pkgs.docker}/bin/docker stop mesos-master || true
         ${pkgs.docker}/bin/docker rm mesos-master || true
-        ${pkgs.docker}/bin/docker pull mesosphere/mesos-master:1.4.0
+        ${pkgs.docker}/bin/docker pull mesosphere/mesos-master:1.5.0
         mkdir -m 0700 -p ${cfg.workDir}
       '';
     };
