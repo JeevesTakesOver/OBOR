@@ -398,7 +398,7 @@ with lib;
 
       # enable the obor-watchdog
       obor-watchdog =  {
-        enable = true;
+        enable = false;
         monitor_block = ''
             #!/run/current-system/sw/bin/bash
             export PATH=$PATH:/run/current-system/sw/bin/:/run/wrappers/bin/
