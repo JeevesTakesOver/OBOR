@@ -249,8 +249,8 @@ with lib;
       OBORmarathon-lb = {
         enable = true;
         extraCmdLineOptions = [
-          "sse" 
-          "--group external"
+          "sse"
+          "--group internal"
           "--marathon http://${cfg.zk_node01}:8080 http://${cfg.zk_node02}:8080 http://${cfg.zk_node03}:8080"
           "--haproxy-map" 
         ];
