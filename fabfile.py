@@ -297,6 +297,7 @@ def jenkins_build(
 
     def _provision_obor(nodes=nodes):
         log_green('running _provision_obor')
+        local('chmod 600 nixos-vagrant-configs/vagrant.priv')
 
         count = 1
         while True or count > 3:
@@ -344,6 +345,7 @@ def jenkins_build(
                 shell_env.write(line + '\n')
         local('chmod +x shell_env')
 
+        local('chmod 600 nixos-vagrant-configs/vagrant.priv')
         with settings(shell='/run/current-system/sw/bin/bash -l -c'):
             with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
 
