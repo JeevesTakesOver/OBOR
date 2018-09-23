@@ -1,6 +1,6 @@
 # clusterMM.nix
 { services, pkgs, programs, environment, networking, virtualisation, config,
-  lib, time, ... }:
+  lib, time, boot, ... }:
 
 let
   cfg = config.services.clusterMM;
@@ -196,6 +196,7 @@ with lib;
     # use a nested array for defining your services, as vim indent will make it
     # a lot easier to navigate as you collapse/expand blocks.
 
+    boot.extraKernelParams = [ "systemd.journald.forward_to_syslog" ] ;
 
     services = {
 
@@ -476,15 +477,19 @@ with lib;
         '';
       };
 
+      journald.extraConfig = ''
+        ForwardToSyslog=true;
+        Storage=None;
+      '';
+
 
       rsyslogd.enable = true;
       rsyslogd.defaultConfig = "";
       rsyslogd.extraConfig = ''
-        $ModLoad imjournal # provides access to the systemd journal
-        $imjournalRatelimitInterval 1
-        $imjournalRatelimitBurst 20000
-        $imjournalPersistStateInterval 100
-        $imjournalStateFile /var/spool/rsyslog/imjournal.state
+        $ModLoad imuxsock
+        $OmitLocalLogging off
+        $SystemLogSocketName /run/systemd/journal/syslog
+
         # setting escaping off to make it possible to remove the control characters
         $EscapeControlCharactersOnReceive off
 
