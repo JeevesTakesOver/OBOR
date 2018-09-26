@@ -200,6 +200,17 @@ with lib;
 
     services = {
 
+      cron = {
+        enable = true;
+        systemCronJobs = [
+          "0 {cfg.zookeeper_id} * * * root systemctl restart OBORmarathon"
+          "0 1{cfg.zookeeper_id} * * * root systemctl restart OBORmarathon"
+          "0 {cfg.zookeeper_id} * * * root systemctl restart OBORmesos-master"
+          "0 1{cfg.zookeeper_id} * * * root systemctl restart OBORmesos-master"
+          "0 {cfg.zookeeper_id} * * * root systemctl restart OBORzookeeper"
+          "0 1{cfg.zookeeper_id} * * * root systemctl restart OBORzookeeper"
+        ];
+      };
 
       OBORzookeeper = {
         enable = true;
@@ -534,8 +545,8 @@ with lib;
       firewall.trustedInterfaces = [ "tinc.core-vpn" "docker0" ];
 
       # allow internet/external access to ssh and tincd port.
-      # ssh is required for provisioning, however it could be locked down to a 
-      # allow access only to a particular group of of addresses in the sshd_config 
+      # ssh is required for provisioning, however it could be locked down to a
+      # allow access only to a particular group of of addresses in the sshd_config
       # file
       firewall.allowedTCPPorts = [ 22 655 ];
       firewall.allowedUDPPorts = [ 655 ];

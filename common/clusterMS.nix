@@ -117,25 +117,25 @@ with lib;
       };
 
       dockerStorageDriver = mkOption {
-        default = "overlay2"; 
+        default = "overlay2";
         type = with types; str;
         description = "Docker storage driver to use ('overlay2')";
       };
 
       timezone = mkOption {
-        default = "GMT"; 
+        default = "GMT";
         type = with types; str;
         description = "Timezone for all our hosts";
       };
 
       workDir = mkOption {
-        default = "/var/lib/mesos"; 
+        default = "/var/lib/mesos";
         type = with types; str;
         description = "Mesos workdir";
       };
 
       mesosUser = mkOption {
-        default = "mesos"; 
+        default = "mesos";
         type = with types; str;
         description = "Mesos user";
       };
@@ -230,8 +230,8 @@ with lib;
     networking.firewall.trustedInterfaces = [ "tinc.core-vpn" "docker0" ];
 
     # allow internet/external access to ssh and tincd port.
-    # ssh is required for provisioning, however it could be locked down to a 
-    # allow access only to a particular group of of addresses in the sshd_config 
+    # ssh is required for provisioning, however it could be locked down to a
+    # allow access only to a particular group of of addresses in the sshd_config
     # file
     networking.firewall.allowedTCPPorts = [ 22 655 ];
     networking.firewall.allowedUDPPorts = [ 655 ];
@@ -253,7 +253,7 @@ with lib;
           "sse"
           "--group internal"
           "--marathon http://${cfg.zk_node01}:8080 http://${cfg.zk_node02}:8080 http://${cfg.zk_node03}:8080"
-          "--haproxy-map" 
+          "--haproxy-map"
         ];
       }; # close marathon-lb block
 
@@ -485,7 +485,7 @@ with lib;
       text = ''
         search ${cfg.tinc_domain}
         nameserver ${cfg.dns_resolver1}
-        nameserver ${cfg.dns_resolver2} 
+        nameserver ${cfg.dns_resolver2}
         nameserver 8.8.8.8
         options attempts:1
         options timeout:1
