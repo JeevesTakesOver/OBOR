@@ -152,7 +152,7 @@ def acceptance_tests_mesos_master():
         "testinfra --connection=ssh --ssh-config=ssh.config "
         "-v  --hosts='{}' "
         "-m 'dnsmasq or docker or marathon or mesos-dns or "
-        "mesos_master or tincd or zookeeper or dns_resolution' "
+        "mesos_master or tincd or zookeeper or dns_resolution or consul' "
         "tests".format(env.host_string)
     )
 
@@ -165,7 +165,7 @@ def acceptance_tests_mesos_slave():
         "testinfra --connection=ssh --ssh-config=ssh.config "
         "-v --hosts='{}' "
         "-m 'mesos_slave or tincd or docker or dns_resolution or "
-        "marathon_lb' "
+        "marathon_lb or consul' "
         "tests".format(env.host_string)
     )
 

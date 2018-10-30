@@ -17,6 +17,7 @@ with lib;
   ./services/OBORmesos-dns.nix
   ./services/OBORmarathon.nix
   ./services/OBORmarathon-lb.nix
+  ./services/OBORconsul.nix
   ./obor-watchdog.nix
   ];
 
@@ -185,6 +186,10 @@ with lib;
         default = "@@syslog.marathon.mesos:514";
       };
 
+      consul_other_node = mkOption {
+        description = "a second consul node";
+        type = types.str;
+      };
     };
   }; # close options
 
@@ -286,6 +291,7 @@ with lib;
           server=/${cfg.tinc_domain}/${cfg.dns_resolver2}
           # .mesos is served by the mesos-dns listening on the tinc interface
           server=/mesos/${cfg.tinc_ip_address}#9153
+          server=/consul/${cfg.tinc_ip_address}#8600
           server=/kubernetes/${cfg.tinc_ip_address}#7153
           listen-address=0.0.0.0
           bind-interfaces
@@ -474,6 +480,11 @@ with lib;
               return $?
             }
 
+            function check_consul() {
+              netstat -nltp | grep '.*:8300 .*/consul' > /dev/null 2>&1
+              return $?
+            }
+
             while true; do
               retry 5 check_tinc_vpn || (systemctl restart OBORtinc.core-vpn; logger -t obor-watchdog 'restarting OBORtinc.core-vpn')
               retry 5 check_dockerd || (systemctl restart docker; logger -t obor-watchdog 'restarting docker')
@@ -482,6 +493,7 @@ with lib;
               retry 120 check_zookeeper || (systemctl restart OBORzookeeper; logger -t obor-watchdog 'restarting OBORzookeeper')
               retry 60 check_marathon || (systemctl restart OBORmarathon; logger -t obor-watchdog 'restarting OBORmarathon')
               retry 60 check_mesos || (systemctl restart OBORmesos-master ; logger -t obor-watchdog 'restarting OBORmesos-master')
+              retry 5 check_consul || (systemctl restart OBORconsul ; logger -t obor-watchdog 'restarting OBORconsul')
 
               sleep 60
             done
@@ -515,6 +527,16 @@ with lib;
         *.* ${cfg.syslog_endpoint}
       '';
 
+      OBORconsul = {
+        enable = true;
+        consulAgentFlags = " " +
+        "-server " +
+        "-advertise=${cfg.tinc_ip_address} " +
+        "-bind=${cfg.tinc_ip_address} " +
+        "-client=${cfg.tinc_ip_address} " +
+        "-retry-join=${cfg.consul_other_node} " +
+        "--bootstrap-expect=3";
+      }; # close consul
 
     }; # close services block
 

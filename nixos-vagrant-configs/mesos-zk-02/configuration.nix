@@ -89,6 +89,7 @@
 
     dns_resolver1 = "10.254.0.1";
     dns_resolver2 = "10.254.0.2";
+    consul_other_node = "10.254.0.13";
 
     # local node TINC settings
     tinc_ip_address = "10.254.0.12";

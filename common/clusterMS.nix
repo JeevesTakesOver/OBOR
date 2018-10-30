@@ -16,6 +16,7 @@ with lib;
   ./services/OBORmesos-dns.nix
   ./services/OBORmarathon.nix
   ./services/OBORmarathon-lb.nix
+  ./services/OBORconsul.nix
   ./obor-watchdog.nix
 ];
 
@@ -202,6 +203,12 @@ with lib;
         default = "@@syslog.marathon.mesos:514";
       };
 
+      # TODO: rename this
+      consul_other_node = mkOption {
+        type = with types; str;
+        description = "other consul node";
+      };
+
     };
 
 
@@ -349,6 +356,14 @@ with lib;
       }; # close tinc block
 
 
+      OBORconsul = {
+        enable = true;
+        consulAgentFlags = " " +
+        "-advertise=${cfg.tinc_ip_address} " +
+        "-bind=${cfg.tinc_ip_address} " +
+        "-client=${cfg.tinc_ip_address} " +
+        "-retry-join=${cfg.consul_other_node}";
+      }; # close consul
 
 
       # enable the obor-watchdog
@@ -399,11 +414,16 @@ with lib;
               return $?
             }
 
+-            function check_consul() {
+-              netstat -nltp | grep '.*:8301 .*/consul' > /dev/null 2>&1
+-              return $?
+-            }
+
             while true; do
               retry 5 check_marathon_lb || (systemctl restart OBORmarathon-lb ; logger -t obor-watchdog 'restarting OBORmarathon-lb')
               retry 5 check_tinc_vpn || (systemctl restart tinc.core-vpn;  logger -t obor-watchdog 'restarting tinc.core-vpn')
               retry 5 check_dockerd || (systemctl restart docker;  logger -t obor-watchdog 'restarting docker')
-              retry 5 check_traefik || (systemctl restart OBORtraefik ; logger -t obor-watchdog 'restarting OBORtraefik')
+              retry 5 check_consul || (systemctl restart OBORconsul ; logger -t obor-watchdog 'restarting OBORconsul')
 
               sleep 60
             done

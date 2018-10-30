@@ -90,6 +90,9 @@
     dns_resolver1 = "10.254.0.11";
     dns_resolver2 = "10.254.0.12";
 
+    # TODO: rename this
+    consul_other_node = "10.254.0.11";
+
     # local node TINC settings
     tinc_ip_address = "10.254.0.14";
     tinc_domain = "tinc-core-vpn";
