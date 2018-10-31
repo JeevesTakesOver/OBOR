@@ -538,6 +538,17 @@ with lib;
         "--bootstrap-expect=3";
       }; # close consul
 
+
+      vault = {
+        enable = true;
+        address = "${cfg.tinc_ip_address}:8200";
+        storageBackend = "consul";
+        storageConfig = ''
+          address = "${cfg.tinc_ip_address}:8500"
+          tls_disable = "true"
+        '';
+      }; # close vault
+
     }; # close services block
 
 
