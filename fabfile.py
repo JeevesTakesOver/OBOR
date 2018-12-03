@@ -18,13 +18,9 @@
 
 import os
 import sys
-import json
 from time import sleep
 from multiprocessing import Process as mp
-from profilehooks import timecall
-from jinja2 import Template
 from retrying import retry
-import yaml
 from fabric.api import task, env, local
 from fabric.operations import sudo
 from fabric.contrib.project import rsync_project
@@ -32,7 +28,7 @@ from fabric.context_managers import settings, prefix
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 sys.setrecursionlimit(30000)
 # pylint: disable=wrong-import-position
-from bookshelf.api_v2.logging_helpers import (log_green, log_red)
+from bookshelf.api_v2.logging_helpers import (log_green, log_red) # noqa
 
 
 @task
@@ -286,7 +282,7 @@ def jenkins_build(
             ('vagrant@192.168.56.204', 'nixos-vagrant-configs/slave')
         ],
         cleanup=True
-    ):
+):
     """ runs a jenkins build """
     nodes = mesos_masters + mesos_slaves
 
@@ -345,7 +341,7 @@ def jenkins_build(
 
         local('chmod 600 nixos-vagrant-configs/vagrant.priv')
         with settings(shell='/run/current-system/sw/bin/bash -l -c'):
-            with prefix(". ./shell_env"):  # pylint: disable=not-context-manager
+            with prefix(". ./shell_env"):  # pylint: disable=not-context-manager # noqa
 
                 for target, _ in mesos_masters:
                     local(
@@ -357,8 +353,8 @@ def jenkins_build(
 
                 for target, _ in mesos_slaves:
                     local("fab -i nixos-vagrant-configs/vagrant.priv " +
-                          "-H {} acceptance_tests_mesos_slave ".format(target) +
-                          "> log/`date '+%Y%m%d%H%M%S'`."
+                          "-H {} acceptance_tests_mesos_slave".format(target) +
+                          " > log/`date '+%Y%m%d%H%M%S'`."
                           "{}.test_obor.log 2>&1".format(target))
 
         log_green('_test_obor completed')
