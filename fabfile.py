@@ -127,7 +127,6 @@ def update(
         with settings(
             shell='/run/current-system/sw/bin/bash -l -c'
         ):
-            sudo('nixos-rebuild build -Q')
             sudo('nixos-rebuild boot -Q')
 
     def _nixos_switch():
@@ -137,11 +136,10 @@ def update(
         ):
             sudo('nixos-rebuild switch -Q')
 
-    _nixos_rebuild()
-
     if switch in yes_answers:
         _nixos_switch()
-
+    else:
+        _nixos_rebuild()
 
 
 @task
