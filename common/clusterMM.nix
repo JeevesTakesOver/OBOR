@@ -201,7 +201,7 @@ with lib;
     # use a nested array for defining your services, as vim indent will make it
     # a lot easier to navigate as you collapse/expand blocks.
 
-    boot.extraKernelParams = [ "systemd.journald.forward_to_syslog" ] ;
+    boot.kernelParams = [ "systemd.journald.forward_to_syslog" ] ;
 
     services = {
 
