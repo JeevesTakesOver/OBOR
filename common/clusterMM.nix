@@ -305,6 +305,11 @@ with lib;
           max-ttl=1
           # and make sure our cache is never older than 30 seconds
           max-cache-ttl=30
+
+          # read /etc/hosts.masters.kubernetes and set a RR rule
+          # to point to masters.kubernetes to our 3 master nodes
+          addn-hosts=/etc/hosts.masters.kubernetes
+
         '';
       }; # close dnsmasq block
 
@@ -644,6 +649,17 @@ with lib;
       resolvconfOptions = [
         "attempts:1"
       ];
+    };
+
+    # we map masters.kubernetes to the 3 ip addresses from our
+    # master nodes
+    environment.etc."hosts.masters.kubernetes" = {
+      mode = "0644";
+      text = ''
+        ${cfg.zk_node01} masters.kubernetes
+        ${cfg.zk_node02} masters.kubernetes
+        ${cfg.zk_node03} masters.kubernetes
+      '';
     };
 
     # desperate attempt to stop resolvconf from updating /etc/resolv.conf
