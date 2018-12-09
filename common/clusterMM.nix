@@ -549,6 +549,40 @@ with lib;
         '';
       }; # close vault
 
+
+      # the block below should be extracted to a separate nix file
+      # bootstrapping an etcd cluster requires all 3 nodes to be up
+      # or the service will fail to start and timeout
+      etcd.enable = true;
+      etcd.name = "${cfg.tinc_ip_address}";
+      etcd.listenClientUrls = ["http://${cfg.tinc_ip_address}:2379"];
+      etcd.listenPeerUrls = ["http://${cfg.tinc_ip_address}:2380"];
+      etcd.initialCluster = [
+        "${cfg.zk_node01}=http://${cfg.zk_node01}:2380"
+        "${cfg.zk_node02}=http://${cfg.zk_node02}:2380"
+        "${cfg.zk_node03}=http://${cfg.zk_node03}:2380"
+      ];
+
+      kubernetes.path = [ pkgs.zfs ];
+      kubernetes.roles = [ "master" ];
+      kubernetes.kubelet.extraOpts = "--fail-swap-on=False";
+      kubernetes.apiserver.kubeletHttps = false;
+      kubernetes.addons.dashboard.enable = true;
+      kubernetes.addons.dns.enable = true;
+      kubernetes.apiserver.bindAddress = "0.0.0.0";
+      kubernetes.apiserver.port = 8888;
+      kubernetes.apiserver.securePort = 8843;
+      kubernetes.apiserver.advertiseAddress = "${cfg.tinc_ip_address}";
+      kubernetes.apiserver.extraOpts = " --insecure-bind-address 0.0.0.0";
+      kubernetes.flannel.enable = true;
+      kubernetes.etcd = {
+        servers = [
+          "http://${cfg.zk_node01}:2379"
+          "http://${cfg.zk_node02}:2379"
+          "http://${cfg.zk_node03}:2379"
+        ];
+      }; # close kubernetes.etcd
+
     }; # close services block
 
 
