@@ -456,6 +456,24 @@ with lib;
         *.* ${cfg.syslog_endpoint}
       '';
 
+      kubernetes.path = [ pkgs.zfs ];
+      kubernetes.roles = [ "node" ];
+      kubernetes.kubelet.extraOpts = "--fail-swap-on=False";
+      kubernetes.kubelet.hostname = "${cfg.tinc_hostname}.${cfg.tinc_domain}";
+      # this is a bit ugly
+      kubernetes.apiserver.advertiseAddress = "masters.kubernetes";
+      kubernetes.apiserver.port = 8888;
+      kubernetes.apiserver.securePort = 8843;
+      kubernetes.flannel.enable = true;
+      kubernetes.apiserver.kubeletHttps = false;
+
+      kubernetes.etcd = {
+        servers = [
+          "http://${cfg.zk_node01}:2379"
+          "http://${cfg.zk_node02}:2379"
+          "http://${cfg.zk_node03}:2379"
+        ];
+      }; # close kubernetes.etcd
 
 
     }; # close services block
