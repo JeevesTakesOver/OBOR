@@ -421,10 +421,12 @@ with lib;
 
       # enable the obor-watchdog
       obor-watchdog =  {
-        enable = false;
+        enable = true;
         monitor_block = ''
             #!/run/current-system/sw/bin/bash
             export PATH=$PATH:/run/current-system/sw/bin/:/run/wrappers/bin/
+
+            # NOTE: only etcd is enabled, as it is required for bootstrapping
 
             function retry {
               local retry_max=$1
@@ -490,15 +492,14 @@ with lib;
               return $?
             }
 
-            while true; do
-              retry 5 check_tinc_vpn || (systemctl restart OBORtinc.core-vpn; logger -t obor-watchdog 'restarting OBORtinc.core-vpn')
-              retry 5 check_dockerd || (systemctl restart docker; logger -t obor-watchdog 'restarting docker')
-              retry 5 check_dnsmasq || (systemctl restart dnsmasq; logger -t obor-watchdog 'restarting dnsmasq')
-              retry 5 check_mesos_dns || (systemctl restart OBORmesos-dns; logger -t obor-watchdog 'restarting OBORmesos-dns')
-              retry 120 check_zookeeper || (systemctl restart OBORzookeeper; logger -t obor-watchdog 'restarting OBORzookeeper')
-              retry 60 check_marathon || (systemctl restart OBORmarathon; logger -t obor-watchdog 'restarting OBORmarathon')
-              retry 60 check_mesos || (systemctl restart OBORmesos-master ; logger -t obor-watchdog 'restarting OBORmesos-master')
-              retry 5 check_consul || (systemctl restart OBORconsul ; logger -t obor-watchdog 'restarting OBORconsul')
+            function check_etcd() {
+              netstat -nltp | grep '.*:2379 .*/etcd' > /dev/null 2>&1
+              return $?
+            }
+
+            while true
+            do
+              retry 5 check_etcd || (systemctl restart etcd ; logger -t obor-watchdog 'restarting etcd')
 
               sleep 60
             done
