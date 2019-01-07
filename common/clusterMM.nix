@@ -502,7 +502,7 @@ with lib;
 
       journald.extraConfig = ''
         ForwardToSyslog=true;
-        Storage=None;
+        Storage=volatile;
       '';
 
 

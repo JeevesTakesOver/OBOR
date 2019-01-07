@@ -431,8 +431,8 @@ with lib;
       };
 
       journald.extraConfig = ''
-        systemd.journald.forward_to_syslog = true;
-        storage = None;
+        ForwardToSyslog=true;
+        Storage=volatile;
       '';
 
       rsyslogd.enable = true;
