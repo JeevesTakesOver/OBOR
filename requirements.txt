@@ -1,6 +1,6 @@
 apipkg==1.5
 asn1crypto==0.24.0
-astroid==1.6.5
+astroid==2.2.5
 atomicwrites==1.2.1
 attrs==18.2.0
 Babel==2.6.0
