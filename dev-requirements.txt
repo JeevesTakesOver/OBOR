@@ -1,4 +1,4 @@
 ipython==5.2.0
-jedi
+jedi==0.13.3
 pylint
 flake8
