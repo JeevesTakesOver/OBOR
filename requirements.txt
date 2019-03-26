@@ -25,7 +25,7 @@ docker-compose==1.22.0
 docker-pycreds==0.3.0
 dockerpty==0.4.1
 docopt==0.6.2
-entrypoints==0.2.3
+entrypoints==0.3
 enum34==1.1.6
 execnet==1.5.0
 Fabric==1.14.0
