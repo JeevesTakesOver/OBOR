@@ -7,7 +7,7 @@ Babel==2.6.0
 backports.functools-lru-cache==1.5
 backports.shutil-get-terminal-size==1.0.0
 backports.ssl-match-hostname==3.5.0.1
-bcrypt==3.1.4
+bcrypt==3.1.6
 boto==2.49.0
 cached-property==1.5.1
 cachetools==2.1.0
