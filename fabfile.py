@@ -301,8 +301,9 @@ def jenkins_build(
 
         count = 1
         while True or count > 3:
-            jobs = []
+            exit_code = 0
             for node, hostdir in nodes:
+                jobs = []
                 jobs.append(
                     mp(
                         target=local,
@@ -317,13 +318,11 @@ def jenkins_build(
                               "%s.provision.log 2>&1" % node,)
                     )
                 )
-            for job in jobs:
-                job.start()
 
-            exit_code = 0
-            for job in jobs:
-                job.join()
-                exit_code = exit_code + job.exitcode
+                for job in jobs:
+                    job.start()
+                    job.join()
+                    exit_code = exit_code + job.exitcode
 
             if exit_code == 0:
                 break

@@ -21,16 +21,16 @@ Vagrant.configure(2) do |config|
 
   machines = [
     { 'name' => 'mesos-zk-01',
-      'ip' =>  '192.168.56.201' 
+      'ip' =>  '192.168.56.201'
     },
     { 'name' => 'mesos-zk-02',
-      'ip' =>  '192.168.56.202' 
+      'ip' =>  '192.168.56.202'
     },
     { 'name' => 'mesos-zk-03',
-      'ip' =>  '192.168.56.203' 
+      'ip' =>  '192.168.56.203'
     },
     { 'name' => 'slave',
-      'ip' =>  '192.168.56.204' 
+      'ip' =>  '192.168.56.204'
     }
   ]
 
@@ -47,9 +47,9 @@ Vagrant.configure(2) do |config|
       machine.ssh.insert_key = false
 
       machine.vm.provider "virtualbox" do |vb|
-        vb.memory = "4096"
+        vb.memory = "2048"
         # https://github.com/hashicorp/otto/issues/423#issuecomment-186076403
-        vb.linked_clone = true if Vagrant::VERSION =~ /^1.9/ 
+        vb.linked_clone = true if Vagrant::VERSION =~ /^1.9/
         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
         vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
         if vbox_version.to_f >= 5.0 and  Vagrant::Util::Platform.linux?
@@ -57,7 +57,7 @@ Vagrant.configure(2) do |config|
         end
         # https://www.virtualbox.org/manual/ch05.html#iocaching
         vb.customize [
-          "storagectl", :id, 
+          "storagectl", :id,
           "--name", "IDE Controller",
           "--hostiocache", "off"
         ]
