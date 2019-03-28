@@ -44,7 +44,7 @@ Vagrant.configure(2) do |config|
       machine.vm.box = box
       machine.vm.hostname = item['name']
       #machine.vm.network "private_network", ip: item['ip']
-      config.vm.network "public_network", bridge: "enp5s0"
+      config.vm.network "public_network", bridge: "ens3"
       machine.ssh.insert_key = false
 
       machine.vm.provider "virtualbox" do |vb|
