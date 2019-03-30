@@ -49,7 +49,7 @@ Vagrant.configure(2) do |config|
       machine.vm.provider "virtualbox" do |vb|
         vb.memory = "2048"
         # https://github.com/hashicorp/otto/issues/423#issuecomment-186076403
-        vb.linked_clone = true if Vagrant::VERSION =~ /^1.9/
+        vb.linked_clone = true
         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
         vb.customize ["modifyvm", :id, "--natdnsproxy1", "on"]
         if vbox_version.to_f >= 5.0 and  Vagrant::Util::Platform.linux?
