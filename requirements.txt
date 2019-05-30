@@ -20,7 +20,7 @@ cuisine==0.7.15
 debtcollector==1.20.0
 decorator==4.3.0
 dill==0.2.8.2
-docker==3.5.0
+docker==4.0.1
 docker-compose==1.22.0
 docker-pycreds==0.3.0
 dockerpty==0.4.1
