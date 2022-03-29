@@ -70,7 +70,7 @@ oslo.config==6.5.1
 oslo.i18n==3.22.1
 oslo.serialization==2.28.1
 oslo.utils==3.37.0
-paramiko==2.4.2
+paramiko==2.10.1
 parso==0.3.1
 pathlib2==2.3.2
 pathos==0.2.2.1
